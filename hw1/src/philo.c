@@ -1,8 +1,10 @@
 #include <stdlib.h>
-#include <string.h>
 
 #include "global.h"
 #include "debug.h"
+
+#include "util.h"
+#include "compare.h"
 
 /**
  * @brief  Read genetic distance data and initialize data structures.
@@ -55,6 +57,183 @@
 
 int read_distance_data(FILE *in) {
     // TO BE IMPLEMENTED
+    if (in == NULL) return -1; // error with file given
+
+    char c; // the character to be read
+    int field_size = 0; // the initial size of the field
+    int taxa_in_line = 0; // the current number of taxa in the line
+    int num_rows = 0; // the number of rows
+    int rows_remaining = 1; // the number of rows remaining. this is calculated from the num rows
+    int first_line = 1; // 1 if we are still looking at the first row of descriptors, 0 if we passed it
+    int name_num = 0; // the taxa position and the num to be used in the node_names matrix
+
+    // the row and column of the distance matrix
+    int row = 0;
+    int col = 0;
+
+    int max_col = 0;
+
+    // get the next char in the file
+    while( (c = fgetc(in)) )
+    {
+        // if we reach the end of the input
+        if ( feof(in) )
+        {
+            // check if there's still rows remaining
+            if (rows_remaining > 0)
+            {
+                debug("rows remaining: %i\n", rows_remaining);
+                // perhaps the last row ended before a \n was added, add it in and continue processing
+                ungetc('\n', in);
+                continue;
+            }
+            break;
+        }
+        switch (c)
+        {
+        // comment line
+        case '#':
+            // consume all chars until a newline and then break to continue
+            while( (c = fgetc(in)) && c != '\n' );
+            break;
+        // end of line
+        case '\n':
+            // line ended, add the last taxa to counter
+            taxa_in_line++;
+            // if this is the first line to be initialized
+            if (num_rows == 0)
+            {
+                num_rows = taxa_in_line;
+                rows_remaining = num_rows;
+                // the number of taxa is the number of rows - 1
+                num_taxa = num_rows - 1;
+                num_all_nodes = num_taxa;
+                num_active_nodes = num_taxa;
+            }
+            // check if the number of taxa is not equal to the number of rows
+            // if not the same, either too little given or too many, fail
+            if (num_rows != taxa_in_line) return -1;
+            if (first_line)
+            {
+                memorycpy(*(node_names + name_num), input_buffer, field_size + 1);
+                name_num++;
+            }else{
+                double n;
+                if (validateNum(input_buffer, field_size, &n))
+                {
+                    debug("number at end got: %lf\n", n);
+                    *(*(distances + col) + row) = n;
+                    row++;
+                    max_col++;
+                    col = 0;
+                } else {
+                    // last field is not a number and not in the first line, fail
+                    // TODO: fail
+                    debug("NUMBER FAILED");
+                }
+            }
+            // else reset taxa count and field size for next line
+            taxa_in_line = 0;
+            field_size = 0;
+            first_line = 0;
+            memoryset(input_buffer, 0, sizeof (input_buffer));
+            // check if we went too many rows down
+            debug("current row: %i\tremaining rows: %i\n", num_rows - rows_remaining, rows_remaining);
+            if (rows_remaining-- <= 0) return -1;
+            break;
+        // comma (,)
+        case ',':
+            // check if we have all the data we need
+            if (rows_remaining <= 0)
+            {
+                // consume the rest of the file
+                while( (c = fgetc(in)) && !feof(in) );
+                break;
+            }
+            // increment the number of taxa in current row
+            taxa_in_line++;
+            // empty field, discount
+            if (field_size <= 0) continue;
+            // add a null delimiter to the end of buffer
+            *(input_buffer + field_size + 1) = '\0';
+            // debug("GOT HERE with: %s\n", input_buffer);
+            // copy over the input buffer to the node_names array from beginning to
+            // the size of the field + 1 to account for the null terminator
+            if (first_line)
+            {
+                memorycpy(*(node_names + name_num), input_buffer, field_size + 1);
+                NODE named_node;
+                named_node.name = *(node_names + name_num);
+                *(nodes + name_num) = named_node;
+                name_num++;
+            }
+            // place the number in the distances matrix
+            double n;
+            if (validateNum(input_buffer, field_size, &n))
+            {
+                debug("Number got was: %lf\n", n);
+                *(*(distances + col) + row) = n;
+                col++;
+            } else {
+                // this is the identifier for the row
+                // we need to make sure the order of the taxa is the same as the first line
+                if (!first_line && taxa_in_line == 1)
+                {
+                    // use the row variable to get what the current row is supposed to be
+                    // and then compare the name of the node to the name of the node in the
+                    // first line
+                    // create pointers to avoid losing the original pointers
+                    char *real_name = *(node_names + row);
+                    char *input_name = input_buffer;
+                    if (!compareStrings(real_name, input_name))
+                    {
+                        debug("NAME FAILED: expected \"%s\", got \"%s\"\n", real_name, input_name);
+                        return -1;
+                    }
+                }
+                // if it's not the first line and it's not the first field, fail
+                if (!first_line && taxa_in_line != 1)
+                {
+                    // TODO: fail
+                    debug("NUMBER FAILED 2");
+                }
+            }
+            // new field coming up, reset field size
+            field_size = 0;
+            memoryset(input_buffer, 0, sizeof (input_buffer));
+            break;
+        // spaces
+        case ' ':
+            // treat like regular input
+        // default case is any chars
+        default:
+            // have no space to set the character, fail
+            // debug("field size: %i\tinput max size: %i\n", field_size, INPUT_MAX);
+            if (field_size >= INPUT_MAX) return -1;
+            // set the character of the buffer
+            // printf("getting character of: %c\n", c);
+            *(input_buffer + field_size) = c;
+            // increase the size of the field
+            field_size++;
+            break;
+        }
+    }
+
+    int i = 0;
+    do
+    {
+        debug("node_names[%i]: %s\n", i, *(node_names + i));
+        debug("node_names[%i][0]: %i, %c\n", i, *(*(node_names + i)), *(*(node_names + i)));
+        // active_node_map[i] = i for 0 <= i < N
+        *(active_node_map + i) = i;
+    } while ((*(*(node_names + ++i))));
+
+    // add the checker for matrix conformity
+    if (checkIdentityMatrix((double *)distances, num_rows)) return -1;
+    // not all rows have been given
+    debug("rows remaining: %i\n", rows_remaining);
+    if (rows_remaining > 0) return -1;
+    return 0;
     abort();
 }
 

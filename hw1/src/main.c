@@ -10,6 +10,7 @@ int main(int argc, char **argv)
         USAGE(*argv, EXIT_FAILURE);
     if(global_options == HELP_OPTION)
         USAGE(*argv, EXIT_SUCCESS);
+    printf("read got: %i\n", read_distance_data(stdin));
     // TO BE IMPLEMENTED
     return EXIT_FAILURE; 
 }
