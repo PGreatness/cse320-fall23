@@ -56,8 +56,11 @@
  */
 
 int read_distance_data(FILE *in) {
-    // TO BE IMPLEMENTED
-    if (in == NULL) return -1; // error with file given
+    if (in == NULL)
+    {
+        fprintf(stderr, "ERROR: no file given\n");
+        return -1;
+    }// error with file given
 
     char c; // the character to be read
     int field_size = 0; // the initial size of the field
@@ -112,10 +115,17 @@ int read_distance_data(FILE *in) {
             }
             // check if the number of taxa is not equal to the number of rows
             // if not the same, either too little given or too many, fail
-            if (num_rows != taxa_in_line) return -1;
+            if (num_rows != taxa_in_line)
+            {
+                fprintf(stderr, "ERROR: number of taxa is not equal to the number of rows\n");
+                return -1;
+            }
             if (first_line)
             {
                 memorycpy(*(node_names + name_num), input_buffer, field_size + 1);
+                NODE named_node;
+                named_node.name = *(node_names + name_num);
+                *(nodes + name_num) = named_node;
                 name_num++;
             }else{
                 double n;
@@ -128,8 +138,9 @@ int read_distance_data(FILE *in) {
                     col = 0;
                 } else {
                     // last field is not a number and not in the first line, fail
-                    // TODO: fail
+                    fprintf(stderr, "ERROR: last field is not a number and not in the first line\n");
                     debug("NUMBER FAILED");
+                    return -1;
                 }
             }
             // else reset taxa count and field size for next line
@@ -139,7 +150,11 @@ int read_distance_data(FILE *in) {
             memoryset(input_buffer, 0, sizeof (input_buffer));
             // check if we went too many rows down
             debug("current row: %i\tremaining rows: %i\n", num_rows - rows_remaining, rows_remaining);
-            if (rows_remaining-- <= 0) return -1;
+            if (rows_remaining-- <= 0)
+            {
+                fprintf(stderr, "ERROR: too many rows given\n");
+                return -1;
+            }
             break;
         // comma (,)
         case ',':
@@ -188,14 +203,16 @@ int read_distance_data(FILE *in) {
                     if (!compareStrings(real_name, input_name))
                     {
                         debug("NAME FAILED: expected \"%s\", got \"%s\"\n", real_name, input_name);
+                        fprintf(stderr, "ERROR: name of taxa \"%s\" is not the same as in first line\n", input_name);
                         return -1;
                     }
                 }
                 // if it's not the first line and it's not the first field, fail
                 if (!first_line && taxa_in_line != 1)
                 {
-                    // TODO: fail
+                    fprintf(stderr, "ERROR: last field is not a number and not in the first line\n");
                     debug("NUMBER FAILED 2");
+                    return -1;
                 }
             }
             // new field coming up, reset field size
@@ -209,7 +226,11 @@ int read_distance_data(FILE *in) {
         default:
             // have no space to set the character, fail
             // debug("field size: %i\tinput max size: %i\n", field_size, INPUT_MAX);
-            if (field_size >= INPUT_MAX) return -1;
+            if (field_size >= INPUT_MAX)
+            {
+                fprintf(stderr, "ERROR: field size is greater than input max size\n");
+                return -1;
+            }
             // set the character of the buffer
             // printf("getting character of: %c\n", c);
             *(input_buffer + field_size) = c;
@@ -229,12 +250,19 @@ int read_distance_data(FILE *in) {
     } while ((*(*(node_names + ++i))));
 
     // add the checker for matrix conformity
-    if (checkIdentityMatrix((double *)distances, num_rows)) return -1;
+    if (checkIdentityMatrix((double *)distances, num_rows))
+    {
+        fprintf(stderr, "ERROR: matrix is not symmetric\n");
+        return -1;
+    }
     // not all rows have been given
     debug("rows remaining: %i\n", rows_remaining);
-    if (rows_remaining > 0) return -1;
+    if (rows_remaining > 0)
+    {
+        fprintf(stderr, "ERROR: not all rows have been given\n");
+        return -1;
+    }
     return 0;
-    abort();
 }
 
 /**
