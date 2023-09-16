@@ -91,3 +91,22 @@ int checkIdentityMatrix(double *matrix, int n)
     
     return 1;
 }
+
+int stringifyNumber(char *buffer, int num, int pos, int addNull)
+{
+    if (num < 10)
+    {
+        *(buffer + pos) = num + '0';
+        if (addNull) *(buffer + pos + 1) = '\0';
+        return (addNull ? pos + 1 : pos);
+    }
+    int i = num;
+    int j = 1;
+    while (i > 10)
+    {
+        i /= 10;
+        j *= 10;
+    }
+    *(buffer + pos) = i + '0';
+    return stringifyNumber(buffer, num % j, pos + 1, addNull);
+}

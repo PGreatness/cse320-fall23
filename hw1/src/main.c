@@ -11,6 +11,7 @@ int main(int argc, char **argv)
     if(global_options == HELP_OPTION)
         USAGE(*argv, EXIT_SUCCESS);
     int read_data = read_distance_data(stdin);
+    // create a file
     build_taxonomy(stdout);
     // TO BE IMPLEMENTED
     return EXIT_FAILURE; 

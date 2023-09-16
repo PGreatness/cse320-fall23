@@ -39,3 +39,15 @@ int validateNum(char *src, int size, double *num);
  * @returns `0` if fail, else `1`
 */
 int checkIdentityMatrix(double *matrix, int n);
+
+/**
+ * Stringifies the given number and places it into the given buffer. The buffer must be
+ * large enough to hold the stringified number. The number is stringified in the way that
+ * it was given.
+ * @param buffer a pointer to the start of the buffer
+ * @param num the number to stringify
+ * @param pos the position to start writing the stringified number
+ * @param addNull whether or not to add a null terminator at the end of the stringified number
+ * @returns the number of bytes written to the buffer
+*/
+int stringifyNumber(char *buffer, int num, int pos, int addNull);

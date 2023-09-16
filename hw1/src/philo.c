@@ -6,6 +6,8 @@
 #include "util.h"
 #include "compare.h"
 
+int taxa_helper();
+
 /**
  * @brief  Read genetic distance data and initialize data structures.
  * @details  This function reads genetic distance data from a specified
@@ -85,7 +87,7 @@ int read_distance_data(FILE *in) {
             // check if there's still rows remaining
             if (rows_remaining > 0)
             {
-                debug("rows remaining: %i\n", rows_remaining);
+                // debug("rows remaining: %i\n", rows_remaining);
                 // perhaps the last row ended before a \n was added, add it in and continue processing
                 ungetc('\n', in);
                 continue;
@@ -131,7 +133,7 @@ int read_distance_data(FILE *in) {
                 double n;
                 if (validateNum(input_buffer, field_size, &n))
                 {
-                    debug("number at end got: %lf\n", n);
+                    // debug("number at end got: %lf\n", n);
                     *(*(distances + col) + row) = n;
                     row++;
                     max_col++;
@@ -139,7 +141,7 @@ int read_distance_data(FILE *in) {
                 } else {
                     // last field is not a number and not in the first line, fail
                     fprintf(stderr, "ERROR: last field is not a number and not in the first line\n");
-                    debug("NUMBER FAILED");
+                    // debug("NUMBER FAILED");
                     return -1;
                 }
             }
@@ -149,7 +151,7 @@ int read_distance_data(FILE *in) {
             first_line = 0;
             memoryset(input_buffer, 0, sizeof (input_buffer));
             // check if we went too many rows down
-            debug("current row: %i\tremaining rows: %i\n", num_rows - rows_remaining, rows_remaining);
+            // debug("current row: %i\tremaining rows: %i\n", num_rows - rows_remaining, rows_remaining);
             if (rows_remaining-- <= 0)
             {
                 fprintf(stderr, "ERROR: too many rows given\n");
@@ -171,7 +173,7 @@ int read_distance_data(FILE *in) {
             if (field_size <= 0) continue;
             // add a null delimiter to the end of buffer
             *(input_buffer + field_size + 1) = '\0';
-            // debug("GOT HERE with: %s\n", input_buffer);
+            // // debug("GOT HERE with: %s\n", input_buffer);
             // copy over the input buffer to the node_names array from beginning to
             // the size of the field + 1 to account for the null terminator
             if (first_line)
@@ -186,7 +188,7 @@ int read_distance_data(FILE *in) {
             double n;
             if (validateNum(input_buffer, field_size, &n))
             {
-                debug("Number got was: %lf\n", n);
+                // debug("Number got was: %lf\n", n);
                 *(*(distances + col) + row) = n;
                 col++;
             } else {
@@ -202,7 +204,7 @@ int read_distance_data(FILE *in) {
                     char *input_name = input_buffer;
                     if (!compareStrings(real_name, input_name))
                     {
-                        debug("NAME FAILED: expected \"%s\", got \"%s\"\n", real_name, input_name);
+                        // debug("NAME FAILED: expected \"%s\", got \"%s\"\n", real_name, input_name);
                         fprintf(stderr, "ERROR: name of taxa \"%s\" is not the same as in first line\n", input_name);
                         return -1;
                     }
@@ -211,7 +213,7 @@ int read_distance_data(FILE *in) {
                 if (!first_line && taxa_in_line != 1)
                 {
                     fprintf(stderr, "ERROR: last field is not a number and not in the first line\n");
-                    debug("NUMBER FAILED 2");
+                    // debug("NUMBER FAILED 2");
                     return -1;
                 }
             }
@@ -225,7 +227,7 @@ int read_distance_data(FILE *in) {
         // default case is any chars
         default:
             // have no space to set the character, fail
-            // debug("field size: %i\tinput max size: %i\n", field_size, INPUT_MAX);
+            // // debug("field size: %i\tinput max size: %i\n", field_size, INPUT_MAX);
             if (field_size >= INPUT_MAX)
             {
                 fprintf(stderr, "ERROR: field size is greater than input max size\n");
@@ -243,8 +245,8 @@ int read_distance_data(FILE *in) {
     int i = 0;
     do
     {
-        debug("node_names[%i]: %s\n", i, *(node_names + i));
-        debug("node_names[%i][0]: %i, %c\n", i, *(*(node_names + i)), *(*(node_names + i)));
+        // debug("node_names[%i]: %s\n", i, *(node_names + i));
+        // debug("node_names[%i][0]: %i, %c\n", i, *(*(node_names + i)), *(*(node_names + i)));
         // active_node_map[i] = i for 0 <= i < N
         *(active_node_map + i) = i;
     } while ((*(*(node_names + ++i))));
@@ -256,7 +258,7 @@ int read_distance_data(FILE *in) {
         return -1;
     }
     // not all rows have been given
-    debug("rows remaining: %i\n", rows_remaining);
+    // debug("rows remaining: %i\n", rows_remaining);
     if (rows_remaining > 0)
     {
         fprintf(stderr, "ERROR: not all rows have been given\n");
@@ -299,7 +301,8 @@ int read_distance_data(FILE *in) {
  */
 int emit_newick_format(FILE *out) {
     // TO BE IMPLEMENTED
-    abort();
+    // abort();
+    return 0;
 }
 
 /**
@@ -321,7 +324,8 @@ int emit_newick_format(FILE *out) {
  */
 int emit_distance_matrix(FILE *out) {
     // TO BE IMPLEMENTED
-    abort();
+    // abort();
+    return 0;
 }
 
 /**
@@ -370,6 +374,270 @@ int emit_distance_matrix(FILE *out) {
  * if any error occurred.
  */
 int build_taxonomy(FILE *out) {
-    // TO BE IMPLEMENTED
-    abort();
+
+    if (num_taxa < 1 || num_active_nodes < 1)
+    {
+        fprintf(stderr, "ERROR: no taxa given\n");
+        return -1;
+    }// error with file given
+
+    if (num_taxa == 1 || num_active_nodes == 1)
+    {
+        // only one taxa given, no need to build tree
+        return 0;
+    }
+
+    int result = taxa_helper(out);
+    if (result == -1)
+    {
+        fprintf(stderr, "ERROR: taxa_helper failed\n");
+        return -1;
+    }
+    return 0;
+}
+
+int taxa_helper(FILE* out)
+{
+    if (num_active_nodes < 3)
+    {
+        // number of active nodes is less than 3, cannot build tree
+        return 1;
+    }
+
+
+    // set up the iterators to go through each row and column of the distances matrix
+    int row = 0, col = 0;
+
+    // first reset row_sums
+    while (row < num_all_nodes)
+    {
+        *(row_sums + row) = 0;
+        row++;
+    }
+
+    // reset row
+    row = 0;
+
+    while (row < num_active_nodes)
+    {
+        // get the row that is listed as active in the active node map
+        int row_in_map = *(active_node_map + row);
+        // calculate the row sum
+        double row_sum = 0;
+        while (col < num_all_nodes)
+        {
+            int add_col = 0;
+            int col_iter = 0;
+            // check to see if this column is an active column
+            while (col_iter < num_active_nodes)
+            {
+                if (*(active_node_map + col_iter) == col)
+                {
+                    add_col = 1;
+                    break;
+                }
+                col_iter++;
+            }
+
+            // if the column was included in the active nodes, add it to the row sum
+            if (add_col)
+            {
+                row_sum += *(*(distances + row_in_map) + col);
+            }
+            // increment column
+            col++;
+        }
+        // set the row sum to correctly show the sum of the row, disregarding
+        // any of the columns that were removed in previous iterations of this
+        // function
+        *(row_sums + row_in_map) = row_sum;
+        // proceed to next row
+        row++;
+        // reset the column
+        col = 0;
+    }
+
+    // at this point, row_sums contain the sum of each row without the columns
+    // that are no longer active. now we need to find the q values
+
+    // reset the row and column iterators
+    row = 0, col = 0;
+
+    // the minimum q value, initialized to the value at the first row and second column
+    double min_q = *(*distances + 1);
+    // the row and column of the minimum q value in the distance matrix
+    int min_row = 0, min_col = 1;
+    // the index in the active node map that corresponds to the minimum row, initialized to 0
+    int chosen_active_node1 = min_row;
+    // the index in the active node map that corresponds to the minimum column, initialized to 1
+    int chosen_active_node2 = min_col;
+
+    // iterate through the rows that matter, meaning rows that are in the active node map
+    while (row < num_active_nodes)
+    {
+        // the row that is listed as active in the active node map
+        int row_in_map = *(active_node_map + row);
+        // iterate through all the columns in that row
+        while (col < num_all_nodes)
+        {
+            int include_col = 0;
+            int col_iter = 0;
+            // check to see if this column is an active column
+            while (col_iter < num_active_nodes)
+            {
+                if (*(active_node_map + col_iter) == col)
+                {
+                    include_col = 1;
+                    break;
+                }
+                col_iter++;
+            }
+            // column and row are the same (meaning on the diagonal), skip
+            if (col == row_in_map) include_col = 0;
+            if (include_col)
+            {
+                // this column matters, find the q value
+                // get the current distance
+                double current_distance = *(*(distances + row_in_map) + col);
+                // get the row sum of the row
+                double row_sum = *(row_sums + row_in_map);
+                // get the row sum of the column
+                double col_sum = *(row_sums + col);
+                // get the number of active nodes - 2
+                double n2 = num_active_nodes - 2;
+                // calculate the q value
+                double q_value = (n2 * current_distance) - row_sum - col_sum;
+                // if the q value is less than the current minimum, set the minimum to the q value
+                if (q_value < min_q)
+                {
+                    min_q = q_value;
+                    min_row = row_in_map;
+                    min_col = col;
+                    chosen_active_node1 = row;
+                    chosen_active_node2 = col_iter;
+                }
+            }
+            // increment column
+            col++;
+        }
+        // increment row
+        row++;
+        // set column to row + 1 to avoid checking the same row and column
+        col = row + 1;
+    }
+
+    // at this point, i have the minimum q value and the row and column of that q value
+
+    // create a new node that will join the two nodes located at the min_col and min_row
+    NODE *u = nodes + num_all_nodes;
+    // get node f, the node at the min_row
+    NODE *f = nodes + min_row;
+    // get node g, the node at the min_col
+    NODE *g = nodes + min_col;
+
+    // set the neighbors of u
+    *(u->neighbors + 1) = f;
+    *(u->neighbors + 2) = g;
+    if (num_active_nodes - 1 < 3)
+    {
+        // the single edge added as the last step should be stored
+        // as neighbor[0] of both of the nodes being connected
+        *(f->neighbors) = u;
+        *(g->neighbors) = u;
+    }
+
+    // set the neighbors of f and g
+    *(f->neighbors) = u;
+    *(g->neighbors) = u;
+
+    // set the name of the node in node_names
+    sprintf(*(node_names + num_all_nodes), "#%d", num_all_nodes);
+    // set the name of the node in the node struct
+    u->name = *(node_names + num_all_nodes);
+
+    // update the distances matrix to incorporate u
+    /**
+     * Formula copied from docs:
+     * D'(u, k) = D'(k, u) =
+     *  if k = u then 0
+     * else if k = f then D'(u, k) = (D(f, g) + (S(f) - S(g)) / (N - 2)) / 2
+     * else if k = g then D'(u, k) = (D(f, g) + (S(g) - S(f)) / (N - 2)) / 2
+     * else D'(u, k) = (D(f, k) + D(g, k) - D(f, g)) / 2
+     */
+
+    // we only need to update the distances matrix for the new node, u
+    row = num_all_nodes, col = 0;
+
+    // iterate through the columns of the new node
+    while (col < num_all_nodes)
+    {
+        // if the column is the same as the row, set the distance to 0
+        if (col == row)
+        {
+            *(*(distances + row) + col) = 0;
+            col++;
+            continue;
+        }
+
+        // get D(f,g)
+        double dfg = *(*(distances + min_row) + min_col);
+        // get the row sum of f and g
+        double sf = *(row_sums + min_row);
+        double sg = *(row_sums + min_col);
+        // get the number of active nodes - 2
+        double n2 = num_active_nodes - 2;
+
+        // if the column is the same as f, set the distance to the first formula
+        if (col == min_row)
+        {
+            debug("at min_row: %i, setting to %.2lf\n", col, (dfg + (sf - sg) / n2) / 2);
+            double d = (dfg + (sf - sg) / n2) / 2;
+            *(*(distances + row) + col) = d;
+            // set the value for the symmetric position as the same
+            *(*(distances + col) + row) = d;
+            col++;
+            continue;
+        }
+
+        // if the column is the same as g, set the distance to the second formula
+        if (col == min_col)
+        {
+            debug("at min_col: %i, setting to %.2lf\n", col, (dfg + (sg - sf) / n2) / 2);
+            double d = (dfg + (sg - sf) / n2) / 2;
+            *(*(distances + row) + col) = d;
+            // set the value for the symmetric position as the same
+            *(*(distances + col) + row) = d;
+            col++;
+            continue;
+        }
+
+        // set the distance to the third formula
+        double dfk = *(*(distances + min_row) + col);
+        double dgk = *(*(distances + min_col) + col);
+
+        debug("at col: %i, setting to %.2lf\n", col, (dfk + dgk - dfg) / 2);
+        double d = (dfk + dgk - dfg) / 2;
+        *(*(distances + row) + col) = d;
+        // set the value for the symmetric position as the same
+        *(*(distances + col) + row) = d;
+        col++;
+    }
+
+    // print out the edge data if out is not null
+    if (out != NULL)
+    {
+        // print out f, u, value of D(f, u)
+        fprintf(out, "%i,%i,%.2lf\n", min_row, num_all_nodes, *(*(distances + min_row) + num_all_nodes));
+        // print out g, u, value of D(g, u)
+        fprintf(out, "%i,%i,%.2lf\n", min_col, num_all_nodes, *(*(distances + min_col) + num_all_nodes));
+    }
+
+    // inactivate f and g
+    // set f to the new node in the active node map
+    *(active_node_map + chosen_active_node1) = num_all_nodes++;
+    // set g to the last active node in the active node map
+    *(active_node_map + chosen_active_node2) = *(active_node_map + --num_active_nodes);
+
+    // recurse
+    return taxa_helper(out);
 }
