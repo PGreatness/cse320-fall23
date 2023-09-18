@@ -6,6 +6,9 @@
 #include "util.h"
 #include "compare.h"
 
+#define DEFTHIS 1
+#undef DEFTHIS
+
 int taxa_helper();
 
 /**
@@ -323,7 +326,36 @@ int emit_newick_format(FILE *out) {
  * if any error occurred.
  */
 int emit_distance_matrix(FILE *out) {
-    // TO BE IMPLEMENTED
+    int row_names = 0;
+    // emit the first ',' character in the first row
+    if (fprintf(out, ",") < 1) return -1;
+    while (row_names < num_all_nodes)
+    {
+        if (fprintf(out, "%s", *(node_names + row_names)) < 1) return -1;
+        if (row_names < num_all_nodes - 1)
+        {
+            if (fprintf(out, ",") < 1) return -1;
+        }
+        row_names++;
+    }
+    if (fprintf(out, "\n") < 1) return -1;
+    int current_row = 0;
+    while (current_row < num_all_nodes)
+    {
+        int current_col = 0;
+        if (fprintf(out, "%s,", *(node_names + current_row)) < 1) return -1;
+        while (current_col < num_all_nodes)
+        {
+            if (fprintf(out, "%.2lf", *(*(distances + current_row) + current_col)) < 1) return -1;
+            if (current_col < num_all_nodes - 1)
+            {
+                if (fprintf(out, ",") < 1) return -1;
+            }
+            current_col++;
+        }
+        if (fprintf(out, "\n") < 1) return -1;
+        current_row++;
+    }
     // abort();
     return 0;
 }
@@ -398,9 +430,36 @@ int build_taxonomy(FILE *out) {
 
 int taxa_helper(FILE* out)
 {
+    #ifdef DEFTHIS
+    // print out the distances matrix
+    sprintf(input_buffer, "%i_iteration.csv", num_all_nodes);
+    FILE *distances_file = fopen(input_buffer, "w");
+    emit_distance_matrix(distances_file);
+    #endif
     if (num_active_nodes < 3)
     {
         // number of active nodes is less than 3, cannot build tree
+        if (num_active_nodes < 2)
+        {
+            // only one taxa given, no need to build tree
+            return 0;
+        }
+        // 2 taxa given, just need to join them
+        // get the two active nodes
+        int node1 = *(active_node_map);
+        int node2 = *(active_node_map + 1);
+        // get the nodes
+        NODE *n1 = nodes + node1;
+        NODE *n2 = nodes + node2;
+        // set the neighbors
+        *(n1->neighbors) = n2;
+        *(n2->neighbors) = n1;
+
+        if (out != NULL)
+        {
+            // emit the edge data
+            if (fprintf(out, "%i,%i,%.2lf\n", node2, node1, *(*(distances + node1) + node2)) < 1) return -1;
+        }
         return 1;
     }
 
@@ -571,6 +630,24 @@ int taxa_helper(FILE* out)
     // iterate through the columns of the new node
     while (col < num_all_nodes)
     {
+        int col_iter = 0;
+        int include_col = 0;
+        // check to see if this column is an active column
+        while (col_iter < num_active_nodes)
+        {
+            if (*(active_node_map + col_iter) == col)
+            {
+                include_col = 1;
+                break;
+            }
+            col_iter++;
+        }
+        // if the column is not an active column, skip
+        if (!include_col)
+        {
+            col++;
+            continue;
+        }
         // if the column is the same as the row, set the distance to 0
         if (col == row)
         {

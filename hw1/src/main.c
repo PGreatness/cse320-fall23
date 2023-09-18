@@ -21,13 +21,15 @@ int main(int argc, char **argv)
     // -m flag set, output matrix data
     if (global_options == MATRIX_OPTION)
     {
+        int matrix = 0;
+        build_taxonomy(NULL);
         emit_distance_matrix(stdout);
         return EXIT_SUCCESS;
     }
     // -n flag set, output newick data
     if (global_options == NEWICK_OPTION)
     {
-        emit_newick_format(stdout);
+        if (build_taxonomy(NULL)) emit_newick_format(stdout);
         return EXIT_SUCCESS;
     }
     // TO BE IMPLEMENTED
