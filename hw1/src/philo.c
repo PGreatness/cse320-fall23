@@ -10,6 +10,7 @@
 #undef DEFTHIS
 
 int taxa_helper();
+int find_newick_form(NODE *node, NODE* prev, NODE *head, FILE *out);
 
 /**
  * @brief  Read genetic distance data and initialize data structures.
@@ -130,6 +131,9 @@ int read_distance_data(FILE *in) {
                 memorycpy(*(node_names + name_num), input_buffer, field_size + 1);
                 NODE named_node;
                 named_node.name = *(node_names + name_num);
+                *(named_node.neighbors) = NULL;
+                *(named_node.neighbors + 1) = NULL;
+                *(named_node.neighbors + 2) = NULL;
                 *(nodes + name_num) = named_node;
                 name_num++;
             }else{
@@ -184,6 +188,9 @@ int read_distance_data(FILE *in) {
                 memorycpy(*(node_names + name_num), input_buffer, field_size + 1);
                 NODE named_node;
                 named_node.name = *(node_names + name_num);
+                *(named_node.neighbors) = NULL;
+                *(named_node.neighbors + 1) = NULL;
+                *(named_node.neighbors + 2) = NULL;
                 *(nodes + name_num) = named_node;
                 name_num++;
             }
@@ -304,7 +311,93 @@ int read_distance_data(FILE *in) {
  */
 int emit_newick_format(FILE *out) {
     // TO BE IMPLEMENTED
+    NODE *outlier_node = NULL;
+    if (outlier_name != NULL)
+    {
+        // check if outlier_name exists in the node_names array
+        int i = 0;
+        int found = 0;
+        while (i < num_taxa)
+        {
+            if (compareStrings(*(node_names + i), outlier_name))
+            {
+                // found the outlier, set it to the outlier node
+                outlier_node = nodes + i;
+                found = 1;
+                break;
+            }
+            i++;
+        }
+        if (!found)
+        {
+            
+        }
+    }
+    if (outlier_node != NULL)
+    {
+        find_newick_form(outlier_node, NULL, outlier_node, out);
+    }else
+    {
+        // find the outlier node by finding the node with the greatest total distance
+        // this node can be found by finding the node with the greatest row sum
+        // and it muust be a leaf node (matrix [0,num_taxa))
+        int i = 0;
+        int max_row = 0;
+        double max_row_sum = 0;
+        while (i < num_taxa)
+        {
+            double row_sum = 0;
+            int j = 0;
+            while (j < num_taxa)
+            {
+                row_sum += *(*(distances + i) + j);
+                j++;
+            }
+            if (row_sum > max_row_sum)
+            {
+                max_row_sum = row_sum;
+                max_row = i;
+            }
+            i++;
+        }
+        // find_newick_form
+        find_newick_form(nodes + max_row, NULL, nodes + max_row, out);
+    }
     // abort();
+    return 0;
+}
+
+int find_newick_form(NODE *node, NODE *prev, NODE *head, FILE *out)
+{
+    NODE* node_parent = (NODE*) *(node->neighbors);
+    if (node_parent) fprintf(out, "(");
+    if (*(node->neighbors)) find_newick_form(*(node->neighbors), node, head, out);
+
+    NODE* n1 = (NODE*) *(node->neighbors + 1);
+    NODE* n2 = (NODE*) *(node->neighbors + 2);
+    if (n1 && n2)
+    {
+        // internal node
+        // distance from node to children
+        double dist1 = *(*(distances + (node - nodes)) + (n1 - nodes));
+        double dist2 = *(*(distances + (node - nodes)) + (n2 - nodes));
+
+        if (prev == n1 || prev == n2)
+        {
+            // will be handled by previous recursion
+            if (prev == n1)
+            {
+                fprintf(out, "%s:%.2lf)", n2->name, dist2);
+            }else{
+                fprintf(out, "%s:%.2lf)", n1->name, dist1);
+            }
+        }else{
+            fprintf(out, "%s:%.2lf,%s:%.2lf)", n1->name, dist1, n2->name, dist2);
+        }
+    }
+    double dist = *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0));
+    NODE* head_parent = (NODE*) *(head->neighbors);
+    if (node != head) head_parent == node ? fprintf(out, "%s:%.02lf\n", node->name, dist) : fprintf(out, "%s:%.02lf,", node->name, dist);
     return 0;
 }
 
@@ -452,8 +545,8 @@ int taxa_helper(FILE* out)
         NODE *n1 = nodes + node1;
         NODE *n2 = nodes + node2;
         // set the neighbors
-        *(n1->neighbors) = n2;
-        *(n2->neighbors) = n1;
+        *(n1->neighbors + 1) = n2;
+        *(n2->neighbors + 2) = n1;
 
         if (out != NULL)
         {
@@ -595,6 +688,7 @@ int taxa_helper(FILE* out)
     NODE *g = nodes + min_col;
 
     // set the neighbors of u
+
     *(u->neighbors + 1) = f;
     *(u->neighbors + 2) = g;
     if (num_active_nodes - 1 < 3)
@@ -605,7 +699,7 @@ int taxa_helper(FILE* out)
         *(g->neighbors) = u;
     }
 
-    // set the neighbors of f and g
+    // set the parents of f and g
     *(f->neighbors) = u;
     *(g->neighbors) = u;
 
