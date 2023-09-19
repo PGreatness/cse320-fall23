@@ -310,7 +310,6 @@ int read_distance_data(FILE *in) {
  * in the tree.
  */
 int emit_newick_format(FILE *out) {
-    // TO BE IMPLEMENTED
     NODE *outlier_node = NULL;
     if (outlier_name != NULL)
     {
@@ -330,7 +329,9 @@ int emit_newick_format(FILE *out) {
         }
         if (!found)
         {
-            
+            // outlier_name does not exist in the node_names array
+            fprintf(stderr, "ERROR: outlier_name does not exist in the node_names array\n");
+            return -1;
         }
     }
     if (outlier_node != NULL)

@@ -11,7 +11,7 @@ int main(int argc, char **argv)
     if(global_options == HELP_OPTION)
         USAGE(*argv, EXIT_SUCCESS);
     int read_data;
-    if (read_data = read_distance_data(stdin))
+    if (( read_data = read_distance_data(stdin) ))
     {
         fprintf(stderr, "Error: read_distance_data() failed\n");
         return EXIT_FAILURE;
