@@ -11,6 +11,7 @@
 
 int taxa_helper();
 int find_newick_form(NODE *node, NODE* prev, NODE *head, FILE *out);
+int find_newick(NODE* node, NODE* prev, NODE* head);
 
 /**
  * @brief  Read genetic distance data and initialize data structures.
@@ -362,9 +363,74 @@ int emit_newick_format(FILE *out) {
             i++;
         }
         // find_newick_form
-        find_newick_form(nodes + max_row, NULL, nodes + max_row, out);
+        // find_newick_form(nodes + max_row, NULL, nodes + max_row, out);
+        find_newick(nodes + max_row, NULL, nodes + max_row);
+        printf("\n");
     }
     // abort();
+    return 0;
+}
+
+int find_newick(NODE* node, NODE* prev, NODE* head)
+{
+    if (node == NULL) return 0;
+    NODE *parent = (NODE*) *(node->neighbors);
+    NODE *n1 = (NODE*) *(node->neighbors + 1);
+    NODE *n2 = (NODE*) *(node->neighbors + 2);
+
+    if (parent != NULL)
+    {
+        printf("(");
+        find_newick(parent, node, head);
+        *(node->neighbors) = NULL;
+    }
+
+    if (node == head) return 0;
+    // simple null check
+    if (n1 != NULL)
+    {
+        // check if n1 is either the head or the previous node
+        if (n1 != head && n1 != prev)
+        {
+            // n1 is unique, print it out in the form of (n1:dist1)
+            double dist1 = *(*(distances + (node - nodes)) + (n1 - nodes));
+            printf("%s:%.2lf", n1->name, dist1);
+        }
+    }
+    // do the same for n2
+    if (n2 != NULL)
+    {
+        if (n2 != head && n2 != prev)
+        {
+            double dist2 = *(*(distances + (node - nodes)) + (n2 - nodes));
+            printf(",%s:%.2lf", n2->name, dist2);
+        }
+    }
+    // if both n1 and n2 are null, then this is a leaf node
+    if (n1 == NULL && n2 == NULL)
+    {
+        // print out the name and distance of the node only if it's not the head node or the previous node
+        if (node != head && node != prev)
+        {
+            double dist = *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0));
+            printf("%s:%.2lf", node->name, dist);
+        }
+        // print out a comma if this is not the head node but the previous node
+        if (node != head && node == prev)
+        {
+            printf(",");
+        }
+    }
+    // print out the name and distance of the node only if it's not the head node or the previous node
+    if (node != head && node != prev)
+    {
+        double dist = *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0));
+        printf(")%s:%.2lf", node->name, dist);
+    }
+    if (parent != head && (n1 == prev || n2 == prev) && (n1 != head && n2 != head))
+    {
+        printf(",");
+    }
     return 0;
 }
 
@@ -547,7 +613,7 @@ int taxa_helper(FILE* out)
         NODE *n2 = nodes + node2;
         // set the neighbors
         *(n1->neighbors + 1) = n2;
-        *(n2->neighbors + 2) = n1;
+        *(n2->neighbors + 1) = n1;
 
         if (out != NULL)
         {
