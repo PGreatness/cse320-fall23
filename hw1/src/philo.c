@@ -10,8 +10,6 @@
 #undef DEFTHIS
 
 int taxa_helper();
-int find_newick_form(NODE *node, NODE* prev, NODE *head, FILE *out);
-int find_newick(NODE* node, NODE* prev, NODE* head);
 
 /**
  * @brief  Read genetic distance data and initialize data structures.
@@ -278,6 +276,78 @@ int read_distance_data(FILE *in) {
     return 0;
 }
 
+int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
+{
+    /* debug("Call made to %s with caller %s, neighbors of %s are %s, %s, %s\n",
+        node->name,
+        prev->name,
+        node->name,
+        node->neighbors[0] ? node->neighbors[0]->name : "NULL",
+        node->neighbors[1] ? node->neighbors[1]->name : "NULL",
+        node->neighbors[2] ? node->neighbors[2]->name : "NULL"
+    ); */
+    if (nodes + num_taxa - 1 > node)
+    {
+        // leaf node
+        // printf("^%s", node->name);
+        fprintf(out,"%s%s:%.02lf)",
+        !add_comma ? "," : "",
+        node->name,
+        *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0)));
+        return 0;
+    }
+
+    if (*(node->neighbors) != NULL)
+    {
+        if (*(node->neighbors) == prev)
+        {
+            // debug("Call not made to %s because it is the caller\n", *(node->neighbors)->name);
+            *(node->neighbors) = NULL;
+        }
+        else
+        {
+            fprintf(out, "(");
+            NODE *n = *(node->neighbors);
+            *(node->neighbors) = NULL;
+            recurse(n, node, og, 0, out);
+        }
+    }
+    if (*(node->neighbors + 1) != NULL)
+    {
+        if (*(node->neighbors + 1) == prev)
+        {
+            // debug("Call not made to %s because it is the caller\n", node->neighbors[1]->name);
+            *(node->neighbors + 1) = NULL;
+        }
+        else
+        {
+            NODE *n = *(node->neighbors + 1);
+            *(node->neighbors + 1) = NULL;
+            recurse(n, node, og, 1, out);
+        }
+    }
+    if (*(node->neighbors + 2) != NULL)
+    {
+        if (*(node->neighbors + 2) == prev)
+        {
+            // debug("Call not made to %s because it is the caller\n", node->neighbors[2]->name);
+            *(node->neighbors + 2) = NULL;
+        }
+        else
+        {
+            NODE *n = *(node->neighbors + 2);
+            *(node->neighbors + 2) = NULL;
+            recurse(n, node, og, 0, out);
+        }
+    }
+    // printf("%s", node->name);
+    fprintf(out, "%s:%.02lf",
+    node->name,
+    *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0))
+    );
+    return 1;
+}
+
 /**
  * @brief  Emit a representation of the phylogenetic tree in Newick
  * format to a specified output stream.
@@ -337,12 +407,16 @@ int emit_newick_format(FILE *out) {
     }
     if (outlier_node != NULL)
     {
-        find_newick_form(outlier_node, NULL, outlier_node, out);
+        // find the head of the tree
+        NODE* n = outlier_node;
+        recurse(*(outlier_node->neighbors), outlier_node, *(outlier_node->neighbors), 0, out);
+        if (out == stdout)
+            printf("\n");
     }else
     {
         // find the outlier node by finding the node with the greatest total distance
         // this node can be found by finding the node with the greatest row sum
-        // and it muust be a leaf node (matrix [0,num_taxa))
+        // and it must be a leaf node (matrix [0,num_taxa))
         int i = 0;
         int max_row = 0;
         double max_row_sum = 0;
@@ -362,109 +436,13 @@ int emit_newick_format(FILE *out) {
             }
             i++;
         }
-        // find_newick_form
-        // find_newick_form(nodes + max_row, NULL, nodes + max_row, out);
-        find_newick(nodes + max_row, NULL, nodes + max_row);
-        printf("\n");
+        NODE* n = nodes + max_row;
+        // printf("n.name: %s\n", n->name);
+        recurse(*(n->neighbors), n, *(n->neighbors), 0, out);
+        if (out == stdout)
+            printf("\n");
     }
     // abort();
-    return 0;
-}
-
-int find_newick(NODE* node, NODE* prev, NODE* head)
-{
-    if (node == NULL) return 0;
-    NODE *parent = (NODE*) *(node->neighbors);
-    NODE *n1 = (NODE*) *(node->neighbors + 1);
-    NODE *n2 = (NODE*) *(node->neighbors + 2);
-
-    if (parent != NULL)
-    {
-        printf("(");
-        find_newick(parent, node, head);
-        *(node->neighbors) = NULL;
-    }
-
-    if (node == head) return 0;
-    // simple null check
-    if (n1 != NULL)
-    {
-        // check if n1 is either the head or the previous node
-        if (n1 != head && n1 != prev)
-        {
-            // n1 is unique, print it out in the form of (n1:dist1)
-            double dist1 = *(*(distances + (node - nodes)) + (n1 - nodes));
-            printf("%s:%.2lf", n1->name, dist1);
-        }
-    }
-    // do the same for n2
-    if (n2 != NULL)
-    {
-        if (n2 != head && n2 != prev)
-        {
-            double dist2 = *(*(distances + (node - nodes)) + (n2 - nodes));
-            printf(",%s:%.2lf", n2->name, dist2);
-        }
-    }
-    // if both n1 and n2 are null, then this is a leaf node
-    if (n1 == NULL && n2 == NULL)
-    {
-        // print out the name and distance of the node only if it's not the head node or the previous node
-        if (node != head && node != prev)
-        {
-            double dist = *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0));
-            printf("%s:%.2lf", node->name, dist);
-        }
-        // print out a comma if this is not the head node but the previous node
-        if (node != head && node == prev)
-        {
-            printf(",");
-        }
-    }
-    // print out the name and distance of the node only if it's not the head node or the previous node
-    if (node != head && node != prev)
-    {
-        double dist = *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0));
-        printf(")%s:%.2lf", node->name, dist);
-    }
-    if (parent != head && (n1 == prev || n2 == prev) && (n1 != head && n2 != head))
-    {
-        printf(",");
-    }
-    return 0;
-}
-
-int find_newick_form(NODE *node, NODE *prev, NODE *head, FILE *out)
-{
-    NODE* node_parent = (NODE*) *(node->neighbors);
-    if (node_parent) fprintf(out, "(");
-    if (*(node->neighbors)) find_newick_form(*(node->neighbors), node, head, out);
-
-    NODE* n1 = (NODE*) *(node->neighbors + 1);
-    NODE* n2 = (NODE*) *(node->neighbors + 2);
-    if (n1 && n2)
-    {
-        // internal node
-        // distance from node to children
-        double dist1 = *(*(distances + (node - nodes)) + (n1 - nodes));
-        double dist2 = *(*(distances + (node - nodes)) + (n2 - nodes));
-
-        if (prev == n1 || prev == n2)
-        {
-            // will be handled by previous recursion
-            if (prev == n1)
-            {
-                fprintf(out, "%s:%.2lf)", n2->name, dist2);
-            }else{
-                fprintf(out, "%s:%.2lf)", n1->name, dist1);
-            }
-        }else{
-            fprintf(out, "%s:%.2lf,%s:%.2lf)", n1->name, dist1, n2->name, dist2);
-        }
-    }
-    double dist = *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0));
-    NODE* head_parent = (NODE*) *(head->neighbors);
-    if (node != head) head_parent == node ? fprintf(out, "%s:%.02lf\n", node->name, dist) : fprintf(out, "%s:%.02lf,", node->name, dist);
     return 0;
 }
 
@@ -599,9 +577,22 @@ int taxa_helper(FILE* out)
     if (num_active_nodes < 3)
     {
         // number of active nodes is less than 3, cannot build tree
-        if (num_active_nodes < 2)
+        if (num_taxa < 2)
         {
             // only one taxa given, no need to build tree
+            NODE *last_taxa = (NODE*) (nodes + num_taxa - 1);
+            NODE *last_synth = (NODE*) (nodes + num_all_nodes - 1);
+
+            // set the neighbors
+            if (*(last_taxa->neighbors + 1) != NULL)
+            {
+                *(last_taxa->neighbors + 1) = last_synth;
+                *(last_synth->neighbors) = last_taxa;
+            }else if (*(last_taxa->neighbors + 2) != NULL)
+            {
+                *(last_taxa->neighbors + 2) = last_synth;
+                *(last_synth->neighbors) = last_taxa;
+            }
             return 0;
         }
         // 2 taxa given, just need to join them
@@ -612,8 +603,9 @@ int taxa_helper(FILE* out)
         NODE *n1 = nodes + node1;
         NODE *n2 = nodes + node2;
         // set the neighbors
-        *(n1->neighbors + 1) = n2;
-        *(n2->neighbors + 1) = n1;
+        debug("setting %s to be the father of %s and vice versa\n", n1->name, n2->name);
+        *(n1->neighbors) = n2;
+        *(n2->neighbors) = n1;
 
         if (out != NULL)
         {
@@ -775,6 +767,13 @@ int taxa_helper(FILE* out)
     // set the name of the node in the node struct
     u->name = *(node_names + num_all_nodes);
 
+    // debug("making %s the father of %s (n[1]) and %s (n[2])\n", u->name, f->name, g->name);
+    int iter = 0;
+/*     while (iter < num_active_nodes)
+    {
+        debug("remaining active_node_map[%i]: %s\n", iter, nodes[*(active_node_map + iter)].name);
+        iter++;
+    } */
     // update the distances matrix to incorporate u
     /**
      * Formula copied from docs:
