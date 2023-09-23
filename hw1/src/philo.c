@@ -327,7 +327,7 @@ int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
             NODE *n = *(node->neighbors + 1);
             *(node->neighbors + 1) = NULL;
             recurse(n, node, og, 1, out);
-            if (prev != og) fprintf(out, ")");
+            if (prev != og && comma <= 0) fprintf(out, ")");
             if (comma > 0) comma = -fprintf(out, ",");
         }
     }
@@ -344,7 +344,7 @@ int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
             NODE *n = *(node->neighbors + 2);
             *(node->neighbors + 2) = NULL;
             recurse(n, node, og, 0, out);
-            fprintf(out, ")");
+            if (comma <= 0) fprintf(out, ")");
         }
     }
     // printf("%s", node->name);
