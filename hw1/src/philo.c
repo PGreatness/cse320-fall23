@@ -195,9 +195,10 @@ int read_distance_data(FILE *in) {
             }
             // place the number in the distances matrix
             double n;
-            if (validateNum(input_buffer, field_size, &n))
+            if (!first_line && taxa_in_line > 1 && validateNum(input_buffer, field_size, &n))
             {
-                // debug("Number got was: %lf\n", n);
+                // if (row == 0)
+                //     debug("Number got was: %lf and first taxa?: %i\n", n, taxa_in_line > 1);
                 *(*(distances + col) + row) = n;
                 col++;
             } else {
