@@ -286,12 +286,13 @@ int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
         node->neighbors[1] ? node->neighbors[1]->name : "NULL",
         node->neighbors[2] ? node->neighbors[2]->name : "NULL"
     ); */
+    int comma = (*(node->neighbors + 1) != NULL) && (*(node->neighbors + 2) != NULL);
+    int can_down_a_level = 1;
     if (nodes + num_taxa - 1 > node)
     {
         // leaf node
         // printf("^%s", node->name);
-        fprintf(out,"%s%s:%.02lf)",
-        !add_comma ? "," : "",
+        fprintf(out,"%s:%.02lf",
         node->name,
         *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0)));
         return 0;
@@ -306,10 +307,11 @@ int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
         }
         else
         {
-            fprintf(out, "(");
+            if (can_down_a_level > 0) can_down_a_level = -fprintf(out, "(");
             NODE *n = *(node->neighbors);
             *(node->neighbors) = NULL;
-            recurse(n, node, og, 0, out);
+            recurse(n, node, og, comma, out);
+            if (comma > 0) comma = -fprintf(out, ",");
         }
     }
     if (*(node->neighbors + 1) != NULL)
@@ -321,9 +323,12 @@ int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
         }
         else
         {
+            if (can_down_a_level > 0) can_down_a_level = -fprintf(out, "(");
             NODE *n = *(node->neighbors + 1);
             *(node->neighbors + 1) = NULL;
             recurse(n, node, og, 1, out);
+            if (prev != og) fprintf(out, ")");
+            if (comma > 0) comma = -fprintf(out, ",");
         }
     }
     if (*(node->neighbors + 2) != NULL)
@@ -335,9 +340,11 @@ int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
         }
         else
         {
+            if (can_down_a_level > 0) can_down_a_level = -fprintf(out, "(");
             NODE *n = *(node->neighbors + 2);
             *(node->neighbors + 2) = NULL;
             recurse(n, node, og, 0, out);
+            fprintf(out, ")");
         }
     }
     // printf("%s", node->name);
@@ -345,6 +352,7 @@ int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
     node->name,
     *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0))
     );
+    if (comma > 0) comma = -fprintf(out, ",");
     return 1;
 }
 
