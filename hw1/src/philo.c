@@ -279,20 +279,11 @@ int read_distance_data(FILE *in) {
 
 int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
 {
-    /* debug("Call made to %s with caller %s, neighbors of %s are %s, %s, %s\n",
-        node->name,
-        prev->name,
-        node->name,
-        node->neighbors[0] ? node->neighbors[0]->name : "NULL",
-        node->neighbors[1] ? node->neighbors[1]->name : "NULL",
-        node->neighbors[2] ? node->neighbors[2]->name : "NULL"
-    ); */
     int comma = (*(node->neighbors + 1) != NULL) && (*(node->neighbors + 2) != NULL);
     int can_down_a_level = 1;
     if (nodes + num_taxa - 1 > node)
     {
         // leaf node
-        // printf("^%s", node->name);
         fprintf(out,"%s:%.02lf",
         node->name,
         *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0)));
@@ -330,7 +321,6 @@ int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
             if (comma <= 0) fprintf(out, ")");
         }
     }
-    // printf("%s", node->name);
     fprintf(out, "%s:%.02lf",
     node->name,
     *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0))
