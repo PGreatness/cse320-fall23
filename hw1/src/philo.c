@@ -279,20 +279,11 @@ int read_distance_data(FILE *in) {
 
 int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
 {
-    /* debug("Call made to %s with caller %s, neighbors of %s are %s, %s, %s\n",
-        node->name,
-        prev->name,
-        node->name,
-        node->neighbors[0] ? node->neighbors[0]->name : "NULL",
-        node->neighbors[1] ? node->neighbors[1]->name : "NULL",
-        node->neighbors[2] ? node->neighbors[2]->name : "NULL"
-    ); */
     int comma = (*(node->neighbors + 1) != NULL) && (*(node->neighbors + 2) != NULL);
     int can_down_a_level = 1;
     if (nodes + num_taxa - 1 > node)
     {
         // leaf node
-        // printf("^%s", node->name);
         fprintf(out,"%s:%.02lf",
         node->name,
         *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0)));
@@ -301,32 +292,20 @@ int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
 
     if (*(node->neighbors) != NULL)
     {
-        if (*(node->neighbors) == prev)
-        {
-            // debug("Call not made to %s because it is the caller\n", *(node->neighbors)->name);
-            *(node->neighbors) = NULL;
-        }
-        else
+        if (*(node->neighbors) != prev)
         {
             if (can_down_a_level > 0) can_down_a_level = -fprintf(out, "(");
             NODE *n = *(node->neighbors);
-            *(node->neighbors) = NULL;
             recurse(n, node, og, comma, out);
             if (comma > 0) comma = -fprintf(out, ",");
         }
     }
     if (*(node->neighbors + 1) != NULL)
     {
-        if (*(node->neighbors + 1) == prev)
-        {
-            // debug("Call not made to %s because it is the caller\n", node->neighbors[1]->name);
-            *(node->neighbors + 1) = NULL;
-        }
-        else
+        if (*(node->neighbors + 1) != prev)
         {
             if (can_down_a_level > 0) can_down_a_level = -fprintf(out, "(");
             NODE *n = *(node->neighbors + 1);
-            *(node->neighbors + 1) = NULL;
             recurse(n, node, og, 1, out);
             if (prev != og && comma <= 0) fprintf(out, ")");
             if (comma > 0) comma = -fprintf(out, ",");
@@ -334,21 +313,14 @@ int recurse(NODE* node, NODE* prev, NODE* og, int add_comma, FILE* out)
     }
     if (*(node->neighbors + 2) != NULL)
     {
-        if (*(node->neighbors + 2) == prev)
-        {
-            // debug("Call not made to %s because it is the caller\n", node->neighbors[2]->name);
-            *(node->neighbors + 2) = NULL;
-        }
-        else
+        if (*(node->neighbors + 2) != prev)
         {
             if (can_down_a_level > 0) can_down_a_level = -fprintf(out, "(");
             NODE *n = *(node->neighbors + 2);
-            *(node->neighbors + 2) = NULL;
             recurse(n, node, og, 0, out);
             if (comma <= 0) fprintf(out, ")");
         }
     }
-    // printf("%s", node->name);
     fprintf(out, "%s:%.02lf",
     node->name,
     *(*(distances + (node - nodes)) + (prev ? (prev - nodes) : 0))
