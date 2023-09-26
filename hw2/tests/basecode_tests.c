@@ -8,10 +8,6 @@
 #include "test_common.h"
 
 #define TEST_INPUT "cse307.dat"
-#define COLLATED_REF "rsrc/cse307.collated"
-#define TABSEP_REF "rsrc/cse307.tabsep"
-#define COLLATED_OUTPUT "cse307.collated"
-#define TABSEP_OUTPUT "cse307.tabsep"
 
 extern int errors, warnings;
 
@@ -20,7 +16,7 @@ Test(basecode_suite, read_file) {
     setup_test(name);
 
     Course *c;
-    c = readfile(TEST_REF_DIR"/"TEST_INPUT);
+    c = readfile(test_infile);
     cr_assert_eq(errors, 0, "There were errors reported when reading test data.\n");
     cr_assert_neq(c, NULL, "NULL pointer returned from readfile().\n");
 }
@@ -31,7 +27,7 @@ Test(basecode_suite, stats) {
 
     Course *c;
     Stats *s;
-    c = readfile(TEST_REF_DIR"/"TEST_INPUT);
+    c = readfile(test_infile);
     cr_assert_eq(errors, 0, "There were errors reported when reading test data.\n");
     cr_assert_neq(c, NULL, "NULL pointer returned from readfile().\n");
     s = statistics(c);
