@@ -6,11 +6,13 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "global.h"
 #include "gradedb.h"
 #include "stats.h"
 #include "allocate.h"
 #include "read.h"
+#include "error.h"
 
 /*
  * Input file stack
