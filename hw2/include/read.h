@@ -1,3 +1,6 @@
+#ifndef HW2_READ_H
+#define HW2_READ_H
+
 /*
  * Type definitions for database read functions
  */
@@ -27,9 +30,14 @@ void gobblewhitespace();
 void gobbleblanklines();
 void advancetoken();
 void advanceeol();
+int istoken();
+int tokensize();
 void flushtoken();
+int checktoken(char *key);
 void expecttoken(char *key);
 void expecteof();
 void expectnewline();
 void pushfile();
 void previousfile();
+
+#endif

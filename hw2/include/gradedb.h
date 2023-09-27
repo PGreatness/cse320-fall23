@@ -1,3 +1,5 @@
+#ifndef HW2_GRADEDB_H
+#define HW2_GRADEDB_H
 
 /*
  * Data structures stored in grades database
@@ -81,3 +83,4 @@ typedef struct {
         Student *roster;                /* List of students in course */
 } Course;
 
+#endif
