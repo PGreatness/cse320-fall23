@@ -1,3 +1,5 @@
+#ifndef HW2_SORT_H
+#define HW2_SORT_H
 
 /*
  * Function prototypes for sorting routines.
@@ -15,3 +17,5 @@ int comparescore(Student *s1, Student *s2);
 int comparename(Student *s1, Student *s2);
 int compareid(Student *s1, Student *s2);
 void checkfordups(Student *sp);
+
+#endif

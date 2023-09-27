@@ -1,3 +1,5 @@
+#ifndef HW2_STATS_H
+#define HW2_STATS_H
 
 /*
  * Data structures to hold per-assignment statistics
@@ -74,3 +76,5 @@ void do_quantiles(Stats *s);
 void do_sums(Course *c);
 void do_moments(Stats *s);
 double stddev(int n, double sum, double sumsq);
+
+#endif //HW2_STATS_H

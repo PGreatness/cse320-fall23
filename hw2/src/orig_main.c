@@ -1,34 +1,4 @@
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <getopt.h>
-#include "version.h"
-#include "global.h"
-#include "gradedb.h"
-#include "stats.h"
-#include "read.h"
-#include "write.h"
-#include "normal.h"
-#include "sort.h"
-
-/*
- * Course grade computation program
- */
-
-#define REPORT          0
-#define COLLATE         1
-#define FREQUENCIES     2
-#define QUANTILES       3
-#define SUMMARIES       4
-#define MOMENTS         5
-#define COMPOSITES      6
-#define INDIVIDUALS     7
-#define HISTOGRAMS      8
-#define TABSEP          9
-#define ALLOUTPUT      10
-#define SORTBY         11
-#define NONAMES        12
+#include "orig.h"
 
 static struct option_info {
         unsigned int val;
@@ -44,7 +14,7 @@ static struct option_info {
                   "Collate input data and dump to standard output."},
  {FREQUENCIES,    "freqs",     0,        no_argument, NULL,
                   "Print frequency tables."},
- {QUANTILES,      "quants",    0,        no_argument, NULL,
+ {QUANTILE,      "quants",    0,        no_argument, NULL,
                   "Print quantile information."},
  {SUMMARIES,      "summaries", 0,        no_argument, NULL,
                   "Print quantile summaries."},
@@ -84,12 +54,13 @@ static void init_options() {
     }
 }
 
-static int report, collate, freqs, quantiles, summaries, moments,
-           scores, composite, histograms, tabsep, nonames;
+static int report, collate, freqs, quants, summaries, moments,
+            student_scores, composite, histograms, tabsep, nonames;
 
-static void usage();
+static void usage(char* name);
 
-int errors, warnings;
+extern int errors, warnings;
+
 
 int orig_main(argc, argv)
 int argc;
@@ -125,15 +96,15 @@ char *argv[];
                     }
                     break;
                 case FREQUENCIES: freqs++; break;
-                case QUANTILES: quantiles++; break;
+                case QUANTILE: quants++; break;
                 case SUMMARIES: summaries++; break;
                 case MOMENTS: moments++; break;
                 case COMPOSITES: composite++; break;
-                case INDIVIDUALS: scores++; break;
+                case INDIVIDUALS: student_scores++; break;
                 case HISTOGRAMS: histograms++; break;
                 case ALLOUTPUT:
-                    freqs++; quantiles++; summaries++; moments++;
-                    composite++; scores++; histograms++; tabsep++;
+                    freqs++; quants++; summaries++; moments++;
+                    composite++; student_scores++; histograms++; tabsep++;
                     break;
                 case '?':
                     usage(argv[0]);
@@ -183,10 +154,10 @@ char *argv[];
         if(moments) reportmoments(stdout, s);
         if(composite) reportcomposites(stdout, c, nonames);
         if(freqs) reportfreqs(stdout, s);
-        if(quantiles) reportquantiles(stdout, s);
+        if(quants) reportquantiles(stdout, s);
         if(summaries) reportquantilesummaries(stdout, s);
         if(histograms) reporthistos(stdout, c, s);
-        if(scores) reportscores(stdout, c, nonames);
+        if(student_scores) reportscores(stdout, c, nonames);
         if(tabsep) reporttabs(stdout, c, nonames);
 
         fprintf(stderr, "\nProcessing complete.\n");

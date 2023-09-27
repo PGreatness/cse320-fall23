@@ -58,7 +58,7 @@ int is_valid_template_string(char** tmpt)
                             // if it's a digit, it's a width
                             if (*tmp >= '0' && *tmp <= '9') unacc_char = 0;
                             // if it's a period, it's a precision
-                            if (*tmp == '.') unacc_char = 0;
+                            if (*tmp == '.' && !decimal) { unacc_char = 0; decimal = 1; }
                             // if it's a * and there's no flags, it's a width
                             if (*tmp == '*' && !flag) unacc_char = 0;
                             break;

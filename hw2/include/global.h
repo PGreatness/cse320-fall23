@@ -1,4 +1,5 @@
-
+#ifndef HW2_GLOBAL_H
+#define HW2_GLOBAL_H
 /*
  * Global definitions
  */
@@ -15,3 +16,4 @@ typedef struct Ifile {
         struct Ifile *prev;
 } Ifile;
 
+#endif
