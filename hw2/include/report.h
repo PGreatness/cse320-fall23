@@ -17,8 +17,8 @@
  * The array of quantiles to be computed and scores to be reported.
 */
 
-float quantiles[] = { 10.0, 25.0, 50.0, 75.0, 90.0 };
-float scores[]    = {  0.0,  0.0,  0.0,  0.0,  0.0 };
+extern float quantiles[];
+extern float scores[];
 
 
 /*
