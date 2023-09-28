@@ -127,8 +127,8 @@ Stats *s;
                r = (scores[i] - min) / (max - min);
                fprintf(fd, "%6.2f", r);
              } else {
-               fprintf(fd, "%03.02f", r);
-              //  fprintf(fd, "%03.02f***.**", r);
+              //  fprintf(fd, "%03.02f", r);
+               fprintf(fd, "***.**");
              }
              fprintf(fd, "\n");
            }
@@ -150,8 +150,8 @@ Stats *s;
                   r = (scores[i] - min) / (max - min);
                   fprintf(fd, "%6.2f", r);
                 } else {
-                  fprintf(fd, "%03.02f", r);
-                  // fprintf(fd, "***.**", r);
+                  // fprintf(fd, "%03.02f", r);
+                  fprintf(fd, "***.**");
                 }
                 fprintf(fd, "\n");
               }
@@ -186,10 +186,9 @@ Stats *s;
                 fprintf(fd, "(%6.2f,%6.2f)", fp->score,
                         (float)fp->numless * 100.0/csp->tallied);
               } else {
-                fprintf(fd, "(%6.2f,%03.02f)", fp->score,
-                        (float)fp->numless * 100.0/csp->tallied);
-                // fprintf(fd, "(%6.2f,***.**)", fp->score,
+                // fprintf(fd, "(%6.2f,%03.02f)", fp->score,
                 //         (float)fp->numless * 100.0/csp->tallied);
+                fprintf(fd, "(%6.2f,***.**)", fp->score);
               }
            }
            fprintf(fd, "\n");
@@ -209,10 +208,9 @@ Stats *s;
                     fprintf(fd, "(%6.2f,%6.2f)", fp->score,
                             (float)fp->numless * 100.0/ssp->tallied);
                  } else {
-                    fprintf(fd, "(%6.2f,%03.02f)", fp->score,
-                            (float)fp->numless * 100.0/ssp->tallied);
-                    // fprintf(fd, "(%6.2f,***.**)", fp->score,
+                    // fprintf(fd, "(%6.2f,%03.02f)", fp->score,
                     //         (float)fp->numless * 100.0/ssp->tallied);
+                    fprintf(fd, "(%6.2f,***.**)", fp->score);
                  }
               }
               fprintf(fd, "\n");

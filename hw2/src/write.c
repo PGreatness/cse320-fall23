@@ -21,6 +21,7 @@ void writeassistant(fd, a)
 FILE *fd;
 Assistant *a;
 {
+        if (a == NULL) return;
         fprintf(fd, " ASSISTANT %s, %s\n", a->surname, a->name);
 }
 

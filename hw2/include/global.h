@@ -13,6 +13,7 @@ typedef struct Ifile {
         FILE *fd;
         char *name;
         int line;
+        struct Ifile *next;
         struct Ifile *prev;
 } Ifile;
 
