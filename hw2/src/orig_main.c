@@ -36,8 +36,8 @@ static struct option_info {
                   "Suppress printing of students' names."}
 };
 
-static char *short_options = "";
 static struct option long_options[12];
+static char *short_options = "rck:an";
 
 static void init_options() {
     for(unsigned int i = 0; i < 12; i++) {
@@ -77,11 +77,11 @@ char *argv[];
         while(optind < argc) {
             if((optval = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
                 switch(optval) {
-                case REPORT: report++; break;
-                case COLLATE: collate++; break;
+                case 'r': case REPORT: report++; break;
+                case 'c': case COLLATE: collate++; break;
                 case TABSEP: tabsep++; break;
-                case NONAMES: nonames++; break;
-                case SORTBY:
+                case 'n': case NONAMES: nonames++; break;
+                case 'k': case SORTBY:
                     if(!strcmp(optarg, "name"))
                         compare = comparename;
                     else if(!strcmp(optarg, "id"))
@@ -102,7 +102,7 @@ char *argv[];
                 case COMPOSITES: composite++; break;
                 case INDIVIDUALS: student_scores++; break;
                 case HISTOGRAMS: histograms++; break;
-                case ALLOUTPUT:
+                case 'a': case ALLOUTPUT:
                     freqs++; quants++; summaries++; moments++;
                     composite++; student_scores++; histograms++; tabsep++;
                     break;
