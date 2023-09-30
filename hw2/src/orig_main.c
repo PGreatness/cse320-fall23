@@ -77,8 +77,33 @@ char *argv[];
         while(optind < argc) {
             if((optval = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
                 switch(optval) {
-                case 'r': case REPORT: report++; break;
-                case 'c': case COLLATE: collate++; break;
+                case 'r': case REPORT:
+                    // if report is not the first option, it will fail
+                    if (optind != 2 && collate == 0)
+                    {
+                        if (optval == 'r')
+                            fprintf(stderr, "Option '-r' must be the first option.\n\n");
+                        else if (optval == REPORT)
+                            fprintf(stderr, "Option '--report' must be the first option.\n\n");
+                        usage(argv[0]);
+                        exit(EXIT_FAILURE);
+                    }
+                    report++; break;
+                case 'c': case COLLATE:
+                    // if collate is not the first option, it will fail
+                    if (optind != 2 && collate == 0)
+                    {
+                        if (optind != 2)
+                        {
+                            if (optval == 'c')
+                                fprintf(stderr, "Option '-c' must be the first option.\n\n");
+                            else if (optval == REPORT)
+                                fprintf(stderr, "Option '--collate' must be the first option.\n\n");
+                            usage(argv[0]);
+                            exit(EXIT_FAILURE);
+                        }
+                    }
+                    collate++; break;
                 case TABSEP: tabsep++; break;
                 case 'n': case NONAMES: nonames++; break;
                 case 'k': case SORTBY:
@@ -150,7 +175,7 @@ char *argv[];
         sortrosters(c, compare);
 
         fprintf(stderr, "Producing reports...\n");
-        reportparams(stdout, ifile, c);
+        if(report) reportparams(stdout, ifile, c);
         if(moments) reportmoments(stdout, s);
         if(composite) reportcomposites(stdout, c, nonames);
         if(freqs) reportfreqs(stdout, s);
