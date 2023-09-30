@@ -322,7 +322,8 @@ Stats *s;
         /*
          * Tally the scores into bins
          */
-        min = max = 0.0;
+        max = 0.0;
+        min = 150.0;
         cnt = 0;
         for(stp = c->roster; stp != NULL; stp = stp->cnext) {
           if(stp->composite < min) min = stp->composite;
