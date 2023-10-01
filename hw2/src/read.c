@@ -50,6 +50,7 @@ char *root;
         gobbleblanklines();
         expecteof();
         while(ifile->prev != NULL) previousfile();
+        fclose(ifile->fd);
         free(ifile);
         fprintf(stderr, " ]\n");
         return(c);

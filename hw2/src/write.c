@@ -64,25 +64,27 @@ Score *s;
         fprintf(fd, "\n");
 }
 
-void writestudent(fd, s)
+void writestudent(fd, s, nm)
 FILE *fd;
 Student *s;
+int nm;
 {
         Score *sp;
-        fprintf(fd, "  STUDENT %s %s, %s\n", s->id, s->surname, s->name);
+        fprintf(fd, "  STUDENT %s %s%s %s\n", s->id, nm ? "" : s->surname, nm ? "": ",", nm ? "" : s->name);
         for(sp = s->rawscores; sp != NULL; sp = sp->next)
                 writescore(fd, sp);
 }
 
-void writesection(fd, s)
+void writesection(fd, s, nonames)
 FILE *fd;
 Section *s;
+int nonames;
 {
         Student *sp;
         fprintf(fd, " SECTION %s\n", s->name);
         writeassistant(fd, s->assistant);
         for(sp = s->roster; sp != NULL; sp = sp->next)
-                writestudent(fd, sp);
+                writestudent(fd, sp, nonames);
 }
 
 void writeassignment(fd, a)
@@ -113,9 +115,10 @@ Assignment *a;
         }
 }
 
-void writecourse(fd, c)
+void writecourse(fd, c, nm)
 FILE *fd;
 Course *c;
+int nm;
 {
         Assignment *ap;
         Section *sp;
@@ -124,19 +127,20 @@ Course *c;
         for(ap = c->assignments; ap != NULL; ap = ap->next)
                 writeassignment(fd, ap);
         for(sp = c->sections; sp != NULL; sp = sp->next)
-                writesection(fd, sp);
+                writesection(fd, sp, nm);
 }
 
-void writefile(f, c)
+void writefile(f, c, nm)
 Course *c;
 char *f;
+int nm;
 {
         FILE *fd;
         if((fd = fopen(f, "w")) == NULL) {
                 error("Can't write file: %s\n", f);
                 return;
         }
-        writecourse(fd, c);
+        writecourse(fd, c, nm);
         fclose(fd);
 }
 
