@@ -8,10 +8,6 @@
 #include "test_common.h"
 
 #define TEST_INPUT "cse307.dat"
-#define COLLATED_REF "rsrc/cse307.collated"
-#define TABSEP_REF "rsrc/cse307.tabsep"
-#define COLLATED_OUTPUT "cse307.collated"
-#define TABSEP_OUTPUT "cse307.tabsep"
 
 extern int errors, warnings;
 
@@ -20,7 +16,7 @@ Test(basecode_suite, read_file) {
     setup_test(name);
 
     Course *c;
-    c = readfile(TEST_REF_DIR"/"TEST_INPUT);
+    c = readfile(test_infile);
     cr_assert_eq(errors, 0, "There were errors reported when reading test data.\n");
     cr_assert_neq(c, NULL, "NULL pointer returned from readfile().\n");
 }
@@ -31,7 +27,7 @@ Test(basecode_suite, stats) {
 
     Course *c;
     Stats *s;
-    c = readfile(TEST_REF_DIR"/"TEST_INPUT);
+    c = readfile(test_infile);
     cr_assert_eq(errors, 0, "There were errors reported when reading test data.\n");
     cr_assert_neq(c, NULL, "NULL pointer returned from readfile().\n");
     s = statistics(c);
@@ -58,7 +54,7 @@ Test(basecode_suite, collate) {
 Test(basecode_suite, tabsep) {
     char *name = "tabsep";
     setup_test(name);
-    extern void reporttabs(FILE *fd, Course *c);
+    extern void reporttabs(FILE *fd, Course *c, int nm);
     extern void normalize(Course *c, Stats *s);
     extern void composites(Course *c);
 
@@ -74,7 +70,7 @@ Test(basecode_suite, tabsep) {
     sortrosters(c, comparename);
     FILE *f = fopen(test_outfile, "w");
     cr_assert_neq(f, NULL, "Error opening test output file.\n");
-    reporttabs(f, c);
+    reporttabs(f, c, 0);
     fclose(f);
     assert_outfile_matches(name, NULL);
 }

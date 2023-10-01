@@ -1,3 +1,6 @@
+#ifndef HW2_ALLOCATE_H
+#define HW2_ALLOCATE_H
+
 /*
  * Type definitions for memory allocation functions
  */
@@ -16,3 +19,5 @@ Classstats *newclassstats();
 Sectionstats *newsectionstats();
 Stats *newstats();
 Ifile *newifile();
+
+#endif

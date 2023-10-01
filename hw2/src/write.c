@@ -8,6 +8,7 @@
 #include "global.h"
 #include "gradedb.h"
 #include "write.h"
+#include "error.h"
 
 void writeprofessor(fd, p)
 FILE *fd;
@@ -20,6 +21,7 @@ void writeassistant(fd, a)
 FILE *fd;
 Assistant *a;
 {
+        if (a == NULL) return;
         fprintf(fd, " ASSISTANT %s, %s\n", a->surname, a->name);
 }
 
@@ -49,6 +51,7 @@ Score *s;
                         case RAW:
                           break;
                         }
+                        break;
                 case USELIKEAVG:
                         fprintf(fd, " USELIKEAVG");
                         break;

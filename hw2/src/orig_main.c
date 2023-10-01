@@ -1,35 +1,6 @@
+#include "orig.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <getopt.h>
-#include "version.h"
-#include "global.h"
-#include "gradedb.h"
-#include "stats.h"
-#include "read.h"
-#include "write.h"
-#include "normal.h"
-#include "sort.h"
-
-/*
- * Course grade computation program
- */
-
-#define REPORT          0
-#define COLLATE         1
-#define FREQUENCIES     2
-#define QUANTILES       3
-#define SUMMARIES       4
-#define MOMENTS         5
-#define COMPOSITES      6
-#define INDIVIDUALS     7
-#define HISTOGRAMS      8
-#define TABSEP          9
-#define ALLOUTPUT      10
-#define SORTBY         11
-#define NONAMES        12
-
+void free_all(Course* c);
 static struct option_info {
         unsigned int val;
         char *name;
@@ -44,7 +15,7 @@ static struct option_info {
                   "Collate input data and dump to standard output."},
  {FREQUENCIES,    "freqs",     0,        no_argument, NULL,
                   "Print frequency tables."},
- {QUANTILES,      "quants",    0,        no_argument, NULL,
+ {QUANTILE,      "quants",    0,        no_argument, NULL,
                   "Print quantile information."},
  {SUMMARIES,      "summaries", 0,        no_argument, NULL,
                   "Print quantile summaries."},
@@ -63,14 +34,16 @@ static struct option_info {
  {SORTBY,         "sortby",    'k',      required_argument, "key",
                   "Sort by {name, id, score}."},
  {NONAMES,        "nonames",   'n',      no_argument, NULL,
-                  "Suppress printing of students' names."}
+                  "Suppress printing of students' names."},
+ {OUTPUT,          "output",   'o',      required_argument, "file",
+                  "Specify file to be used for output."}
 };
 
-static char *short_options = "";
-static struct option long_options[12];
+static struct option long_options[14];
+static char *short_options = "rck:ano:";
 
 static void init_options() {
-    for(unsigned int i = 0; i < 12; i++) {
+    for(unsigned int i = 0; i < 14; i++) {
         struct option_info *oip = &option_table[i];
         if(oip->val != i) {
             fprintf(stderr, "Option initialization error\n");
@@ -84,12 +57,13 @@ static void init_options() {
     }
 }
 
-static int report, collate, freqs, quantiles, summaries, moments,
-           scores, composite, histograms, tabsep, nonames;
+static int report, collate, freqs, quants, summaries, moments,
+            student_scores, composite, histograms, tabsep, nonames;
 
-static void usage();
+static void usage(char* name);
 
-int errors, warnings;
+extern int errors, warnings;
+
 
 int orig_main(argc, argv)
 int argc;
@@ -99,6 +73,7 @@ char *argv[];
         Stats *s;
         char optval;
         int (*compare)() = comparename;
+        FILE* f = stdout;
 
         fprintf(stderr, BANNER);
         init_options();
@@ -106,11 +81,36 @@ char *argv[];
         while(optind < argc) {
             if((optval = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
                 switch(optval) {
-                case REPORT: report++; break;
-                case COLLATE: collate++; break;
+                case 'r': case REPORT:
+                    // if report is not the first option, it will fail
+                    if (optind != 2 && collate == 0)
+                    {
+                        if (optval == 'r')
+                            fprintf(stderr, "Option '-r' must be the first option.\n\n");
+                        else if (optval == REPORT)
+                            fprintf(stderr, "Option '--report' must be the first option.\n\n");
+                        usage(argv[0]);
+                        exit(EXIT_FAILURE);
+                    }
+                    report++; break;
+                case 'c': case COLLATE:
+                    // if collate is not the first option, it will fail
+                    if (optind != 2 && collate == 0)
+                    {
+                        if (optind != 2)
+                        {
+                            if (optval == 'c')
+                                fprintf(stderr, "Option '-c' must be the first option.\n\n");
+                            else if (optval == REPORT)
+                                fprintf(stderr, "Option '--collate' must be the first option.\n\n");
+                            usage(argv[0]);
+                            exit(EXIT_FAILURE);
+                        }
+                    }
+                    collate++; break;
                 case TABSEP: tabsep++; break;
-                case NONAMES: nonames++; break;
-                case SORTBY:
+                case 'n': case NONAMES: nonames++; break;
+                case 'k': case SORTBY:
                     if(!strcmp(optarg, "name"))
                         compare = comparename;
                     else if(!strcmp(optarg, "id"))
@@ -125,18 +125,25 @@ char *argv[];
                     }
                     break;
                 case FREQUENCIES: freqs++; break;
-                case QUANTILES: quantiles++; break;
+                case QUANTILE: quants++; break;
                 case SUMMARIES: summaries++; break;
                 case MOMENTS: moments++; break;
                 case COMPOSITES: composite++; break;
-                case INDIVIDUALS: scores++; break;
+                case INDIVIDUALS: student_scores++; break;
                 case HISTOGRAMS: histograms++; break;
-                case ALLOUTPUT:
-                    freqs++; quantiles++; summaries++; moments++;
-                    composite++; scores++; histograms++; tabsep++;
+                case 'a': case ALLOUTPUT:
+                    freqs++; quants++; summaries++; moments++;
+                    composite++; student_scores++; histograms++; tabsep++;
                     break;
                 case '?':
                     usage(argv[0]);
+                    break;
+                case 'o': case OUTPUT:
+                    f = fopen(optarg, "w");
+                    if(f == NULL) {
+                        fprintf(stderr, "Unable to open output file '%s'.\n\n", optarg);
+                        usage(argv[0]);
+                    }
                     break;
                 default:
                     break;
@@ -159,6 +166,8 @@ char *argv[];
         fprintf(stderr, "Reading input data...\n");
         c = readfile(ifile);
         if(errors) {
+            // if (c != NULL) free_course(c);
+            if (c != NULL) free_all(c);
            printf("%d error%s found, so no computations were performed.\n",
                   errors, errors == 1 ? " was": "s were");
            exit(EXIT_FAILURE);
@@ -166,32 +175,50 @@ char *argv[];
 
         fprintf(stderr, "Calculating statistics...\n");
         s = statistics(c);
-        if(s == NULL) fatal("There is no data from which to generate reports.");
+        if(s == NULL)
+        {
+            if (c != NULL) free_all(c);
+            if (s != NULL) free_stats(s);
+            fatal("There is no data from which to generate reports.");
+        }
         normalize(c, s);
         composites(c);
         sortrosters(c, comparename);
         checkfordups(c->roster);
         if(collate) {
                 fprintf(stderr, "Dumping collated data...\n");
-                writecourse(stdout, c);
-                exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);
+                if (histograms == 0 &&
+                    student_scores == 0 &&
+                    tabsep == 0)
+                {
+                    writecourse(f, c);
+                    // if (c != NULL) free_course(c);
+                    if (c != NULL) free_all(c);
+                    if (s != NULL) free_stats(s);
+                    if (f != NULL) fclose(f);
+                    exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);
+                }
         }
         sortrosters(c, compare);
 
         fprintf(stderr, "Producing reports...\n");
-        reportparams(stdout, ifile, c);
-        if(moments) reportmoments(stdout, s);
-        if(composite) reportcomposites(stdout, c, nonames);
-        if(freqs) reportfreqs(stdout, s);
-        if(quantiles) reportquantiles(stdout, s);
-        if(summaries) reportquantilesummaries(stdout, s);
-        if(histograms) reporthistos(stdout, c, s);
-        if(scores) reportscores(stdout, c, nonames);
-        if(tabsep) reporttabs(stdout, c, nonames);
+        if(report) reportparams(f, ifile, c);
+        if(moments) reportmoments(f, s);
+        if(composite) reportcomposites(f, c, nonames);
+        if(freqs) reportfreqs(f, s);
+        if(quants) reportquantiles(f, s);
+        if(summaries) reportquantilesummaries(f, s);
+        if(histograms) reporthistos(f, c, s);
+        if(student_scores) reportscores(f, c, nonames);
+        if(tabsep) reporttabs(f, c, nonames);
 
         fprintf(stderr, "\nProcessing complete.\n");
-        printf("%d warning%s issued.\n", warnings+errors,
+        fprintf(stderr,"%d warning%s issued.\n", warnings+errors,
                warnings+errors == 1? " was": "s were");
+        // if (c != NULL) free_course(c);
+        if (c != NULL) free_all(c);
+        if (s != NULL) free_stats(s);
+        if (f != NULL) fclose(f);
         exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
@@ -202,7 +229,7 @@ char *name;
 
         fprintf(stderr, "Usage: %s [options] <data file>\n", name);
         fprintf(stderr, "Valid options are:\n");
-        for(unsigned int i = 0; i < 13; i++) {
+        for(unsigned int i = 0; i < 14; i++) {
                 opt = &option_table[i];
                 char optchr[5] = {' ', ' ', ' ', ' ', '\0'};
                 if(opt->chr)

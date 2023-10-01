@@ -3,13 +3,15 @@
  * Normalize scores, using the computed statistics.
  */
 
-#include<stddef.h>
-#include<stdio.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 #include "global.h"
 #include "gradedb.h"
 #include "stats.h"
 #include "allocate.h"
 #include "normal.h"
+#include "error.h"
 
 /*
  * Normalize scores:
@@ -26,7 +28,7 @@ Stats *s;
 {
         Student *stp;
         Score *rscp, *nscp;
-        Classstats *csp;
+        Classstats *csp = s->cstats;
         Sectionstats *ssp;
 
         for(stp = c->roster; stp != NULL; stp = stp->cnext) {
@@ -36,9 +38,11 @@ Stats *s;
               ssp = rscp->sstats;
               if(nscp == NULL) {
                 stp->normscores = nscp = newscore();
+                nscp->code = NULL;
                 nscp->next = NULL;
               } else {
                 nscp->next = newscore();
+                nscp->next->code = NULL;
                 nscp = nscp->next;
                 nscp->next = NULL;
               }
@@ -107,13 +111,7 @@ Sectionstats *ssp;
                          }
                         return(linear(s, ssp->mean, ssp->stddev, a->mean, a->stddev));
                 }
-        case SCALE:
-                if(a->max < EPSILON) {
-                  warning("Declared maximum score of %s too small for normalization.",
-                        csp->asgt->name);
-                  a->max = 2*EPSILON;
-                }
-                return(scale(s, a->max, a->scale));
+                break;
         case QUANTILE:
                 switch(a->ngroup) {
                 case BYCLASS:
@@ -148,7 +146,16 @@ Sectionstats *ssp;
                    else if(s == fp->score)
                         return((float)fp->numless*100.0/n);
                 }
+                break;
+        case SCALE:
+                if(a->max < EPSILON) {
+                warning("Declared maximum score of %s too small for normalization.",
+                        csp->asgt->name);
+                a->max = 2*EPSILON;
+                }
+                return(scale(s, a->max, a->scale));
         }
+        return(0.0);
 }
 
 /*
