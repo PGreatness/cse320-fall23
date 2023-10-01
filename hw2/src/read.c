@@ -49,13 +49,8 @@ char *root;
         c = readcourse();
         gobbleblanklines();
         expecteof();
-        while(ifile->prev != NULL)
-        {
-                free(ifile->name);
-                free(ifile);
-                fclose(ifile->fd);
-                previousfile();
-        }
+        while(ifile->prev != NULL) previousfile();
+        free(ifile);
         fprintf(stderr, " ]\n");
         return(c);
 }
@@ -634,10 +629,20 @@ void previousfile()
         Ifile *prev;
         if((prev = ifile->prev) == NULL)
         {
+                if (ifile->name != NULL)
+                {
+                        free(ifile->name);
+                        ifile->name = NULL;
+                }
                 free(ifile);
                 fatal("(%s:%d) No previous file.", ifile->name, ifile->line);
         }
         fclose(ifile->fd);
+        if (ifile->name != NULL)
+        {
+                free(ifile->name);
+                ifile->name = NULL;
+        }
         free(ifile);
         ifile = prev;
         fprintf(stderr, " ]");
