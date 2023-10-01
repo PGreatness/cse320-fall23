@@ -5,6 +5,7 @@
 #include "global.h"
 #include "gradedb.h"
 #include "stats.h"
+#include "debug.h"
 
 #ifdef MSDOS
 #include <time.h>

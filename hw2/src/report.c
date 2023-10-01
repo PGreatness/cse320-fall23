@@ -2,6 +2,7 @@
 /*
  * Generate reports from the computed data.
  */
+#include <math.h>
 #include "report.h"
 
 float quantiles[] = { 10.0, 25.0, 50.0, 75.0, 90.0 };
@@ -311,7 +312,7 @@ Stats *s;
         Student *stp;
         Freqs *fp;
         int col, pct, cnt;
-        int bins[20];
+        int bins[50];
         float min, max, diff;
 
         fprintf(fd, "HISTOGRAMS\n\n");
@@ -330,9 +331,18 @@ Stats *s;
           if(stp->composite > max) max = stp->composite;
           cnt++;
         }
-        for(col = 0; col < 20; col++) bins[col] = 0;
-        diff = (max-min == 0.0) ? 1.0 : (max-min);
+        for(col = 0; col < 50; col++) bins[col] = 0;
+        float width = (max - min) / 50;
+        diff = (max - min == 0.0) ? 1.0 : (max - min);
+        debug("min: %f, max: %f, width: %f\n", min, max, width);
         for(stp = c->roster; stp != NULL; stp = stp->cnext) {
+          // for (int i = 0; i < 50; i++)
+          // {
+          //   if (min + (width * i) <= stp->composite && stp->composite < min + (width * (i + 1)))
+          //   {
+          //     bins[i] += 1;
+          //   }
+          // }
           pct = 49*(stp->composite-min)/diff;
           bins[pct] += 1;
         }
@@ -381,26 +391,44 @@ void histo(FILE* fd, int bins[], float min, float max, int cnt)
     /*
      * Now display the histogram.
      */
+    float column_height = (float)20 / cmax;
+    int decrement = cmax;
+    int col_height = (int)(column_height);
+    if (column_height - col_height > 0.5)
+    {
+      col_height++;
+    }
+    debug("cmax: %d, column_height: %f\n", cmax, column_height);
     for(row = 20; row >= 0; row--) {
       if(row == 20)
         fprintf(fd, "        ");
-      else if(row%4 == 3) {
-        fprintf(fd, "%5.1f%% |", (float)(100*cmax/cnt)*(row+1)/20);
+      else if(row%col_height == col_height-1) {
+        fprintf(fd, "%6i |", decrement--);
       } else {
         fprintf(fd, "       |");
       }
       for(col = 0; col < 50; col++) {
-        if(20*bins[col] > row*cmax)
-          fprintf(fd, "%s", (row==20)?"^":"*");
+        if (row == 20)
+        {
+          fprintf(fd, "%s", (col==0) ? "\b^" : "");
+          continue;
+        }
+        if (bins[col] == 0)
+        {
+          fprintf(fd, " ");
+          continue;
+        }
+        if(bins[col]*col_height >= (float)(row + 1))
+          fprintf(fd, "%s", "*");
         else
           fprintf(fd, " ");
       }
       fprintf(fd, "\n");
     }
-    fprintf(fd, "    0%% -+------------------------------------------------+\n");
+    fprintf(fd, "    0  -+------------------------------------------------+\n");
     fprintf(fd, "     %6.2f                                         %6.2f\n\n",
             min, max);
-}    
+}
 
 void
 reporttabs(FILE *fd, Course *c, int nm)
