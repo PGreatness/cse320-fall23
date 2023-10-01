@@ -34,6 +34,7 @@
 #define ALLOUTPUT      10
 #define SORTBY         11
 #define NONAMES        12
+#define OUTPUT         13
 
 
 #endif //HW2_ORIG_H
