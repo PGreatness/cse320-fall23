@@ -54,7 +54,7 @@ Test(basecode_suite, collate) {
 Test(basecode_suite, tabsep) {
     char *name = "tabsep";
     setup_test(name);
-    extern void reporttabs(FILE *fd, Course *c);
+    extern void reporttabs(FILE *fd, Course *c, int nm);
     extern void normalize(Course *c, Stats *s);
     extern void composites(Course *c);
 
@@ -70,7 +70,7 @@ Test(basecode_suite, tabsep) {
     sortrosters(c, comparename);
     FILE *f = fopen(test_outfile, "w");
     cr_assert_neq(f, NULL, "Error opening test output file.\n");
-    reporttabs(f, c);
+    reporttabs(f, c, 0);
     fclose(f);
     assert_outfile_matches(name, NULL);
 }
