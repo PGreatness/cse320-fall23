@@ -11,6 +11,7 @@
 #include "stats.h"
 #include "allocate.h"
 #include "error.h"
+#include "free.h"
 
 Stats *statistics(c)
 Course *c;
@@ -38,11 +39,13 @@ Course *c;
         stats = newstats();
         stats->cstats = NULL;
         csp = NULL;
+        int freer = 0;
         for(ap = c->assignments; ap != NULL; ap = ap->next) {
                 if(csp == NULL) {
                         stats->cstats = newclassstats();
                         csp = stats->cstats;
                 } else {
+                        freer = 1;
                         csp->next = newclassstats();
                         csp = csp->next;
                 }
@@ -72,6 +75,10 @@ Course *c;
                         ssp->freqs = NULL;
                 }
         }
+        if (freer)
+                free_classstats(csp->next);
+        else
+                free_classstats(csp);
         return(stats);
 }
 

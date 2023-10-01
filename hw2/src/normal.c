@@ -38,9 +38,11 @@ Stats *s;
               ssp = rscp->sstats;
               if(nscp == NULL) {
                 stp->normscores = nscp = newscore();
+                nscp->code = NULL;
                 nscp->next = NULL;
               } else {
                 nscp->next = newscore();
+                nscp->next->code = NULL;
                 nscp = nscp->next;
                 nscp->next = NULL;
               }

@@ -15,6 +15,7 @@
 #include "sort.h"
 #include "error.h"
 #include "report.h"
+#include "free.h"
 
 
 /*

@@ -13,6 +13,7 @@
 #include "allocate.h"
 #include "read.h"
 #include "error.h"
+#include "free.h"
 
 /*
  * Input file stack
@@ -38,14 +39,23 @@ char *root;
         ifile->name = root;
         ifile->line = 1;
         if((ifile->fd = fopen(root, "r")) == NULL)
+        {
+                free(ifile);
                 fatal("Can't open data file %s.\n", root);
+        }
 
         fprintf(stderr, "[ %s", root);
         gobbleblanklines();
         c = readcourse();
         gobbleblanklines();
         expecteof();
-        fclose(ifile->fd);
+        while(ifile->prev != NULL)
+        {
+                free(ifile->name);
+                free(ifile);
+                fclose(ifile->fd);
+                previousfile();
+        }
         fprintf(stderr, " ]\n");
         return(c);
 }
@@ -160,6 +170,7 @@ Assignment *a;
 
         if(!checktoken("SCORE")) return(NULL);
         s = newscore();
+        s->code = NULL;
         if(!istoken()) advancetoken();
         s->asgt = NULL;
         /*
@@ -174,10 +185,14 @@ Assignment *a;
                         }
                 }
                 if(s->asgt == NULL)
-                   fatal("(%s:%d) Undeclared assignment %s encountered in student scores.",
-                         ifile->name, ifile->line, tokenptr);
+                {
+                        free_scores(s);
+                        fatal("(%s:%d) Undeclared assignment %s encountered in student scores.",
+                                ifile->name, ifile->line, tokenptr);
+                }
                 flushtoken();
         } else {
+                free_scores(s);
                 fatal("(%s:%d) Expecting assignment ID.", ifile->name, ifile->line);
         }
         readgrade(s);
@@ -457,8 +472,11 @@ void gobbleblanklines()
           if((c = getc(ifile->fd)) == '#') {
             while((c = getc(ifile->fd)) != '\n') {
               if(c == EOF)
+              {
+                free(ifile);
                 fatal("(%s:%d) EOF within comment line.",
                       ifile->name, ifile->line);
+              }
             }
             ifile->line++;
             continue;
@@ -486,7 +504,10 @@ char nextchar()
         if(istoken()) return(*tokenptr++);
         flushtoken();
         if((c = getc(ifile->fd)) == EOF)
+        {
+                free(ifile);
            fatal("(%s:%d) Unexpected EOF.", ifile->name, ifile->line);
+        }
         return(c);
 }
 
@@ -530,7 +551,10 @@ void advanceeol()
                 *tokenend++ = c;
         }
         if(c == EOF)
+        {
+                free(ifile);
                 fatal("(%s:%d) Incomplete line at end of file.", ifile->name, ifile->line);
+        }
         *tokenend++ = '\0';
 }
 
@@ -603,7 +627,10 @@ void previousfile()
 {
         Ifile *prev;
         if((prev = ifile->prev) == NULL)
+        {
+                free(ifile);
                 fatal("(%s:%d) No previous file.", ifile->name, ifile->line);
+        }
         fclose(ifile->fd);
         free(ifile);
         ifile = prev;
@@ -628,7 +655,12 @@ void pushfile()
         nfile->name = n;
         nfile->line = 1;
         if((nfile->fd = fopen(n, "r")) == NULL)
+        {
+                free(n);
+                free(nfile);
+                free(ifile);
                 fatal("(%s:%d) Can't open data file %s\n", ifile->name, ifile->line, n);
+        }
         nfile->prev = ifile;
         ifile->next = nfile;
         ifile = nfile;

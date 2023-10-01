@@ -1,5 +1,6 @@
 #include "orig.h"
 
+void free_all(Course* c);
 static struct option_info {
         unsigned int val;
         char *name;
@@ -165,6 +166,8 @@ char *argv[];
         fprintf(stderr, "Reading input data...\n");
         c = readfile(ifile);
         if(errors) {
+            // if (c != NULL) free_course(c);
+            if (c != NULL) free_all(c);
            printf("%d error%s found, so no computations were performed.\n",
                   errors, errors == 1 ? " was": "s were");
            exit(EXIT_FAILURE);
@@ -172,7 +175,12 @@ char *argv[];
 
         fprintf(stderr, "Calculating statistics...\n");
         s = statistics(c);
-        if(s == NULL) fatal("There is no data from which to generate reports.");
+        if(s == NULL)
+        {
+            if (c != NULL) free_all(c);
+            if (s != NULL) free_stats(s);
+            fatal("There is no data from which to generate reports.");
+        }
         normalize(c, s);
         composites(c);
         sortrosters(c, comparename);
@@ -184,6 +192,10 @@ char *argv[];
                     tabsep == 0)
                 {
                     writecourse(f, c);
+                    // if (c != NULL) free_course(c);
+                    if (c != NULL) free_all(c);
+                    if (s != NULL) free_stats(s);
+                    if (f != NULL) fclose(f);
                     exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);
                 }
         }
@@ -203,6 +215,10 @@ char *argv[];
         fprintf(stderr, "\nProcessing complete.\n");
         fprintf(stderr,"%d warning%s issued.\n", warnings+errors,
                warnings+errors == 1? " was": "s were");
+        // if (c != NULL) free_course(c);
+        if (c != NULL) free_all(c);
+        if (s != NULL) free_stats(s);
+        if (f != NULL) fclose(f);
         exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
