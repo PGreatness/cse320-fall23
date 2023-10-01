@@ -332,9 +332,9 @@ Stats *s;
           cnt++;
         }
         for(col = 0; col < 50; col++) bins[col] = 0;
-        float width = (max - min) / 50;
+        // float width = (max - min) / 50;
         diff = (max - min == 0.0) ? 1.0 : (max - min);
-        debug("min: %f, max: %f, width: %f\n", min, max, width);
+        // debug("min: %f, max: %f, width: %f\n", min, max, width);
         for(stp = c->roster; stp != NULL; stp = stp->cnext) {
           // for (int i = 0; i < 50; i++)
           // {
@@ -401,7 +401,7 @@ void histo(FILE* fd, int bins[], float min, float max, int cnt)
     debug("cmax: %d, column_height: %f\n", cmax, column_height);
     for(row = 20; row >= 0; row--) {
       if(row == 20)
-        fprintf(fd, "        ");
+        fprintf(fd, "       ");
       else if(row%col_height == col_height-1) {
         fprintf(fd, "%6i |", decrement--);
       } else {
@@ -410,7 +410,7 @@ void histo(FILE* fd, int bins[], float min, float max, int cnt)
       for(col = 0; col < 50; col++) {
         if (row == 20)
         {
-          fprintf(fd, "%s", (col==0) ? "\b^" : "");
+          fprintf(fd, "%s", (col==0) ? "^" : "");
           continue;
         }
         if (bins[col] == 0)

@@ -519,7 +519,10 @@ char nextchar()
 void advancetoken()
 {
         char c;
-        if(istoken()) error("(%s:%d) Flushing unread input token.", ifile->name, ifile->line);
+        if(istoken())
+        {
+                error("(%s:%d) Flushing unread input token.", ifile->name, ifile->line);
+        }
         flushtoken();
         gobblewhitespace();
         while((c = getc(ifile->fd)) != EOF) {
@@ -540,7 +543,10 @@ void advancetoken()
 void advanceeol()
 {
         char c;
-        if(istoken()) error("(%s:%d) Flushing unread input token.", ifile->name, ifile->line);
+        if(istoken())
+        {
+                error("(%s:%d) Flushing unread input token.", ifile->name, ifile->line);
+        }
         flushtoken();
         gobblewhitespace();
         while((c = getc(ifile->fd)) != EOF) {
