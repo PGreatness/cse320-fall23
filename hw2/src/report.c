@@ -392,7 +392,7 @@ void histo(FILE* fd, int bins[], float min, float max, int cnt)
      * Now display the histogram.
      */
     float column_height = (float)20 / cmax;
-    int decrement = cmax;
+    // int decrement = cmax;
     int col_height = (int)(column_height);
     if (column_height - col_height > 0.5)
     {
@@ -402,8 +402,8 @@ void histo(FILE* fd, int bins[], float min, float max, int cnt)
     for(row = 20; row >= 0; row--) {
       if(row == 20)
         fprintf(fd, "       ");
-      else if(row%col_height == col_height-1) {
-        fprintf(fd, "%6i |", decrement--);
+      else if(row%4 == 3) {
+        fprintf(fd, "%5.1f%% |", (float)(100*cmax/cnt)*(row+1)/20);
       } else {
         fprintf(fd, "       |");
       }
@@ -425,7 +425,7 @@ void histo(FILE* fd, int bins[], float min, float max, int cnt)
       }
       fprintf(fd, "\n");
     }
-    fprintf(fd, "    0  -+------------------------------------------------+\n");
+    fprintf(fd, "    0%% -+------------------------------------------------+\n");
     fprintf(fd, "     %6.2f                                         %6.2f\n\n",
             min, max);
 }
