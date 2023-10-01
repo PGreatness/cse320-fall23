@@ -14,17 +14,23 @@ void free_freqs(Freqs* f)
 void free_classstats(Classstats* c)
 {
     if (c == NULL) return;
-    Freqs* f = c->freqs;
-    if (f != NULL)
+    while(c != NULL)
     {
-        free_freqs(f);
-        c->freqs = NULL;
-    }
-    Sectionstats* s = c->sstats;
-    if (s != NULL)
-    {
-        free_sectionstats(s);
-        c->sstats = NULL;
+        Classstats* tmp = c->next;
+        Freqs* f = c->freqs;
+        if (f != NULL)
+        {
+            free_freqs(f);
+            c->freqs = NULL;
+        }
+        Sectionstats* s = c->sstats;
+        if (s != NULL)
+        {
+            free_sectionstats(s);
+            c->sstats = NULL;
+        }
+        free(c);
+        c = tmp;
     }
 }
 
@@ -103,6 +109,7 @@ void free_sections(Section* s)
             free(ast);
             s->assistant = NULL;
         }
+        free(s);
         s = tmp;
     }
 }

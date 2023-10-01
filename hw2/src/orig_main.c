@@ -191,7 +191,7 @@ char *argv[];
                     student_scores == 0 &&
                     tabsep == 0)
                 {
-                    writecourse(f, c);
+                    writecourse(f, c, nonames);
                     // if (c != NULL) free_course(c);
                     if (c != NULL) free_all(c);
                     if (s != NULL) free_stats(s);

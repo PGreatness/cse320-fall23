@@ -46,7 +46,7 @@ Test(basecode_suite, collate) {
     cr_assert_neq(f, NULL, "Error opening test output file (%s).\n", test_outfile);
     statistics(c);
     sortrosters(c, comparename);
-    writecourse(f, c);
+    writecourse(f, c, 0);
     fclose(f);
     assert_outfile_matches(name, NULL);
 }
