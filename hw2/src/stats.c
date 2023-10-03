@@ -13,8 +13,7 @@
 #include "error.h"
 #include "free.h"
 
-Stats *statistics(c)
-Course *c;
+Stats *statistics(Course* c)
 {
         Stats *s;
         s = buildstats(c);              /* Build "stats" data structure */
@@ -27,8 +26,7 @@ Course *c;
         return(s);
 }
 
-Stats *buildstats(c)
-Course *c;
+Stats *buildstats(Course* c)
 {
         Stats *stats;
         Classstats *csp;
@@ -93,9 +91,7 @@ Course *c;
  *              link score to class and section statistics.
  */
 
-void do_links(c, s)
-Course *c;
-Stats *s;
+void do_links(Course* c, Stats* s)
 {
         Assignment *ap;
         Section *sep;
@@ -141,8 +137,7 @@ Stats *s;
  *               frequency tables for the appropriate assignment and section.
  */
 
-void do_freqs(c)
-Course *c;
+void do_freqs(Course* c)
 {
         Student *stp;
         Score *scp;
@@ -165,9 +160,7 @@ Course *c;
  * The head of the new list is returned.
  */
 
-Freqs *count_score(scp, afp)
-Score *scp;
-Freqs *afp;
+Freqs *count_score(Score* scp, Freqs* afp)
 {
         Freqs *fp, *sfp;
 
@@ -214,8 +207,7 @@ Freqs *afp;
  * quantile information.  This saves time in score normalization.
  */
 
-void do_quantiles(s)
-Stats *s;
+void do_quantiles(Stats* s)
 {
         Classstats *csp;
         Sectionstats *ssp;
@@ -250,8 +242,7 @@ Stats *s;
  *            for the section.
  */
 
-void do_sums(c)
-Course *c;
+void do_sums(Course* c)
 {
         Student *stp;
         Score *scp;
@@ -290,8 +281,7 @@ Course *c;
  * to fill in the moments and quantiles.
  */
 
-void do_moments(sp)
-Stats *sp;
+void do_moments(Stats* sp)
 {
         Classstats *csp;
         Sectionstats *ssp;
@@ -330,10 +320,7 @@ Stats *sp;
         }
 }
 
-double stddev(n, sum, sumsq)
-int n;
-double sum;
-double sumsq;
+double stddev(int n, double sum, double sumsq)
 {
         if(n >= 2) return(sqrt((sumsq - (sum*sum)/n)/(n-1)));
         else return(0.0);

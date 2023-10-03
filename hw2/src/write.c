@@ -10,24 +10,18 @@
 #include "write.h"
 #include "error.h"
 
-void writeprofessor(fd, p)
-FILE *fd;
-Professor *p;
+void writeprofessor(FILE* fd, Professor* p)
 {
         fprintf(fd, " PROFESSOR %s, %s\n", p->surname, p->name);
 }
 
-void writeassistant(fd, a)
-FILE *fd;
-Assistant *a;
+void writeassistant(FILE* fd, Assistant* a)
 {
         if (a == NULL) return;
         fprintf(fd, " ASSISTANT %s, %s\n", a->surname, a->name);
 }
 
-void writescore(fd, s)
-FILE *fd;
-Score *s;
+void writescore(FILE* fd, Score* s)
 {
         fprintf(fd, "   SCORE %s", s->asgt->name);
         if(s->flag == VALID) {
@@ -64,10 +58,7 @@ Score *s;
         fprintf(fd, "\n");
 }
 
-void writestudent(fd, s, nm)
-FILE *fd;
-Student *s;
-int nm;
+void writestudent(FILE* fd, Student* s, int nm)
 {
         Score *sp;
         fprintf(fd, "  STUDENT %s %s%s %s\n", s->id, nm ? "" : s->surname, nm ? "": ",", nm ? "" : s->name);
@@ -75,10 +66,7 @@ int nm;
                 writescore(fd, sp);
 }
 
-void writesection(fd, s, nonames)
-FILE *fd;
-Section *s;
-int nonames;
+void writesection(FILE* fd, Section* s, int nonames)
 {
         Student *sp;
         fprintf(fd, " SECTION %s\n", s->name);
@@ -87,9 +75,7 @@ int nonames;
                 writestudent(fd, sp, nonames);
 }
 
-void writeassignment(fd, a)
-FILE *fd;
-Assignment *a;
+void writeassignment(FILE* fd, Assignment *a)
 {
         fprintf(fd, " ASSIGNMENT %s %s\n", a->name, a->atype);
         if(a->wpolicy == WEIGHT)
@@ -115,10 +101,7 @@ Assignment *a;
         }
 }
 
-void writecourse(fd, c, nm)
-FILE *fd;
-Course *c;
-int nm;
+void writecourse(FILE* fd, Course* c, int nm)
 {
         Assignment *ap;
         Section *sp;
@@ -130,10 +113,7 @@ int nm;
                 writesection(fd, sp, nm);
 }
 
-void writefile(f, c, nm)
-Course *c;
-char *f;
-int nm;
+void writefile(char* f, Course* c, int nm)
 {
         FILE *fd;
         if((fd = fopen(f, "w")) == NULL) {

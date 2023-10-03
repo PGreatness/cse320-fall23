@@ -29,8 +29,7 @@ char tokenbuf[512];
 char *tokenptr = tokenbuf;
 char *tokenend = tokenbuf;
 
-Course *readfile(root)
-char *root;
+Course *readfile(char* root)
 {
         Course *c;
 
@@ -118,8 +117,7 @@ Assignment *readassignments()
         return(a);
 }
 
-Section *readsections(a)
-Assignment *a;
+Section *readsections(Assignment* a)
 {
         Section *s;
         while(!istoken()) {
@@ -142,9 +140,7 @@ Assignment *a;
         return(s);
 }
 
-Student *readstudents(a, sep)
-Assignment *a;
-Section *sep;
+Student *readstudents(Assignment* a, Section* sep)
 {
         Student *s;
         if(!checktoken("STUDENT")) return(NULL);
@@ -158,8 +154,7 @@ Section *sep;
         return(s);
 }
 
-Score *readscores(a)
-Assignment *a;
+Score *readscores(Assignment* a)
 {
         Score *s;
         Assignment *ap;
@@ -197,8 +192,7 @@ Assignment *a;
         return(s);
 }
 
-void readgrade(s)
-Score *s;
+void readgrade(Score* s)
 {
         float f;
 
@@ -278,8 +272,7 @@ Score *s;
         }
 }
 
-void readweight(a)
-Assignment *a;
+void readweight(Assignment* a)
 {
         float f;
         advancetoken();
@@ -293,8 +286,7 @@ Assignment *a;
         }
 }
 
-void readmax(a)
-Assignment *a;
+void readmax(Assignment* a)
 {
         float f;
         advancetoken();
@@ -306,8 +298,7 @@ Assignment *a;
         }
 }
 
-void readnorm(a)
-Assignment *a;
+void readnorm(Assignment* a)
 {
         float f;
         int found;
@@ -444,8 +435,7 @@ void flushtoken()
         tokenptr = tokenend = tokenbuf;
 }
 
-int iswhitespace(c)
-char c;
+int iswhitespace(int c)
 {
         if(c == ',' || c == ':' || c == ' ' ||
                            c == '\t' || c == '\f') return(TRUE);
@@ -566,8 +556,7 @@ void advanceeol()
  * If it does match, the matched token is removed from the input stream.
  */
 
-void expecttoken(key)
-char *key;
+void expecttoken(char* key)
 {
         if(!istoken()) advancetoken();
         if(istoken() && !strcmp(tokenptr, key)) {
@@ -584,8 +573,7 @@ char *key;
  * and TRUE is returned.
  */
 
-int checktoken(key)
-char *key;
+int checktoken(char* key)
 {
         if(!istoken()) advancetoken();
         if(istoken() && !strcmp(tokenptr, key)) {
