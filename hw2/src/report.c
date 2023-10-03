@@ -8,10 +8,7 @@
 float quantiles[] = { 10.0, 25.0, 50.0, 75.0, 90.0 };
 float scores[]    = {  0.0,  0.0,  0.0,  0.0,  0.0 };
 
-void reportparams(fd, fn, c)
-FILE *fd;
-char *fn;
-Course *c;
+void reportparams(FILE* fd, char* fn, Course* c)
 {
         char *today = NULL;
         time_t now;
@@ -27,9 +24,7 @@ Course *c;
         fprintf(fd, "\n");
 }
 
-void reportfreqs(fd, s)
-FILE *fd;
-Stats *s;
+void reportfreqs(FILE* fd, Stats* s)
 {
         Classstats *csp;
         Sectionstats *ssp;
@@ -102,9 +97,7 @@ float interpolatequantile(Freqs* fp, int n, float q)
 }
 
 
-void reportquantilesummaries(fd, s)
-FILE *fd;
-Stats *s;
+void reportquantilesummaries(FILE* fd, Stats* s)
 {
   Classstats *csp;
   Sectionstats *ssp;
@@ -163,9 +156,7 @@ Stats *s;
         fprintf(fd, "\n");
 }
 
-void reportquantiles(fd, s)
-FILE *fd;
-Stats *s;
+void reportquantiles(FILE* fd, Stats* s)
 {
         Classstats *csp;
         Sectionstats *ssp;
@@ -221,9 +212,7 @@ Stats *s;
         fprintf(fd, "\n");
 }
 
-void reportmoments(fd, s)
-FILE *fd;
-Stats *s;
+void reportmoments(FILE* fd, Stats* s)
 {
         Classstats *csp;
         Sectionstats *ssp;
@@ -302,10 +291,7 @@ void reportcomposites(FILE* fd, Course* c, int nm)
  * the vertical axis to a scale of 0 to 20.
  */
 
-void reporthistos(fd, c, s)
-FILE *fd;
-Course *c;
-Stats *s;
+void reporthistos(FILE* fd, Course* c, Stats* s)
 {
         Classstats *csp;
         // Sectionstats *ssp;
@@ -430,8 +416,7 @@ void histo(FILE* fd, int bins[], float min, float max, int cnt)
             min, max);
 }
 
-void
-reporttabs(FILE *fd, Course *c, int nm)
+void reporttabs(FILE *fd, Course *c, int nm)
 {
         Assignment *ap;
         Student *stp;

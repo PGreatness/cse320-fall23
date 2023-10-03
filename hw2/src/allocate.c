@@ -70,9 +70,7 @@ Score *newscore()
         return(s);
 }
 
-char *newstring(tp, size)
-char *tp;
-int size;
+char *newstring(char* tp, int size)
 {
         char *s, *cp;
         if((s = (char *)malloc(size)) == NULL)

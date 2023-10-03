@@ -22,9 +22,7 @@
  *              options set for that score and for the assignment.
  */
 
-void normalize(c, s)
-Course *c;
-Stats *s;
+void normalize(Course* c, Stats* s)
 {
         Student *stp;
         Score *rscp, *nscp;
@@ -81,10 +79,7 @@ Stats *s;
  * Normalize a raw score according to the normalization policy indicated.
  */
 
-float normal(s, csp, ssp)
-double s;
-Classstats *csp;
-Sectionstats *ssp;
+float normal(double s, Classstats* csp, Sectionstats* ssp)
 {
         Assignment *a;
         Freqs *fp;
@@ -167,8 +162,7 @@ Sectionstats *ssp;
  * It is assumed that rd is not too small.
  */
 
-float linear(s, rm, rd, nm, nd)
-double s, rm, rd, nm, nd;
+float linear(double s, double rm, double rd, double nm, double nd)
 {
         return(nd*(s-rm)/rd + nm);
 }
@@ -179,8 +173,7 @@ double s, rm, rd, nm, nd;
  * It is assumed that the declared max is not too small.
  */
 
-float scale(s, max, scale)
-double s, max, scale;
+float scale(double s, double max, double scale)
 {
         return(s*scale/max);
 }
@@ -191,9 +184,7 @@ double s, max, scale;
  * otherwise all the assignments of the type are weighted equally.
  */
 
-float studentavg(s, t)
-Student *s;
-Atype t;
+float studentavg(Student* s, Atype t)
 {
         int n, wp;
         double sum;
@@ -236,8 +227,7 @@ Atype t;
  *              and include it in the weighted sum.
  */
 
-void composites(c)
-Course *c;
+void composites(Course* c)
 {
         Student *stp;
         Score *scp;

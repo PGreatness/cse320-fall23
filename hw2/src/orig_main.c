@@ -68,9 +68,7 @@ extern int errors, warnings;
 void checkIfAbbreviated(int opt, char optval, char** argv);
 void checkPositionalArguments(char* flag, char** argv);
 
-int orig_main(argc, argv)
-int argc;
-char *argv[];
+int orig_main(int argc,char* argv[])
 {
         Course *c;
         Stats *s;
@@ -232,8 +230,7 @@ char *argv[];
         exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
-void usage(name)
-char *name;
+void usage(char* name)
 {
         struct option_info *opt;
 

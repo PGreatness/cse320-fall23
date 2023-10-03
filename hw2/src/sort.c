@@ -10,33 +10,27 @@
  * Sort the Class and Section Rosters
  */
 
-Student *getnext(s)
-Student *s;
+Student *getnext(Student* s)
 {
         return(s->next);
 }
 
-Student *getcnext(s)
-Student *s;
+Student *getcnext(Student* s)
 {
         return(s->cnext);
 }
 
-void setnext(s, n)
-Student *s, *n;
+void setnext(Student* s, Student* n)
 {
         s->next = n;
 }
 
-void setcnext(s, n)
-Student *s, *n;
+void setcnext(Student* s, Student* n)
 {
         s->cnext = n;
 }
 
-void sortrosters(c, compare)
-Course *c;
-int compare();
+void sortrosters(Course* c, int compare())
 {
         Section *s;
         c->roster = sortroster(c->roster, getcnext, setcnext, compare);
@@ -44,11 +38,7 @@ int compare();
                 s->roster = sortroster(s->roster, getnext, setnext, compare);
 }
 
-Student *sortroster(s, gtnxt, stnxt, compare)
-Student *s;
-Student *gtnxt();
-void stnxt();
-int compare();
+Student *sortroster(Student* s, Student* gtnxt(), void stnxt(), int compare())
 {
         int count, i;
         Student *sp, **stab;
@@ -84,10 +74,7 @@ int compare();
  * Quicksort algorithm for sorting table of students.
  */
 
-void sorttable(stab, low, high, compare)
-Student **stab;
-int low, high;
-int compare();
+void sorttable(Student** stab, int low, int high, int compare())
 {
         int middle;
         if(low == high) return;
@@ -97,10 +84,7 @@ int compare();
         sorttable(stab, middle, high, compare);
 }
 
-int partition(stab, low, high, compare)
-Student **stab;
-int low, high;
-int compare();
+int partition(Student** stab, int low, int high,int compare())
 {
         int l, h, c, alt;
         Student *temp, *pivot;
@@ -126,8 +110,7 @@ int compare();
         return(l);
 }
 
-int comparename(s1, s2)
-Student *s1, *s2;
+int comparename(Student* s1, Student* s2)
 {
         int c;
         c = strcmp(s1->surname, s2->surname);
@@ -135,23 +118,20 @@ Student *s1, *s2;
         else return(strcmp(s1->name, s2->name));
 }
 
-int compareid(s1, s2)
-Student *s1, *s2;
+int compareid(Student* s1, Student* s2)
 {
         // int c;
         return(strcmp(s1->id, s2->id));
 }
 
-int comparescore(s1, s2)
-Student *s1, *s2;
+int comparescore(Student* s1, Student* s2)
 {
         if(s1->composite > s2->composite) return(-1);
         else if(s1->composite < s2->composite) return(1);
         else return(0);
 }
 
-void checkfordups(sp)
-Student *sp;
+void checkfordups(Student* sp)
 {
         // debug("Checking for duplicate entries.\n");
         // debug("sp = %p\n", sp);
