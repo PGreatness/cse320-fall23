@@ -36,15 +36,15 @@ static struct option_info {
  {NONAMES,        "nonames",   'n',      no_argument, NULL,
                   "Suppress printing of students' names."},
  {OUTPUT,          "output",   'o',      required_argument, "file",
-                  "Specify file to be used for output."}
-    // {14, NULL, 0, 0, NULL, NULL}
+                  "Specify file to be used for output."},
+    {14, NULL, 0, 0, NULL, NULL}
 };
 
-static struct option long_options[14];
+static struct option long_options[15];
 static char *short_options = "rck:ano:";
 
 static void init_options() {
-    for(unsigned int i = 0; i < 14; i++) {
+    for(unsigned int i = 0; i < 15; i++) {
         struct option_info *oip = &option_table[i];
         if(oip->val != i) {
             fprintf(stderr, "Option initialization error\n");
