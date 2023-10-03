@@ -36,15 +36,15 @@ static struct option_info {
  {NONAMES,        "nonames",   'n',      no_argument, NULL,
                   "Suppress printing of students' names."},
  {OUTPUT,          "output",   'o',      required_argument, "file",
-                  "Specify file to be used for output."},
-    {14, NULL, 0, 0, NULL, NULL}
+                  "Specify file to be used for output."}
+    // {14, NULL, 0, 0, NULL, NULL}
 };
 
-static struct option long_options[15];
+static struct option long_options[14];
 static char *short_options = "rck:ano:";
 
 static void init_options() {
-    for(unsigned int i = 0; i < 15; i++) {
+    for(unsigned int i = 0; i < 14; i++) {
         struct option_info *oip = &option_table[i];
         if(oip->val != i) {
             fprintf(stderr, "Option initialization error\n");
@@ -65,6 +65,7 @@ static void usage(char* name);
 
 extern int errors, warnings;
 
+void checkIfAbbreviated(int opt, char optval, char** argv);
 
 int orig_main(argc, argv)
 int argc;
@@ -78,35 +79,13 @@ char *argv[];
 
         fprintf(stderr, BANNER);
         init_options();
-        int valid_flag = 0;
         if(argc <= 1) usage(argv[0]);
         while(optind < argc) {
             if((optval = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
                 switch(optval) {
                 case 'r': case REPORT:
-                    // check if the argument has been abbreviated
-                    if (option_table[REPORT].chr == optval) valid_flag++;
-                    if (!valid_flag)
-                    {
-                        char* option = argv[optind - 1];
-                        if (option[0] == '-' && option[1] == '-')
-                        {
-                            char* option_name = option + 2;
-                            if (strcmp(option_name, option_table[REPORT].name) != 0)
-                                {
-                                    fprintf(stderr, "Unknown option '%s'. Did you mean '--%s'?\n",
-                                        argv[optind - 1],
-                                        option_table[REPORT].name);
-                                    usage(argv[0]);
-                                    exit(EXIT_FAILURE);
-                                }
-                        }else{
-                            fprintf(stderr, "Unknown option '%s'.\n", argv[optind - 1]);
-                            usage(argv[0]);
-                            exit(EXIT_FAILURE);
-                        }
-                    }
-                    valid_flag = 0;
+                    // check if it is abbreviated and exit
+                    checkIfAbbreviated(REPORT, optval, argv);
                     // if report is not the first option, it will fail
                     if (optind != 2 && collate == 0)
                     {
@@ -120,28 +99,7 @@ char *argv[];
                     report++; break;
                 case 'c': case COLLATE:
                     // check if the argument has been abbreviated
-                    if (option_table[COLLATE].chr == optval) valid_flag++;
-                    if (!valid_flag)
-                    {
-                        char* option = argv[optind - 1];
-                        if (option[0] == '-' && option[1] == '-')
-                        {
-                            char* option_name = option + 2;
-                            if (strcmp(option_name, option_table[COLLATE].name) != 0)
-                                {
-                                    fprintf(stderr, "Unknown option \"%s\". Did you mean \"--%s\"?\n",
-                                        argv[optind - 1],
-                                        option_table[COLLATE].name);
-                                    usage(argv[0]);
-                                    exit(EXIT_FAILURE);
-                                }
-                        }else{
-                            fprintf(stderr, "Unknown option \"%s\".\n", argv[optind - 1]);
-                            usage(argv[0]);
-                            exit(EXIT_FAILURE);
-                        }
-                    }
-                    valid_flag = 0;
+                    checkIfAbbreviated(COLLATE, optval, argv);
                     // if collate is not the first option, it will fail
                     if (optind != 2 && collate == 0)
                     {
@@ -156,9 +114,10 @@ char *argv[];
                         }
                     }
                     collate++; break;
-                case TABSEP: tabsep++; break;
-                case 'n': case NONAMES: nonames++; break;
+                case TABSEP: checkIfAbbreviated(TABSEP, optval, argv); tabsep++; break;
+                case 'n': case NONAMES: checkIfAbbreviated(NONAMES, optval, argv); nonames++; break;
                 case 'k': case SORTBY:
+                    checkIfAbbreviated(NONAMES, optval, argv);
                     if(!strcmp(optarg, "name"))
                         compare = comparename;
                     else if(!strcmp(optarg, "id"))
@@ -172,14 +131,15 @@ char *argv[];
                         usage(argv[0]);
                     }
                     break;
-                case FREQUENCIES: freqs++; break;
-                case QUANTILE: quants++; break;
-                case SUMMARIES: summaries++; break;
-                case MOMENTS: moments++; break;
-                case COMPOSITES: composite++; break;
-                case INDIVIDUALS: student_scores++; break;
-                case HISTOGRAMS: histograms++; break;
+                case FREQUENCIES: checkIfAbbreviated(FREQUENCIES, optval, argv); freqs++; break;
+                case QUANTILE: checkIfAbbreviated(QUANTILE, optval, argv); quants++; break;
+                case SUMMARIES: checkIfAbbreviated(SUMMARIES, optval, argv); summaries++; break;
+                case MOMENTS: checkIfAbbreviated(MOMENTS, optval, argv); moments++; break;
+                case COMPOSITES: checkIfAbbreviated(COMPOSITES, optval, argv); composite++; break;
+                case INDIVIDUALS: checkIfAbbreviated(INDIVIDUALS, optval, argv); student_scores++; break;
+                case HISTOGRAMS: checkIfAbbreviated(HISTOGRAMS, optval, argv); histograms++; break;
                 case 'a': case ALLOUTPUT:
+                    checkIfAbbreviated(ALLOUTPUT, optval, argv);
                     freqs++; quants++; summaries++; moments++;
                     composite++; student_scores++; histograms++; tabsep++;
                     break;
@@ -187,6 +147,7 @@ char *argv[];
                     usage(argv[0]);
                     break;
                 case 'o': case OUTPUT:
+                    checkIfAbbreviated(OUTPUT, optval, argv);
                     f = fopen(optarg, "w");
                     if(f == NULL) {
                         fprintf(stderr, "Unable to open output file '%s'.\n\n", optarg);
@@ -291,4 +252,28 @@ char *name;
                 opt++;
         }
         exit(EXIT_FAILURE);
+}
+
+void checkIfAbbreviated(int opt, char optval, char** argv)
+{
+    int valid_flag = 0;
+    // check if the argument has been abbreviated
+    if (option_table[opt].chr == optval)
+        valid_flag++;
+    if (!valid_flag)
+    {
+        char *option = argv[optind - 1];
+        if (option[0] == '-' && option[1] == '-')
+        {
+            char *option_name = option + 2;
+            if (strcmp(option_name, option_table[opt].name) != 0)
+            {
+                fprintf(stderr, "Unknown option '%s'. Did you mean '--%s'?\n",
+                        argv[optind - 1],
+                        option_table[opt].name);
+                usage(argv[0]);
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
 }
