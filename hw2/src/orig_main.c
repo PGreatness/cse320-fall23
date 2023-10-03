@@ -36,14 +36,15 @@ static struct option_info {
  {NONAMES,        "nonames",   'n',      no_argument, NULL,
                   "Suppress printing of students' names."},
  {OUTPUT,          "output",   'o',      required_argument, "file",
-                  "Specify file to be used for output."}
+                  "Specify file to be used for output."},
+    {14, NULL, 0, 0, NULL, NULL}
 };
 
-static struct option long_options[14];
+static struct option long_options[15];
 static char *short_options = "rck:ano:";
 
 static void init_options() {
-    for(unsigned int i = 0; i < 14; i++) {
+    for(unsigned int i = 0; i < 15; i++) {
         struct option_info *oip = &option_table[i];
         if(oip->val != i) {
             fprintf(stderr, "Option initialization error\n");
@@ -93,14 +94,14 @@ char *argv[];
                             char* option_name = option + 2;
                             if (strcmp(option_name, option_table[REPORT].name) != 0)
                                 {
-                                    fprintf(stderr, "Unknown option \"%s\". Did you mean \"--%s\"?\n",
+                                    fprintf(stderr, "Unknown option '%s'. Did you mean '--%s'?\n",
                                         argv[optind - 1],
                                         option_table[REPORT].name);
                                     usage(argv[0]);
                                     exit(EXIT_FAILURE);
                                 }
                         }else{
-                            fprintf(stderr, "Unknown option \"%s\".\n", argv[optind - 1]);
+                            fprintf(stderr, "Unknown option '%s'.\n", argv[optind - 1]);
                             usage(argv[0]);
                             exit(EXIT_FAILURE);
                         }
@@ -148,7 +149,7 @@ char *argv[];
                         {
                             if (optval == 'c')
                                 fprintf(stderr, "Option '-c' must be the first option.\n\n");
-                            else if (optval == REPORT)
+                            else if (optval == COLLATE)
                                 fprintf(stderr, "Option '--collate' must be the first option.\n\n");
                             usage(argv[0]);
                             exit(EXIT_FAILURE);
@@ -232,19 +233,18 @@ char *argv[];
         composites(c);
         sortrosters(c, comparename);
         checkfordups(c->roster);
-        if(collate) {
-                fprintf(stderr, "Dumping collated data...\n");
-                if (histograms == 0 &&
-                    student_scores == 0 &&
-                    tabsep == 0)
-                {
-                    writecourse(f, c, nonames);
-                    // if (c != NULL) free_course(c);
-                    if (c != NULL) free_all(c);
-                    if (s != NULL) free_stats(s);
-                    if (f != NULL) fclose(f);
-                    exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);
-                }
+        if (collate)
+        {
+            fprintf(stderr, "Dumping collated data...\n");
+            writecourse(f, c, nonames);
+            // if (c != NULL) free_course(c);
+            if (c != NULL)
+                free_all(c);
+            if (s != NULL)
+                free_stats(s);
+            if (f != NULL)
+                fclose(f);
+            exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);
         }
         sortrosters(c, compare);
 
