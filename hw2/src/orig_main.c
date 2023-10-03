@@ -197,7 +197,7 @@ int orig_main(int argc,char* argv[])
         if (collate)
         {
             fprintf(stderr, "Dumping collated data...\n");
-            writecourse(f, c, nonames);
+            writecourse(f, c, FALSE);
             // if (c != NULL) free_course(c);
             if (c != NULL)
                 free_all(c);
