@@ -77,11 +77,35 @@ char *argv[];
 
         fprintf(stderr, BANNER);
         init_options();
+        int valid_flag = 0;
         if(argc <= 1) usage(argv[0]);
         while(optind < argc) {
             if((optval = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
                 switch(optval) {
                 case 'r': case REPORT:
+                    // check if the argument has been abbreviated
+                    if (option_table[REPORT].chr == optval) valid_flag++;
+                    if (!valid_flag)
+                    {
+                        char* option = argv[optind - 1];
+                        if (option[0] == '-' && option[1] == '-')
+                        {
+                            char* option_name = option + 2;
+                            if (strcmp(option_name, option_table[REPORT].name) != 0)
+                                {
+                                    fprintf(stderr, "Unknown option \"%s\". Did you mean \"--%s\"?\n",
+                                        argv[optind - 1],
+                                        option_table[REPORT].name);
+                                    usage(argv[0]);
+                                    exit(EXIT_FAILURE);
+                                }
+                        }else{
+                            fprintf(stderr, "Unknown option \"%s\".\n", argv[optind - 1]);
+                            usage(argv[0]);
+                            exit(EXIT_FAILURE);
+                        }
+                    }
+                    valid_flag = 0;
                     // if report is not the first option, it will fail
                     if (optind != 2 && collate == 0)
                     {
@@ -94,6 +118,29 @@ char *argv[];
                     }
                     report++; break;
                 case 'c': case COLLATE:
+                    // check if the argument has been abbreviated
+                    if (option_table[COLLATE].chr == optval) valid_flag++;
+                    if (!valid_flag)
+                    {
+                        char* option = argv[optind - 1];
+                        if (option[0] == '-' && option[1] == '-')
+                        {
+                            char* option_name = option + 2;
+                            if (strcmp(option_name, option_table[COLLATE].name) != 0)
+                                {
+                                    fprintf(stderr, "Unknown option \"%s\". Did you mean \"--%s\"?\n",
+                                        argv[optind - 1],
+                                        option_table[COLLATE].name);
+                                    usage(argv[0]);
+                                    exit(EXIT_FAILURE);
+                                }
+                        }else{
+                            fprintf(stderr, "Unknown option \"%s\".\n", argv[optind - 1]);
+                            usage(argv[0]);
+                            exit(EXIT_FAILURE);
+                        }
+                    }
+                    valid_flag = 0;
                     // if collate is not the first option, it will fail
                     if (optind != 2 && collate == 0)
                     {
@@ -120,7 +167,7 @@ char *argv[];
                     else {
                         fprintf(stderr,
                                 "Option '%s' requires argument from {name, id, score}.\n\n",
-                                option_table[(int)optval].name);
+                                option_table[SORTBY].name);
                         usage(argv[0]);
                     }
                     break;
