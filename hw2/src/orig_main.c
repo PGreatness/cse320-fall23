@@ -66,6 +66,7 @@ static void usage(char* name);
 extern int errors, warnings;
 
 void checkIfAbbreviated(int opt, char optval, char** argv);
+void checkPositionalArguments(char* flag, char** argv);
 
 int orig_main(argc, argv)
 int argc;
@@ -79,44 +80,42 @@ char *argv[];
 
         fprintf(stderr, BANNER);
         init_options();
+        char positional_arguments_satisfied = 0;
         if(argc <= 1) usage(argv[0]);
         while(optind < argc) {
             if((optval = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
+                debug("GOT: %c, %i\n", optval, optind);
                 switch(optval) {
                 case 'r': case REPORT:
                     // check if it is abbreviated and exit
                     checkIfAbbreviated(REPORT, optval, argv);
-                    // if report is not the first option, it will fail
-                    if (optind != 2 && collate == 0)
+                    // argument satisfied by collate
+                    if (positional_arguments_satisfied != 0)
                     {
-                        if (optval == 'r')
-                            fprintf(stderr, "Option '-r' must be the first option.\n\n");
-                        else if (optval == REPORT)
-                            fprintf(stderr, "Option '--report' must be the first option.\n\n");
+                        fprintf(stderr, "Exactly one of '%s' or '%s' is required.\n\n",
+                                option_table[REPORT].name, option_table[COLLATE].name);
                         usage(argv[0]);
                         exit(EXIT_FAILURE);
                     }
+                    positional_arguments_satisfied = 'r';
                     report++; break;
                 case 'c': case COLLATE:
                     // check if the argument has been abbreviated
                     checkIfAbbreviated(COLLATE, optval, argv);
                     // if collate is not the first option, it will fail
-                    if (optind != 2 && collate == 0)
+                    if (positional_arguments_satisfied != 0)
                     {
-                        if (optind != 2)
-                        {
-                            if (optval == 'c')
-                                fprintf(stderr, "Option '-c' must be the first option.\n\n");
-                            else if (optval == COLLATE)
-                                fprintf(stderr, "Option '--collate' must be the first option.\n\n");
-                            usage(argv[0]);
-                            exit(EXIT_FAILURE);
-                        }
+                        fprintf(stderr, "Exactly one of '%s' or '%s' is required.\n\n",
+                                option_table[REPORT].name, option_table[COLLATE].name);
+                        usage(argv[0]);
+                        exit(EXIT_FAILURE);
                     }
+                    positional_arguments_satisfied = 'c';
                     collate++; break;
-                case TABSEP: checkIfAbbreviated(TABSEP, optval, argv); tabsep++; break;
-                case 'n': case NONAMES: checkIfAbbreviated(NONAMES, optval, argv); nonames++; break;
+                case TABSEP: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(TABSEP, optval, argv); tabsep++; break;
+                case 'n': case NONAMES: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(NONAMES, optval, argv); nonames++; break;
                 case 'k': case SORTBY:
+                    checkPositionalArguments(&positional_arguments_satisfied, argv);
                     checkIfAbbreviated(NONAMES, optval, argv);
                     if(!strcmp(optarg, "name"))
                         compare = comparename;
@@ -131,14 +130,15 @@ char *argv[];
                         usage(argv[0]);
                     }
                     break;
-                case FREQUENCIES: checkIfAbbreviated(FREQUENCIES, optval, argv); freqs++; break;
-                case QUANTILE: checkIfAbbreviated(QUANTILE, optval, argv); quants++; break;
-                case SUMMARIES: checkIfAbbreviated(SUMMARIES, optval, argv); summaries++; break;
-                case MOMENTS: checkIfAbbreviated(MOMENTS, optval, argv); moments++; break;
-                case COMPOSITES: checkIfAbbreviated(COMPOSITES, optval, argv); composite++; break;
-                case INDIVIDUALS: checkIfAbbreviated(INDIVIDUALS, optval, argv); student_scores++; break;
-                case HISTOGRAMS: checkIfAbbreviated(HISTOGRAMS, optval, argv); histograms++; break;
+                case FREQUENCIES: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(FREQUENCIES, optval, argv); freqs++; break;
+                case QUANTILE: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(QUANTILE, optval, argv); quants++; break;
+                case SUMMARIES: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(SUMMARIES, optval, argv); summaries++; break;
+                case MOMENTS: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(MOMENTS, optval, argv); moments++; break;
+                case COMPOSITES: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(COMPOSITES, optval, argv); composite++; break;
+                case INDIVIDUALS: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(INDIVIDUALS, optval, argv); student_scores++; break;
+                case HISTOGRAMS: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(HISTOGRAMS, optval, argv); histograms++; break;
                 case 'a': case ALLOUTPUT:
+                    checkPositionalArguments(&positional_arguments_satisfied, argv);
                     checkIfAbbreviated(ALLOUTPUT, optval, argv);
                     freqs++; quants++; summaries++; moments++;
                     composite++; student_scores++; histograms++; tabsep++;
@@ -147,6 +147,7 @@ char *argv[];
                     usage(argv[0]);
                     break;
                 case 'o': case OUTPUT:
+                    checkPositionalArguments(&positional_arguments_satisfied, argv);
                     checkIfAbbreviated(OUTPUT, optval, argv);
                     f = fopen(optarg, "w");
                     if(f == NULL) {
@@ -161,6 +162,7 @@ char *argv[];
                 break;
             }
         }
+        debug("First: %s\n", argv[optind]);
         if(optind == argc) {
                 fprintf(stderr, "No input file specified.\n\n");
                 usage(argv[0]);
@@ -275,5 +277,16 @@ void checkIfAbbreviated(int opt, char optval, char** argv)
                 exit(EXIT_FAILURE);
             }
         }
+    }
+}
+
+void checkPositionalArguments(char* flag, char** argv)
+{
+    if (*flag == 0)
+    {
+        fprintf(stderr, "Exactly one of '%s' or '%s' is required.\n\n",
+                        option_table[REPORT].name, option_table[COLLATE].name);
+                usage(argv[0]);
+        exit(EXIT_FAILURE);
     }
 }
