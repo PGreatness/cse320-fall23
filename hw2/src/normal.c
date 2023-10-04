@@ -134,13 +134,13 @@ float normal(double s, Classstats* csp, Sectionstats* ssp)
                  * If not found, then use the percentile score corresponding
                  * to the greatest valid score in the table that is < s.
                  */
-
+                Freqs* f_ptr = fp;
                 for( ; fp != NULL; fp = fp->next) {
-                   if(s < fp->score)
-                        return((float)fp->numless*100.0/n);
-                   else if(s == fp->score)
-                        return((float)fp->numless*100.0/n);
+                        if (s < fp->score && fp->score > f_ptr->score) f_ptr = fp;
+                        if(s == fp->score)
+                                return((float)fp->numless*100.0/n);
                 }
+                return((float)f_ptr->numless*100.0/n);
                 break;
         case SCALE:
                 if(a->max < EPSILON) {
