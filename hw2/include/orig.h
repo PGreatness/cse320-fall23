@@ -37,5 +37,8 @@
 #define NONAMES        12
 #define OUTPUT         13
 
+// to allow strict pattern matching, enable the below
+// #define STRICT_MATCHING 1
+
 
 #endif //HW2_ORIG_H
