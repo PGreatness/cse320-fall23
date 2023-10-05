@@ -85,8 +85,10 @@ int orig_main(int argc,char* argv[])
                 debug("GOT: %c, %i\n", optval, optind);
                 switch(optval) {
                 case 'r': case REPORT:
+                    #ifdef STRICT_MATCHING
                     // check if it is abbreviated and exit
                     checkIfAbbreviated(REPORT, optval, argv);
+                    #endif
                     // argument satisfied by collate
                     if (positional_arguments_satisfied != 0)
                     {
@@ -98,8 +100,10 @@ int orig_main(int argc,char* argv[])
                     positional_arguments_satisfied = 'r';
                     report++; break;
                 case 'c': case COLLATE:
+                    #ifdef STRICT_MATCHING
                     // check if the argument has been abbreviated
                     checkIfAbbreviated(COLLATE, optval, argv);
+                    #endif
                     // if collate is not the first option, it will fail
                     if (positional_arguments_satisfied != 0)
                     {
@@ -110,11 +114,23 @@ int orig_main(int argc,char* argv[])
                     }
                     positional_arguments_satisfied = 'c';
                     collate++; break;
-                case TABSEP: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(TABSEP, optval, argv); tabsep++; break;
-                case 'n': case NONAMES: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(NONAMES, optval, argv); nonames++; break;
+                case TABSEP:
+                    checkPositionalArguments(&positional_arguments_satisfied, argv);
+                    #ifdef STRICT_MATCHING
+                    checkIfAbbreviated(TABSEP, optval, argv);
+                    #endif
+                    tabsep++; break;
+                case 'n': case NONAMES:
+                    checkPositionalArguments(&positional_arguments_satisfied, argv);
+                    #ifdef STRICT_MATCHING
+                    checkIfAbbreviated(NONAMES, optval, argv);
+                    #endif
+                    nonames++; break;
                 case 'k': case SORTBY:
                     checkPositionalArguments(&positional_arguments_satisfied, argv);
+                    #ifdef STRICT_MATCHING
                     checkIfAbbreviated(NONAMES, optval, argv);
+                    #endif
                     if(!strcmp(optarg, "name"))
                         compare = comparename;
                     else if(!strcmp(optarg, "id"))
@@ -128,16 +144,53 @@ int orig_main(int argc,char* argv[])
                         usage(argv[0]);
                     }
                     break;
-                case FREQUENCIES: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(FREQUENCIES, optval, argv); freqs++; break;
-                case QUANTILE: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(QUANTILE, optval, argv); quants++; break;
-                case SUMMARIES: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(SUMMARIES, optval, argv); summaries++; break;
-                case MOMENTS: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(MOMENTS, optval, argv); moments++; break;
-                case COMPOSITES: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(COMPOSITES, optval, argv); composite++; break;
-                case INDIVIDUALS: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(INDIVIDUALS, optval, argv); student_scores++; break;
-                case HISTOGRAMS: checkPositionalArguments(&positional_arguments_satisfied, argv); checkIfAbbreviated(HISTOGRAMS, optval, argv); histograms++; break;
+                case FREQUENCIES:
+                    checkPositionalArguments(&positional_arguments_satisfied, argv);
+                    #ifdef STRICT_MATCHING
+                    checkIfAbbreviated(FREQUENCIES, optval, argv);
+                    #endif
+                    ++freqs; break;
+                case QUANTILE:
+                    checkPositionalArguments(&positional_arguments_satisfied, argv);
+                    #ifdef STRICT_MATCHING
+                    checkIfAbbreviated(QUANTILE, optval, argv);
+                    #endif
+                    quants++; break;
+                case SUMMARIES:
+                    checkPositionalArguments(&positional_arguments_satisfied, argv);
+                    #ifdef STRICT_MATCHING
+                    checkIfAbbreviated(SUMMARIES, optval, argv);
+                    #endif
+                    summaries++; break;
+                case MOMENTS:
+                    checkPositionalArguments(&positional_arguments_satisfied, argv);
+                    #ifdef STRICT_MATCHING
+                    checkIfAbbreviated(MOMENTS, optval, argv);
+                    #endif
+                    moments++; break;
+                case COMPOSITES:
+                    checkPositionalArguments(&positional_arguments_satisfied, argv);
+                    #ifdef STRICT_MATCHING
+                    checkIfAbbreviated(COMPOSITES, optval, argv);
+                    #endif
+                    composite++; break;
+                case INDIVIDUALS:
+                    checkPositionalArguments(&positional_arguments_satisfied, argv);
+                    #ifdef STRICT_MATCHING
+                    checkIfAbbreviated(INDIVIDUALS, optval, argv);
+                    #endif
+                    student_scores++; break;
+                case HISTOGRAMS:
+                    checkPositionalArguments(&positional_arguments_satisfied, argv);
+                    #ifdef STRICT_MATCHING
+                    checkIfAbbreviated(HISTOGRAMS, optval, argv);
+                    #endif
+                    histograms++; break;
                 case 'a': case ALLOUTPUT:
                     checkPositionalArguments(&positional_arguments_satisfied, argv);
+                    #ifdef STRICT_MATCHING
                     checkIfAbbreviated(ALLOUTPUT, optval, argv);
+                    #endif
                     freqs++; quants++; summaries++; moments++;
                     composite++; student_scores++; histograms++; tabsep++;
                     break;
@@ -146,7 +199,9 @@ int orig_main(int argc,char* argv[])
                     break;
                 case 'o': case OUTPUT:
                     checkPositionalArguments(&positional_arguments_satisfied, argv);
+                    #ifdef STRICT_MATCHING
                     checkIfAbbreviated(OUTPUT, optval, argv);
+                    #endif
                     f = fopen(optarg, "w");
                     if(f == NULL) {
                         fprintf(stderr, "Unable to open output file '%s'.\n\n", optarg);
