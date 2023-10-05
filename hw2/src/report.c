@@ -396,7 +396,7 @@ void histo(FILE* fd, int bins[], float min, float max, int cnt)
       for(col = 0; col < 50; col++) {
         if (row == 20)
         {
-          fprintf(fd, "%s", (col==0) ? "^" : "");
+          fprintf(fd, "%s", "");
           continue;
         }
         if (bins[col] == 0)
