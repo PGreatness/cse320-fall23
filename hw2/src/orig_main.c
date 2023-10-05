@@ -92,7 +92,7 @@ int orig_main(int argc,char* argv[])
                     // argument satisfied by collate
                     if (positional_arguments_satisfied != 0)
                     {
-                        fprintf(stderr, "Exactly one of '%s' or '%s' is required.\n\n",
+                        fprintf(stderr, "You must supply either %s or %s as the first argument.\n\n",
                                 option_table[REPORT].name, option_table[COLLATE].name);
                         usage(argv[0]);
                         exit(EXIT_FAILURE);
@@ -107,7 +107,7 @@ int orig_main(int argc,char* argv[])
                     // if collate is not the first option, it will fail
                     if (positional_arguments_satisfied != 0)
                     {
-                        fprintf(stderr, "Exactly one of '%s' or '%s' is required.\n\n",
+                        fprintf(stderr, "You must supply either %s or %s as the first argument.\n\n",
                                 option_table[REPORT].name, option_table[COLLATE].name);
                         usage(argv[0]);
                         exit(EXIT_FAILURE);
