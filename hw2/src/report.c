@@ -349,7 +349,7 @@ void reporthistos(FILE* fd, Course* c, Stats* s)
                 if(csp->max == 0.0) max = 1.0;
                 else max = csp->max;
            } else max = csp->asgt->max;
-           for(col = 0; col < 20; col++) bins[col] = 0;
+           for(col = 0; col < 50; col++) bins[col] = 0;
            for(fp = csp->freqs; fp != NULL; fp = fp->next) {
                 if(fp->score > max) pct = 49;
                 else pct = 49*fp->score/max;
@@ -394,18 +394,8 @@ void histo(FILE* fd, int bins[], float min, float max, int cnt)
         fprintf(fd, "       |");
       }
       for(col = 0; col < 50; col++) {
-        if (row == 20)
-        {
-          fprintf(fd, "%s", "");
-          continue;
-        }
-        if (bins[col] == 0)
-        {
-          fprintf(fd, " ");
-          continue;
-        }
-        if(bins[col]*col_height >= (float)(row + 1))
-          fprintf(fd, "%s", "*");
+        if(20*bins[col] > row*cmax)
+          fprintf(fd, "%s", (row==20)?"^":"*");
         else
           fprintf(fd, " ");
       }
