@@ -74,7 +74,8 @@ int orig_main(int argc,char* argv[])
         Stats *s;
         char optval;
         int (*compare)() = comparename;
-        FILE* f = stdout;
+        FILE* f = tmpfile();
+        char* filename = NULL;
 
         fprintf(stderr, BANNER);
         init_options();
@@ -202,11 +203,7 @@ int orig_main(int argc,char* argv[])
                     #ifdef STRICT_MATCHING
                     checkIfAbbreviated(OUTPUT, optval, argv);
                     #endif
-                    f = fopen(optarg, "w");
-                    if(f == NULL) {
-                        fprintf(stderr, "Unable to open output file '%s'.\n\n", optarg);
-                        usage(argv[0]);
-                    }
+                    filename = optarg;
                     break;
                 default:
                     break;
@@ -232,6 +229,16 @@ int orig_main(int argc,char* argv[])
         if(errors) {
             // if (c != NULL) free_course(c);
             if (c != NULL) free_all(c);
+            FILE* tmp = filename == NULL ? stdout : fopen(filename, "w");
+            // copy over the contents of the tmpfile to the output file
+            char c;
+            rewind(f);
+            while ((c = fgetc(f)))
+            {
+                if (feof(f)) break;
+                fputc(c, tmp);
+            }
+            fclose(tmp);
            fprintf(f,"%d error%s found, so no computations were performed.\n",
                   errors, errors == 1 ? " was": "s were");
            exit(EXIT_FAILURE);
@@ -243,6 +250,16 @@ int orig_main(int argc,char* argv[])
         {
             if (c != NULL) free_all(c);
             if (s != NULL) free_stats(s);
+            FILE* tmp = filename == NULL ? stdout : fopen(filename, "w");
+            // copy over the contents of the tmpfile to the output file
+            char c;
+            rewind(f);
+            while ((c = fgetc(f)))
+            {
+                if (feof(f)) break;
+                fputc(c, tmp);
+            }
+            fclose(tmp);
             fatal("There is no data from which to generate reports.");
         }
         normalize(c, s);
@@ -258,6 +275,16 @@ int orig_main(int argc,char* argv[])
                 free_all(c);
             if (s != NULL)
                 free_stats(s);
+            FILE* tmp = filename == NULL ? stdout : fopen(filename, "w");
+            // copy over the contents of the tmpfile to the output file
+            char c;
+            rewind(f);
+            while ((c = fgetc(f)))
+            {
+                if (feof(f)) break;
+                fputc(c, tmp);
+            }
+            fclose(tmp);
             if (f != NULL)
                 fclose(f);
             exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);
@@ -281,6 +308,16 @@ int orig_main(int argc,char* argv[])
         // if (c != NULL) free_course(c);
         if (c != NULL) free_all(c);
         if (s != NULL) free_stats(s);
+        FILE* tmp = filename == NULL ? stdout : fopen(filename, "w");
+        // copy over the contents of the tmpfile to the output file
+        char ch;
+        rewind(f);
+        while ((ch = fgetc(f)))
+        {
+            if (feof(f)) break;
+            fputc(ch, tmp);
+        }
+        fclose(tmp);
         if (f != NULL) fclose(f);
         exit(errors ? EXIT_FAILURE : EXIT_SUCCESS);
 }
