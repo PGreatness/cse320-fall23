@@ -232,7 +232,7 @@ int orig_main(int argc,char* argv[])
         if(errors) {
             // if (c != NULL) free_course(c);
             if (c != NULL) free_all(c);
-           printf("%d error%s found, so no computations were performed.\n",
+           fprintf(f,"%d error%s found, so no computations were performed.\n",
                   errors, errors == 1 ? " was": "s were");
            exit(EXIT_FAILURE);
         }
