@@ -303,7 +303,7 @@ int orig_main(int argc,char* argv[])
         if(tabsep) reporttabs(f, c, nonames);
 
         fprintf(stderr, "\nProcessing complete.\n");
-        fprintf(stderr,"%d warning%s issued.\n", warnings+errors,
+        fprintf(f,"%d warning%s issued.\n", warnings+errors,
                warnings+errors == 1? " was": "s were");
         // if (c != NULL) free_course(c);
         if (c != NULL) free_all(c);
