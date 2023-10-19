@@ -197,3 +197,83 @@ Test(sfmm_basecode_suite, realloc_smaller_block_free_block, .timeout = TEST_TIME
 
 //Test(sfmm_student_suite, student_test_1, .timeout = TEST_TIMEOUT) {
 //}
+
+Test(sfmm_student_suite, malloc_0, .timeout = TEST_TIMEOUT) {
+	sf_errno = 0;
+	void *x = sf_malloc(0);
+
+	cr_assert_null(x, "x is not NULL!");
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+}
+
+Test(sfmm_student_suite, proper_payload_size, .timeout = TEST_TIMEOUT) {
+	sf_errno = 0;
+	void *x = sf_malloc(37);
+	size_t payload_size = (((sf_block*)(((void*)x) - 16))->header & 0x3F00000000) >> 32;
+
+	cr_assert(payload_size == 37, "payload size is not 37!");
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+
+	assert_free_block_count(0, 1);
+	assert_free_block_count(3984, 1);
+}
+
+Test(sfmm_student_suite, proper_block_size, .timeout = TEST_TIMEOUT) {
+	sf_errno = 0;
+	void *x = sf_malloc(37);
+	size_t block_size = ((sf_block*)((void*)x - 16))->header & 0xFFFFFFF3;
+
+	cr_assert(block_size == 64, "block size is not 64!");
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+
+	assert_free_block_count(0, 1);
+	assert_free_block_count(3984, 1);
+}
+
+Test(sfmm_student_suite, utilization, .timeout = TEST_TIMEOUT) {
+	sf_errno = 0;
+	void *x = sf_malloc(37);
+	double utilization = sf_utilization();
+
+	sf_free(x);
+
+	double util = 37.0 / 4096.0;
+	cr_assert_float_eq(utilization, util, 0.000001, "utilization is not %f%%!", util);
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+
+	assert_free_block_count(0, 1);
+	assert_free_block_count(3992, 0);
+}
+
+Test(sfmm_student_suite, free_null, .timeout = TEST_TIMEOUT) {
+	sf_errno = 0;
+	sf_free(NULL);
+
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+}
+
+Test(sfmm_student_suite, realloc_null, .timeout = TEST_TIMEOUT) {
+	sf_errno = 0;
+	void *x = sf_realloc(NULL, 37);
+
+	cr_assert_null(x, "x is not NULL!");
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+}
+
+Test(sfmm_student_suite, realloc_0, .timeout = TEST_TIMEOUT) {
+	sf_errno = 0;
+	void *x = sf_malloc(37);
+	void *y = sf_realloc(x, 0);
+
+	cr_assert_null(y, "y is not NULL!");
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+}
+
+Test(sfmm_student_suite, realloc_same_size, .timeout = TEST_TIMEOUT) {
+	sf_errno = 0;
+	void *x = sf_malloc(37);
+	void *y = sf_realloc(x, 37);
+
+	cr_assert(x == y, "x and y are not the same!");
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+}
