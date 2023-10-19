@@ -749,7 +749,7 @@ int is_allocated(sf_block* sfb)
 
 int can_realloc_without_splinter(sf_block* block, size_t rsize)
 {
-    if (block == NULL)
+    if (block == NULL || rsize == 0)
         return 0;
     // size_t block_size = peek_block_size(block);
     size_t payload_size = peek_payload_size(block);

@@ -54,7 +54,8 @@ void *sf_malloc(size_t size) {
 }
 
 void sf_free(void *pp) {
-    // To be implemented.
+    if (pp == NULL)
+        return;
     sf_block* sfb = (sf_block*) (pp - ALIGNMENT_SIZE);
     // debug("WHY HERE?");
     if (free_allocated_block(sfb) == -1)
@@ -69,6 +70,8 @@ void sf_free(void *pp) {
 }
 
 void *sf_realloc(void *pp, size_t rsize) {
+    if (pp == NULL)
+        return NULL;
     sf_block* sfr = (sf_block*) (pp - ALIGNMENT_SIZE);
     int can_realloc = can_realloc_without_splinter(sfr, rsize);
     if (can_realloc == 0)
