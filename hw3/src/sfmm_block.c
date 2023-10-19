@@ -740,6 +740,13 @@ size_t peek_payload_size(sf_block* sfb)
     return sfb->header >> (SFMM_SIZES.HEADER_WIDTH - SFMM_SIZES.PAYLOAD_WIDTH);
 }
 
+int is_allocated(sf_block* sfb)
+{
+    if (sfb == NULL)
+        return -1;
+    return (sfb->header & 0x8) >> 3;
+}
+
 int can_realloc_without_splinter(sf_block* block, size_t rsize)
 {
     if (block == NULL)

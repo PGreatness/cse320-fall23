@@ -103,10 +103,12 @@ void *sf_realloc(void *pp, size_t rsize) {
 
 double sf_fragmentation() {
     // To be implemented.
-    abort();
+    return sfmm_get_fragmentation();
+    // abort();
 }
 
 double sf_utilization() {
     // To be implemented.
-    abort();
+    return sfmm_get_utilization();
+    // abort();
 }
