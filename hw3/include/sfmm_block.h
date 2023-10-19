@@ -1,9 +1,9 @@
-#ifndef HW3_BLOCK_H
-#define HW3_BLOCK_H
+#ifndef HW3_SFMM_BLOCK_H
+#define HW3_SFMM_BLOCK_H
 
 #include "debug.h"
 #include "sfmm.h"
-
+#include "sfmm_analytics.h"
 typedef struct sfmm_sizes {
     size_t HEADER_SIZE;
     size_t FOOTER_SIZE;
@@ -27,6 +27,7 @@ sf_block* realloc_block(sf_block* sfb, size_t new_block_size, size_t new_payload
 
 size_t peek_block_size(sf_block* sfb);
 size_t peek_payload_size(sf_block* sfb);
+int is_allocated(sf_block* sfb);
 sf_block* update_payload_size(sf_block* sfb, size_t update);
 
 #endif //HW3_BLOCK_H
