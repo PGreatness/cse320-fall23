@@ -93,70 +93,6 @@ struct sf_block* insert_after(struct sf_block* prev, struct sf_block* next)
     return next;
 }
 
-struct sf_block* touch_for_update(sf_block* block)
-{
-    if (block == NULL)
-        return NULL;
-    sf_block* next = block->body.links.next;
-    if (next == NULL)
-    {
-        // block is not in the list
-        return NULL;
-    }
-    sf_block* prev = block->body.links.prev;
-    if (prev == NULL)
-    {
-        // block is not in the list
-        return NULL;
-    }
-
-    size_t orig_next = next->header;
-
-    size_t is_prev_alloc = prev->header & 0x8;
-    if (is_prev_alloc)
-    {
-        // update the current block's header to reflect prev being allocated
-        block->header = block->header | 0x4;
-        // update the prev_footer field to reflect the prev block being allocated
-        block->prev_footer = prev->header;
-        // update the next block's prev_footer to reflect the change
-        next->prev_footer = block->header;
-    }
-    size_t is_current_alloc = block->header & 0x8;
-    if (is_current_alloc)
-    {
-        // update the next block's prev_footer to reflect the change
-        next->prev_footer = block->header;
-        // update the next block's header to reflect the prev block is allocated
-        next->header = next->header | 0x4;
-    }
-
-    if (orig_next != next->header)
-    {
-        // the next block's header has changed
-        // change the next's next info
-        sf_block* next_next = next->body.links.next;
-        if (next_next == NULL)
-        {
-            // next is not in the list
-            return NULL;
-        }
-        next_next->prev_footer = next->header;
-    }
-
-    block->prev_footer = prev->header;
-    next = (sf_block*)((void*)block + (block->header & 0xFFFFFF3));
-    if (next == NULL || (void*)next > sf_mem_end())
-    {
-        // block is not in the list
-        return NULL;
-    }
-    next->prev_footer = block->header;
-
-    // return the block
-    return block;
-}
-
 sf_block* touch_for_heap_update(sf_block* block)
 {
     if (block == NULL)
@@ -453,29 +389,6 @@ sf_block* coalesce(sf_block* main, sf_block* join)
     // sf_heap();
     return higher_in_heap;
 }
-int perform_coalesce(int index)
-{
-    sf_block* head = &sf_free_list_heads[index];
-    if (head == NULL)
-        return 0;
-    sf_block* tmp = head->body.links.next;
-    // sf_heap();
-    while (tmp && tmp != head && tmp->body.links.next != head)
-    {
-        // coalesce the current block with the next block
-        if (can_coalesce(tmp))
-        {
-            tmp = coalesce(tmp, tmp->body.links.next);
-            continue;
-        }
-        tmp = tmp->body.links.next;
-    }
-    if (tmp == NULL)
-        return 0;
-    if (tmp == head)
-        return 0;
-    return 1;
-}
 
 int do_coalesce()
 {
@@ -534,6 +447,7 @@ sf_block* find_last_in_heap()
     }
     return last;
 }
+
 struct sf_block* get_free_block(int index, size_t payload_size, size_t total_bytes)
 {
     if (index < 0 || index >= NUM_FREE_LISTS)
@@ -830,3 +744,5 @@ sf_block* realloc_block(sf_block* sfb, size_t new_block_size, size_t new_payload
     sf_heap();
     return sfb;
 }
+
+// END src/sfmm_block.c
