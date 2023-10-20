@@ -277,3 +277,12 @@ Test(sfmm_student_suite, realloc_same_size, .timeout = TEST_TIMEOUT) {
 	cr_assert(x == y, "x and y are not the same!");
 	cr_assert(sf_errno == 0, "sf_errno is not zero!");
 }
+
+Test(sfmm_student_suite, free_invalid, .timeout = TEST_TIMEOUT, .signal = SIGABRT) {
+	sf_errno = 0;
+	void *x = sf_malloc(37);
+	sf_free(x);
+	sf_free(x);
+
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+}

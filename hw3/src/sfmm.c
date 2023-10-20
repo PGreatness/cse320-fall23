@@ -62,7 +62,7 @@ void sf_free(void *pp) {
     {
         debug("free_allocated_block returned -1");
         fprintf(stderr, "ERROR: invalid free\n");
-        // abort();
+        abort();
         // exit(EXIT_FAILURE);
     }
     return;
@@ -105,13 +105,11 @@ void *sf_realloc(void *pp, size_t rsize) {
 }
 
 double sf_fragmentation() {
-    // To be implemented.
     return sfmm_get_fragmentation();
     // abort();
 }
 
 double sf_utilization() {
-    // To be implemented.
     return sfmm_get_utilization();
     // abort();
 }
