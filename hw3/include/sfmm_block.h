@@ -30,4 +30,5 @@ size_t peek_payload_size(sf_block* sfb);
 int is_allocated(sf_block* sfb);
 sf_block* update_payload_size(sf_block* sfb, size_t update);
 
+double get_peak_utilization();
 #endif //HW3_BLOCK_H

@@ -1,5 +1,7 @@
 #include "sfmm_block.h"
 
+static double sfmm_peak_utilization = 0.0;
+
 sfmm_sizes SFMM_SIZES = {
     .HEADER_SIZE = 8,
     .FOOTER_SIZE = 8,
@@ -559,6 +561,29 @@ struct sf_block* get_free_block(int index, size_t payload_size, size_t total_byt
     return get_free_block(index, payload_size, total_bytes);
 }
 
+double get_utilization()
+{
+    double util = 0.0;
+    void* start = sf_mem_start();
+    void* end = sf_mem_end();
+    if (start == end)
+        return util;
+    sf_block* tmp = (sf_block*)start;
+    double total = 0.0;
+    while ((void*)tmp < (void*)end)
+    {
+        double current_payload = (double)peek_payload_size(tmp);
+        size_t block_size = (double)peek_block_size(tmp);
+        if (!block_size)
+            break;
+        total += current_payload;
+        tmp = (sf_block*)((void*)tmp + block_size);
+    }
+    util = total / ((double)((char*)end - (char*)start));
+    if (util > sfmm_peak_utilization)
+        sfmm_peak_utilization = util;
+    return util;
+}
 
 // =============================================================
 // Below are functions that are visible through the header file
@@ -582,6 +607,7 @@ struct sf_block* find_next_free_block(size_t total_bytes, size_t payload_size)
         info("YO? %i", index);
         return NULL;
     }
+    get_utilization();
     // sf_heap();
     sf_heap("Allocating %lu bytes", total_bytes);
     // return the block
@@ -741,8 +767,13 @@ sf_block* realloc_block(sf_block* sfb, size_t new_block_size, size_t new_payload
     int is_prev_alloc = (last->header & 0x8) >> 3;
     epilogue->header = is_prev_alloc == 0 ? epilogue->header & 0xFFFFFFFB : epilogue->header | 0x4;
 
+    get_utilization();
     sf_heap();
     return sfb;
 }
 
+double get_peak_utilization()
+{
+    return sfmm_peak_utilization;
+}
 // END src/sfmm_block.c
