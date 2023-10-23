@@ -245,7 +245,7 @@ Test(sfmm_student_suite, utilization, .timeout = TEST_TIMEOUT) {
 	assert_free_block_count(3992, 0);
 }
 
-Test(sfmm_student_suite, free_null, .timeout = TEST_TIMEOUT) {
+Test(sfmm_student_suite, free_null, .timeout = TEST_TIMEOUT, .signal = SIGABRT) {
 	sf_errno = 0;
 	sf_free(NULL);
 
