@@ -257,7 +257,7 @@ Test(sfmm_student_suite, realloc_null, .timeout = TEST_TIMEOUT) {
 	void *x = sf_realloc(NULL, 37);
 
 	cr_assert_null(x, "x is not NULL!");
-	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+	cr_assert(sf_errno == EINVAL, "sf_errno is not zero!");
 }
 
 Test(sfmm_student_suite, realloc_0, .timeout = TEST_TIMEOUT) {
