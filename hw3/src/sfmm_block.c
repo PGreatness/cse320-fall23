@@ -606,7 +606,13 @@ int free_allocated_block(sf_block* block)
         return -1;
 
     // get the prev_alloc information
-    size_t prev_alloc = block->header & 0x4;
+    size_t prev_alloc = (block->header & 0x4) >> 2;
+    size_t prev_block_alloc = (block->prev_footer & 0x8) >> 3;
+    if (prev_alloc != prev_block_alloc)
+    {
+        // the prev_alloc information is incorrect
+        return -1;
+    }
     // set the block to be unallocated
     // insert the block into the free list
     insert_block(block, index);
