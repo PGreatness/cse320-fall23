@@ -1,6 +1,15 @@
 #ifndef HW3_SFMM_BLOCK_H
 #define HW3_SFMM_BLOCK_H
 
+#ifndef SIZES
+    #define SFMM_HEADER_SIZE sizeof(sf_header)
+    #define SFMM_FOOTER_SIZE sizeof(sf_footer)
+    #define SFMM_ALIGNMENT_SIZE (sizeof(sf_header) + sizeof(sf_footer))
+    #define SFMM_MIN_BLOCK_SIZE sizeof(sf_block)
+    #define SFMM_HEADER_WIDTH 64
+    #define SFMM_PAYLOAD_WIDTH 32
+#endif
+
 #include "debug.h"
 #include "sfmm.h"
 #include "sfmm_analytics.h"
