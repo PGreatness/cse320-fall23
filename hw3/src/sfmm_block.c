@@ -63,7 +63,7 @@ int find_between_fibonacci(int n, int* left, int* right, int limit)
 
     while (((temp = fib(i)) > -1) && (temp * per_size < n))
     {
-        if (i > limit)
+        if (i >= limit)
         {
             *left = -1;
             *right = -1;
