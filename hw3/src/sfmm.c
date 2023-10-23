@@ -59,7 +59,10 @@ void sf_free(void *pp) {
 
 void *sf_realloc(void *pp, size_t rsize) {
     if (pp == NULL)
+    {
+        sf_errno = EINVAL;
         return NULL;
+    }
     sf_block* sfr = (sf_block*) (pp - SFMM_ALIGNMENT_SIZE);
     int can_realloc = can_realloc_without_splinter(sfr, rsize);
     if (can_realloc == 0)
