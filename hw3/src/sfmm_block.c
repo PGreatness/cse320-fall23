@@ -3,12 +3,12 @@
 static double sfmm_peak_utilization = 0.0;
 
 sfmm_sizes SFMM_SIZES = {
-    .HEADER_SIZE = 8,
-    .FOOTER_SIZE = 8,
-    .ALIGNMENT_SIZE = 16,
-    .MIN_BLOCK_SIZE = 32,
-    .HEADER_WIDTH = 64,
-    .PAYLOAD_WIDTH = 32
+    .HEADER_SIZE = SFMM_HEADER_SIZE,
+    .FOOTER_SIZE = SFMM_FOOTER_SIZE,
+    .ALIGNMENT_SIZE = SFMM_ALIGNMENT_SIZE,
+    .MIN_BLOCK_SIZE = SFMM_MIN_BLOCK_SIZE,
+    .HEADER_WIDTH = SFMM_HEADER_WIDTH,
+    .PAYLOAD_WIDTH = SFMM_PAYLOAD_WIDTH
 };
 
 #ifdef DEBUG
@@ -140,11 +140,9 @@ sf_block* touch_for_heap_update(sf_block* block)
         next->header = next->header | 0x4;
     }
     next->prev_footer = block->header;
-    // sf_heap();
     // return the block
     return block;
 }
-
 
 struct sf_block* isolate_block(sf_block* block)
 {
@@ -170,7 +168,6 @@ struct sf_block* isolate_block(sf_block* block)
     block->body.links.prev = NULL;
 
     // update the prev_footer fields
-    // touch_for_update(next);
     touch_for_heap_update(next);
 
     // return the block
@@ -252,24 +249,24 @@ sf_block* insert_block(sf_block* block, int index)
         head->body.links.prev = block;
         block->body.links.next = head;
         block->body.links.prev = head;
+        goto empty_list;
     }
     block->body.links.next = tmp;
     block->body.links.prev = head;
     head->body.links.next = block;
     tmp->body.links.prev = block;
 
+empty_list:
     // set the prev_footer field
     touch_for_heap_update(block);
     return block;
 }
 
-
 void* get_more_memory()
 {
     // if the start of the heap is equal to the end of the heap, a prologue block is needed
-    // sf_heap();
     size_t diff = sf_mem_end() - sf_mem_start();
-    void* old_epilogue = diff != 0 ? sf_mem_end() - 16 : NULL;
+    void* old_epilogue = diff != 0 ? sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE : NULL;
     // grow the memory
     void* new_mem = sf_mem_grow();
     if (new_mem == NULL)
@@ -278,8 +275,6 @@ void* get_more_memory()
         debug("No more memory can be allocated");
         return NULL;
     }
-    // sf_show_heap();
-    // sf_heap("Before creating prologue block");
     // if there is an old epilogue, set the beginning of the new memory to be the old epilogue
     if (old_epilogue != NULL)
         new_mem = old_epilogue;
@@ -289,24 +284,15 @@ void* get_more_memory()
         // set the prologue block to be 8 bytes from the start of the heap
         sf_block *prologue = (sf_block*)(sf_mem_start());
         // set the header to be 0, MIN_BLOCK_SIZE, 1, 0
-        // sf_show_heap();
         prologue->header = set_header(0, SFMM_SIZES.MIN_BLOCK_SIZE, 1, 0);
         // set the footer to be the same as the header
         prologue->prev_footer = prologue->header;
-        // prologue->body.links.next = prologue->body.links.prev = NULL;
-        // set new mem to start after the prologue
-        // debug("new mem: %p", new_mem);
-        // sf_heap("After creating prologue block");
     }
-    // sf_show_heap();
-    // sf_heap();
     // create an epilogue header
-    sf_block *epilogue = (sf_block *)(sf_mem_end() - 16);
+    sf_block *epilogue = (sf_block *)(sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE);
     // set the epilogue header to have 0 payload, 0 block size, and 1 for allocation
     epilogue->header = set_header(0, 0, 1, 0);
 
-    // sf_show_heap();
-    // sf_heap();
     // return the start of the new memory
     return diff == 0 ? new_mem + (SFMM_SIZES.MIN_BLOCK_SIZE) : new_mem;
 }
@@ -322,7 +308,6 @@ int can_coalesce(sf_block* block)
     size_t prev_size = (block->prev_footer & 0xFFFFFF3);
     sf_block* next = (sf_block*)((void*)block + block_size);
     sf_block* prev = (sf_block*)((void*)block - prev_size);
-    warn("block size: %lu, prev size: %lu, prev: %p", block_size, prev_size, prev);
     if ((void*)next < sf_mem_end())
     {
         size_t next_alloc = (next->header & 0x8) >> 3;
@@ -380,15 +365,14 @@ sf_block* coalesce(sf_block* main, sf_block* join)
     higher_in_heap->body.links.next = next;
     next->body.links.prev = higher_in_heap;
 
-    // sf_heap();
     lower_in_heap = isolate_block(lower_in_heap);
-    // touch_for_update(lower_in_heap);
+
     higher_in_heap->prev_footer = lower_in_heap->prev_footer;
     touch_for_heap_update(higher_in_heap);
-    // sf_heap();
+
     next = (sf_block*)((void*)higher_in_heap + (main_size + join_size));
     next->prev_footer = higher_in_heap->header;
-    // sf_heap();
+
     return higher_in_heap;
 }
 
@@ -398,7 +382,7 @@ int do_coalesce()
     if (tmp == NULL)
         return 0;
     size_t current_size = tmp->header & 0xFFFFFF3;
-    void* end = sf_mem_end() - 16;
+    void* end = sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE;
     while (((void*)tmp) < end)
     {
         sf_block* next = (sf_block*)((void*)tmp + current_size);
@@ -408,7 +392,6 @@ int do_coalesce()
             return 0;
         if (can_coalesce(tmp))
         {
-            info("next: %p", next);
             sf_block* tmp2 = coalesce(tmp, next);
             if (tmp2 == NULL)
             {
@@ -438,7 +421,7 @@ sf_block* find_last_in_heap()
     size_t current_size = tmp->header & 0xFFFFFF3;
     if (current_size < SFMM_SIZES.MIN_BLOCK_SIZE)
         return NULL;
-    void* end = sf_mem_end() - 16;
+    void* end = sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE;
     while (((void*)tmp) < end)
     {
         last = tmp;
@@ -479,7 +462,6 @@ struct sf_block* get_free_block(int index, size_t payload_size, size_t total_byt
                     // split the block
                     struct sf_block *split_section_block = (void *)tmp + total_bytes;
                     split_section_block->header = set_header(0, block_size - total_bytes, 0, 1);
-                    info("Split block size: %lu", split_section_block->header & 0xFFFFFF3);
                     insert_after(tmp, split_section_block);
                 }
                 // update the current block's header to reflect the allocation
@@ -491,28 +473,21 @@ struct sf_block* get_free_block(int index, size_t payload_size, size_t total_byt
                 // get the next block
                 struct sf_block* next = tmp->body.links.next;
                 // update the block
-                // sf_heap();
-                // touch_for_update(tmp);
                 touch_for_heap_update(tmp);
-                // touch_for_heap_update(tmp);
                 // isolate the block
                 tmp = isolate_block(tmp);
                 // should not happen, means something went wrong
                 if (tmp == NULL)
                     return NULL;
                 // update the next block
-                // touch_for_update(next);
                 touch_for_heap_update(next);
-                // next->prev_footer = tmp->header;
                 // update the epilogue's prev_footer to reflect the change
                 sf_block* last = find_last_in_heap();
-                sf_block* epilogue = (sf_block*)(sf_mem_end() - 16);
-                // sf_heap();
+                sf_block* epilogue = (sf_block*)(sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE);
+
                 epilogue->prev_footer = last->header;
                 int should_have_prev = last == (sf_block*)(sf_mem_start()) ? 0 : (last->header & 0x8) >> 3;
                 epilogue->header |= (should_have_prev << 2);
-                // epilogue->header = last_wilderness->header;
-                // sf_heap();
                 // return the block
                 return tmp;
             }
@@ -526,7 +501,7 @@ struct sf_block* get_free_block(int index, size_t payload_size, size_t total_byt
     // no block was found, call for more memory
     size_t diff = sf_mem_end() - sf_mem_start();
     void* new_mem = get_more_memory();
-    // sf_heap();
+
     if (new_mem == NULL)
     {
         // no more memory can be allocated
@@ -538,9 +513,9 @@ struct sf_block* get_free_block(int index, size_t payload_size, size_t total_byt
     sf_block* new_block = (sf_block*)new_mem;
 
     // set the header to have 0 payload, PAGE_SZ - (40 if prologue exists) - 16 for the block size, and 0 for allocation
-    new_block->header = set_header(0, PAGE_SZ - (diff == 0 ? 48 : 0), 0, 0);
+    new_block->header = set_header(0, PAGE_SZ - (diff == 0 ? (SFMM_SIZES.MIN_BLOCK_SIZE + SFMM_SIZES.HEADER_SIZE + SFMM_SIZES.FOOTER_SIZE) : 0), 0, 0);
     // set the footer to be the same as the header
-    new_block->prev_footer = diff == 0 ? 32 : new_block->prev_footer;
+    new_block->prev_footer = diff == 0 ? (SFMM_SIZES.MIN_BLOCK_SIZE) : new_block->prev_footer;
     // add the new block to the last free list
     insert_block(new_block, NUM_FREE_LISTS - 1);
     sf_heap();
@@ -548,15 +523,13 @@ struct sf_block* get_free_block(int index, size_t payload_size, size_t total_byt
     touch_for_heap_update(new_block);
     // update the epilogue
     sf_block* last = find_last_in_heap();
-    sf_block* epilogue = (sf_block*)(sf_mem_end() - 16);
+    sf_block* epilogue = (sf_block*)(sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE);
     epilogue->prev_footer = last->header;
     int should_have_prev = last == (sf_block*)(sf_mem_start()) ? 0 : (last->header & 0x8) >> 3;
     epilogue->header |= (should_have_prev << 2);
 
     // perform coalesce
-    sf_heap();
     do_coalesce();
-    sf_heap();
     // call the function again to get the block
     return get_free_block(index, payload_size, total_bytes);
 }
@@ -608,7 +581,6 @@ struct sf_block* find_next_free_block(size_t total_bytes, size_t payload_size)
         return NULL;
     }
     get_utilization();
-    // sf_heap();
     sf_heap("Allocating %lu bytes", total_bytes);
     // return the block
     return block;
@@ -616,27 +588,22 @@ struct sf_block* find_next_free_block(size_t total_bytes, size_t payload_size)
 
 int free_allocated_block(sf_block* block)
 {
-    // sf_heap();
-    if (block == NULL)
-    {
+    if (((size_t)block) % SFMM_SIZES.ALIGNMENT_SIZE != 0)
         return -1;
-    }
+    if (block == NULL)
+        return -1;
     // get the size of the block
     size_t block_size = block->header & 0xFFFFFF3;
     // get the allocation information
     size_t alloc = (block->header & 0x8) >> 3;
+    // the block is not allocated
     if (!alloc)
-    {
-        // the block is not allocated
         return -1;
-    }
     // get the index of the block
     int index = find_allocation_index(block_size);
+    // the block is too large
     if (index < 0)
-    {
-        // the block is too large
         return -1;
-    }
 
     // get the prev_alloc information
     size_t prev_alloc = block->header & 0x4;
@@ -644,25 +611,16 @@ int free_allocated_block(sf_block* block)
     // insert the block into the free list
     insert_block(block, index);
     block->header = set_header(0, block_size, 0, prev_alloc);
-    // get the next block
-    // sf_block* next = (sf_block*)((void*)block + block_size);
-    // next->prev_footer = block->header;
-    // update the block
-    // sf_heap();
-    // touch_for_update(block);
-    // sf_heap();
     touch_for_heap_update(block);
-    // sf_heap();
     // perform coalesce
     do_coalesce();
     // fix the epilogue
     sf_block* last = find_last_in_heap();
-    sf_block* epilogue = (sf_block*)(sf_mem_end() - 16);
+    sf_block* epilogue = (sf_block*)(sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE);
     epilogue->prev_footer = last->header;
     int is_prev_alloc = (last->header & 0x8) >> 3;
     epilogue->header = is_prev_alloc == 0 ? epilogue->header & 0xFFFFFFFB : epilogue->header | 0x4;
     // return 0 for success
-    sf_heap();
     return 0;
 }
 
@@ -717,7 +675,7 @@ sf_block* update_payload_size(sf_block* sfb, size_t update)
     size_t prev_alloc = (sfb->header & 0x4) >> 2;
     // get the next and prev in heap
     sf_block* next = (sf_block*)((void*)sfb + block_size);
-    if ((void*)next > sf_mem_end() - 16)
+    if ((void*)next > sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE)
     {
         // next is not in the heap
         return NULL;
@@ -725,12 +683,15 @@ sf_block* update_payload_size(sf_block* sfb, size_t update)
     sfb->header = set_header(payload_size, block_size, alloc, prev_alloc);
     // update the next's prev_footer field
     next->prev_footer = sfb->header;
-    sf_heap();
     return sfb;
 }
 
 sf_block* realloc_block(sf_block* sfb, size_t new_block_size, size_t new_payload)
 {
+    if (sfb == NULL)
+        return NULL;
+    if (((size_t)sfb) % SFMM_SIZES.ALIGNMENT_SIZE != 0)
+        return NULL;
     size_t block_size = peek_block_size(sfb);
     size_t payload_size = new_payload;
     size_t alloc = (sfb->header & 0x8) >> 3;
@@ -740,7 +701,7 @@ sf_block* realloc_block(sf_block* sfb, size_t new_block_size, size_t new_payload
     sfb->header = set_header(payload_size, new_block_size, alloc, prev_alloc);
     split_section_block->prev_footer = sfb->header;
     sf_block* next = (sf_block*)((void*)split_section_block + (block_size - new_block_size));
-    if ((void*)next > sf_mem_end() - 16)
+    if ((void*)next > sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE)
     {
         // next is not in the heap
         return NULL;
@@ -762,13 +723,12 @@ sf_block* realloc_block(sf_block* sfb, size_t new_block_size, size_t new_payload
     do_coalesce();
     // fix the epilogue
     sf_block* last = find_last_in_heap();
-    sf_block* epilogue = (sf_block*)(sf_mem_end() - 16);
+    sf_block* epilogue = (sf_block*)(sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE);
     epilogue->prev_footer = last->header;
     int is_prev_alloc = (last->header & 0x8) >> 3;
     epilogue->header = is_prev_alloc == 0 ? epilogue->header & 0xFFFFFFFB : epilogue->header | 0x4;
 
     get_utilization();
-    sf_heap();
     return sfb;
 }
 
