@@ -12,11 +12,6 @@
 
 #ifndef SIZES
 
-#define HEADER_SIZE 8
-#define FOOTER_SIZE 8
-#define ALIGNMENT_SIZE 16
-#define MIN_BLOCK_SIZE 32
-
 #endif
 
 void *sf_malloc(size_t size) {
@@ -25,22 +20,19 @@ void *sf_malloc(size_t size) {
     int size_to_use = size;
     if (size < 16)
         size_to_use = 16;
-    int total_size = size_to_use + HEADER_SIZE + FOOTER_SIZE;
-    int added_size = (total_size % ALIGNMENT_SIZE == 0)
+    int total_size = size_to_use + SFMM_HEADER_SIZE + SFMM_FOOTER_SIZE;
+    int added_size = (total_size % SFMM_ALIGNMENT_SIZE == 0)
                         ? 0
-                        : ALIGNMENT_SIZE - (total_size % ALIGNMENT_SIZE);
+                        : SFMM_ALIGNMENT_SIZE - (total_size % SFMM_ALIGNMENT_SIZE);
     total_size += added_size;
-    debug("total size: %d, added_size: %d, size before add: %d, padding added: %ld, original size: %zu", total_size, added_size, total_size - added_size, size_to_use - size == 0 ? added_size : size_to_use - size, size);
+    debug("total size: %d, added_size: %d, size before add: %d, \
+    padding added: %ld, original size: %zu",
+        total_size,
+        added_size,
+        total_size - added_size,
+        size_to_use - size == 0 ? added_size : size_to_use - size,
+        size);
 
-    /* struct sf_block* sfb = find_next_free_block(total_size, size, MIN_BLOCK_SIZE);
-    if (sfb == NULL)
-    {
-        debug("sfb is null");
-        fprintf(stderr, "ERROR: Could not allocate new block.\n");
-        errno = ENOMEM;
-        return NULL;
-    }
-    return sfb->body.payload; */
     sf_block* sfb = find_next_free_block(total_size, size_to_use);
     if (sfb == NULL)
     {
@@ -50,29 +42,25 @@ void *sf_malloc(size_t size) {
         return NULL;
     }
     return sfb->body.payload;
-    // abort();
 }
 
 void sf_free(void *pp) {
     if (pp == NULL)
         return;
-    sf_block* sfb = (sf_block*) (pp - ALIGNMENT_SIZE);
-    // debug("WHY HERE?");
+    sf_block* sfb = (sf_block*) (pp - SFMM_ALIGNMENT_SIZE);
     if (free_allocated_block(sfb) == -1)
     {
         debug("free_allocated_block returned -1");
         fprintf(stderr, "ERROR: invalid free\n");
         abort();
-        // exit(EXIT_FAILURE);
     }
     return;
-    // abort();
 }
 
 void *sf_realloc(void *pp, size_t rsize) {
     if (pp == NULL)
         return NULL;
-    sf_block* sfr = (sf_block*) (pp - ALIGNMENT_SIZE);
+    sf_block* sfr = (sf_block*) (pp - SFMM_ALIGNMENT_SIZE);
     int can_realloc = can_realloc_without_splinter(sfr, rsize);
     if (can_realloc == 0)
     {
@@ -98,7 +86,7 @@ void *sf_realloc(void *pp, size_t rsize) {
         return update_payload_size(sfr, rsize)->body.payload;
     }
     // will not splinter if realloced
-    sf_block* tmp = (sf_block*)(sf_malloc(rsize) - ALIGNMENT_SIZE);
+    sf_block* tmp = (sf_block*)(sf_malloc(rsize) - SFMM_ALIGNMENT_SIZE);
     size_t block_size = peek_block_size(tmp);
     sf_free(tmp->body.payload);
     return realloc_block(sfr, block_size, rsize)->body.payload;
@@ -106,10 +94,8 @@ void *sf_realloc(void *pp, size_t rsize) {
 
 double sf_fragmentation() {
     return sfmm_get_fragmentation();
-    // abort();
 }
 
 double sf_utilization() {
     return sfmm_get_utilization();
-    // abort();
 }
