@@ -33,7 +33,7 @@ void *sf_malloc(size_t size) {
         size_to_use - size == 0 ? added_size : size_to_use - size,
         size);
 
-    sf_block* sfb = find_next_free_block(total_size, size_to_use);
+    sf_block* sfb = find_next_free_block(total_size, size);
     if (sfb == NULL)
     {
         debug("sfb is null");
@@ -46,7 +46,11 @@ void *sf_malloc(size_t size) {
 
 void sf_free(void *pp) {
     if (pp == NULL)
-        return;
+    {
+        debug("pp is null");
+        fprintf(stderr, "ERROR: invalid free\n");
+        abort();
+    }
     sf_block* sfb = (sf_block*) (pp - SFMM_ALIGNMENT_SIZE);
     if (free_allocated_block(sfb) == -1)
     {
