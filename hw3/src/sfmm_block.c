@@ -11,6 +11,8 @@ sfmm_sizes SFMM_SIZES = {
     .PAYLOAD_WIDTH = SFMM_PAYLOAD_WIDTH
 };
 
+size_t set_header(size_t payload_size, size_t block_size, size_t alloc, size_t prev_alloc);
+
 #ifdef DEBUG
 #define sf_heap(x...) debug(x);sf_show_heap();
 #else
@@ -115,7 +117,7 @@ sf_block* touch_for_heap_update(sf_block* block)
         // prev is not in the heap
         return NULL;
     }
-    size_t is_prev_alloc = prev->header & 0x8;
+    size_t is_prev_alloc = (prev->header & 0x8) >> 3;
     if (is_prev_alloc)
     {
         // update the current block's header to reflect prev being allocated
@@ -125,7 +127,7 @@ sf_block* touch_for_heap_update(sf_block* block)
         // update the next block's prev_footer to reflect the change
         next->prev_footer = block->header;
     }
-    size_t is_current_alloc = block->header & 0x8;
+    size_t is_current_alloc = (block->header & 0x8) >> 3;
     if (og_header != block->header)
     {
         // the header has changed
@@ -140,6 +142,8 @@ sf_block* touch_for_heap_update(sf_block* block)
         next->header = next->header | 0x4;
     }
     next->prev_footer = block->header;
+    size_t is_next_alloc = (next->header & 0x8) >> 3;
+    next->header = set_header(peek_payload_size(next), peek_block_size(next), is_next_alloc, is_current_alloc);
     // return the block
     return block;
 }
@@ -609,7 +613,8 @@ int free_allocated_block(sf_block* block)
     // get the prev_alloc information
     size_t prev_alloc = (block->header & 0x4) >> 2;
     size_t prev_block_alloc = (block->prev_footer & 0x8) >> 3;
-    if (prev_alloc != prev_block_alloc)
+    if ((prev_alloc == 0 && prev_block_alloc != 0) ||
+        (prev_alloc != 0 && prev_block_alloc == 0))
     {
         // the prev_alloc information is incorrect
         return -1;
