@@ -1,6 +1,6 @@
 #include "sfmm_block.h"
 
-static double sfmm_peak_utilization = 0.0;
+static size_t sfmm_peak_utilization = 0;
 
 sfmm_sizes SFMM_SIZES = {
     .HEADER_SIZE = SFMM_HEADER_SIZE,
@@ -536,11 +536,10 @@ struct sf_block* get_free_block(int index, size_t payload_size, size_t total_byt
 
 double get_utilization()
 {
-    double util = 0.0;
     void* start = sf_mem_start();
     void* end = sf_mem_end();
     if (start == end)
-        return util;
+        return 0;
     sf_block* tmp = (sf_block*)start;
     double total = 0.0;
     while ((void*)tmp < (void*)end)
@@ -552,10 +551,9 @@ double get_utilization()
         total += current_payload;
         tmp = (sf_block*)((void*)tmp + block_size);
     }
-    util = total / ((double)((char*)end - (char*)start));
-    if (util > sfmm_peak_utilization)
-        sfmm_peak_utilization = util;
-    return util;
+    if (total > sfmm_peak_utilization)
+        sfmm_peak_utilization = total;
+    return total;
 }
 
 // =============================================================
@@ -740,6 +738,6 @@ sf_block* realloc_block(sf_block* sfb, size_t new_block_size, size_t new_payload
 
 double get_peak_utilization()
 {
-    return sfmm_peak_utilization;
+    return (sfmm_peak_utilization / (double)(sf_mem_end() - sf_mem_start()));
 }
 // END src/sfmm_block.c
