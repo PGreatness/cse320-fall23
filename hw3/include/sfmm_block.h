@@ -36,6 +36,8 @@ sf_block* realloc_block(sf_block* sfb, size_t new_block_size, size_t new_payload
 
 size_t peek_block_size(sf_block* sfb);
 size_t peek_payload_size(sf_block* sfb);
+size_t calculate_block_size(size_t size);
+
 int is_allocated(sf_block* sfb);
 sf_block* update_payload_size(sf_block* sfb, size_t update);
 
