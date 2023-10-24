@@ -15,16 +15,9 @@
 #endif
 
 void *sf_malloc(size_t size) {
-    if (size == 0)
+    size_t total_size = calculate_block_size(size);
+    if (total_size < SFMM_ALIGNMENT_SIZE)
         return NULL;
-    int size_to_use = size;
-    if (size < 16)
-        size_to_use = 16;
-    int total_size = size_to_use + SFMM_HEADER_SIZE + SFMM_FOOTER_SIZE;
-    int added_size = (total_size % SFMM_ALIGNMENT_SIZE == 0)
-                        ? 0
-                        : SFMM_ALIGNMENT_SIZE - (total_size % SFMM_ALIGNMENT_SIZE);
-    total_size += added_size;
     debug("total size: %d, added_size: %d, size before add: %d, \
     padding added: %ld, original size: %zu",
         total_size,

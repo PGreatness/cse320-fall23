@@ -567,6 +567,20 @@ double get_utilization()
 // Below are functions that are visible through the header file
 // =============================================================
 
+size_t calculate_block_size(size_t size)
+{
+    if (size == 0)
+        return 0;
+    int size_to_use = size;
+    if (size < 16)
+        size_to_use = 16;
+    int total_size = size_to_use + SFMM_HEADER_SIZE + SFMM_FOOTER_SIZE;
+    int added_size = (total_size % SFMM_ALIGNMENT_SIZE == 0)
+                        ? 0
+                        : SFMM_ALIGNMENT_SIZE - (total_size % SFMM_ALIGNMENT_SIZE);
+    total_size += added_size;
+    return total_size;
+}
 
 struct sf_block* find_next_free_block(size_t total_bytes, size_t payload_size)
 {
@@ -661,8 +675,12 @@ int can_realloc_without_splinter(sf_block* block, size_t rsize)
 {
     if (block == NULL || rsize == 0)
         return 0;
-    // size_t block_size = peek_block_size(block);
     size_t payload_size = peek_payload_size(block);
+    size_t block_size = peek_block_size(block);
+    size_t new_block_size = calculate_block_size(rsize);
+    if (block_size == new_block_size)
+        return 3;
+
     size_t alloc = (block->header & 0x8) >> 3;
     if (!alloc)
         return -1;
