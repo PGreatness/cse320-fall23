@@ -462,7 +462,10 @@ struct sf_block* get_free_block(int index, size_t payload_size, size_t total_byt
                     // split the block
                     struct sf_block *split_section_block = (void *)tmp + total_bytes;
                     split_section_block->header = set_header(0, block_size - total_bytes, 0, 1);
-                    insert_after(tmp, split_section_block);
+                    split_section_block->prev_footer = tmp->header;
+                    // insert the split section block into the proper free list
+                    int index_of_split = find_allocation_index(block_size - total_bytes);
+                    insert_block(split_section_block, index_of_split);
                 }
                 // update the current block's header to reflect the allocation
                 // header has the payload size in the first 32 bits,
