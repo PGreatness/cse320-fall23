@@ -523,7 +523,6 @@ struct sf_block* get_free_block(int index, size_t payload_size, size_t total_byt
     new_block->prev_footer = diff == 0 ? (SFMM_SIZES.MIN_BLOCK_SIZE) : new_block->prev_footer;
     // add the new block to the last free list
     insert_block(new_block, NUM_FREE_LISTS - 1);
-    sf_heap();
     // update the next
     touch_for_heap_update(new_block);
     // update the epilogue
