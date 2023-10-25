@@ -18,13 +18,6 @@ void *sf_malloc(size_t size) {
     size_t total_size = calculate_block_size(size);
     if (total_size < SFMM_ALIGNMENT_SIZE)
         return NULL;
-    debug("total size: %d, added_size: %d, size before add: %d, \
-    padding added: %ld, original size: %zu",
-        total_size,
-        added_size,
-        total_size - added_size,
-        size_to_use - size == 0 ? added_size : size_to_use - size,
-        size);
 
     sf_block* sfb = find_next_free_block(total_size, size);
     if (sfb == NULL)
@@ -69,10 +62,11 @@ void *sf_realloc(void *pp, size_t rsize) {
     }
     if (can_realloc == 1)
     {
+        void* backup_pp = pp;
         void* realloc_block = sf_malloc(rsize);
         if (realloc_block == NULL)
             return NULL;
-        memcpy(realloc_block, pp, rsize);
+        memcpy(realloc_block, backup_pp, rsize);
         sf_free(pp);
         return realloc_block;
     }
@@ -86,9 +80,7 @@ void *sf_realloc(void *pp, size_t rsize) {
         return update_payload_size(sfr, rsize)->body.payload;
     }
     // will not splinter if realloced
-    sf_block* tmp = (sf_block*)(sf_malloc(rsize) - SFMM_ALIGNMENT_SIZE);
-    size_t block_size = peek_block_size(tmp);
-    sf_free(tmp->body.payload);
+    size_t block_size = calculate_block_size(rsize);
     return realloc_block(sfr, block_size, rsize)->body.payload;
 }
 
