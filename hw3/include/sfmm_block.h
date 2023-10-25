@@ -4,8 +4,8 @@
 #ifndef SIZES
     #define SFMM_HEADER_SIZE sizeof(sf_header)
     #define SFMM_FOOTER_SIZE sizeof(sf_footer)
-    #define SFMM_ALIGNMENT_SIZE (sizeof(sf_header) + sizeof(sf_footer))
     #define SFMM_MIN_BLOCK_SIZE sizeof(sf_block)
+    #define SFMM_ALIGNMENT_SIZE 16
     #define SFMM_HEADER_WIDTH 64
     #define SFMM_PAYLOAD_WIDTH 32
 #endif
