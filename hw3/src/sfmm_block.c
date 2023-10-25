@@ -289,8 +289,6 @@ void* get_more_memory()
         sf_block *prologue = (sf_block*)(sf_mem_start());
         // set the header to be 0, MIN_BLOCK_SIZE, 1, 0
         prologue->header = set_header(0, SFMM_SIZES.MIN_BLOCK_SIZE, 1, 0);
-        // set the footer to be the same as the header
-        prologue->prev_footer = prologue->header;
     }
     // create an epilogue header
     sf_block *epilogue = (sf_block *)(sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE);
@@ -349,7 +347,7 @@ sf_block* coalesce(sf_block* main, sf_block* join)
     size_t join_size = join->header & 0xFFFFFF3;
     sf_block* higher_in_heap = main > join ? join : main;
     sf_block* lower_in_heap = main < join ? join : main;
-    int prev_alloc = higher_in_heap->header & 0x4;
+    int prev_alloc = (higher_in_heap->header & 0x4) >> 2;
     higher_in_heap->header = set_header(0, main_size + join_size, 0, prev_alloc);
     int index = find_allocation_index(main_size + join_size);
     if (index < 0)
@@ -371,7 +369,7 @@ sf_block* coalesce(sf_block* main, sf_block* join)
 
     lower_in_heap = isolate_block(lower_in_heap);
 
-    higher_in_heap->prev_footer = lower_in_heap->prev_footer;
+    // higher_in_heap->prev_footer = lower_in_heap->prev_footer;
     touch_for_heap_update(higher_in_heap);
 
     next = (sf_block*)((void*)higher_in_heap + (main_size + join_size));
@@ -404,7 +402,6 @@ int do_coalesce()
                 continue;
             }
             tmp = tmp2;
-            sf_heap();
             current_size = tmp->header & 0xFFFFFF3;
             continue;
         }
@@ -455,15 +452,18 @@ struct sf_block* get_free_block(int index, size_t payload_size, size_t total_byt
             // remove the allocation information and look at the remaining 28 bits to see if it is large enough
             size_t block_size = tmp->header & 0xFFFFFF3;
             // look to see if the current block is already allocated
-            size_t alloc = tmp->header & 0x8;
+            size_t alloc = (tmp->header & 0x8) >> 3;
+            size_t prev_alloc = (tmp->header & 0x4) >> 2;
 
             // if not allocated and the block is large enough
             if (!alloc && block_size >= total_bytes)
             {
+                tmp->header = set_header(payload_size, block_size, 1, prev_alloc);
                 // check if the block is large enough to split
                 if (block_size - total_bytes >= SFMM_SIZES.MIN_BLOCK_SIZE)
                 {
                     // split the block
+                    tmp->header = set_header(payload_size, total_bytes, 1, prev_alloc);
                     struct sf_block *split_section_block = (void *)tmp + total_bytes;
                     split_section_block->header = set_header(0, block_size - total_bytes, 0, 1);
                     split_section_block->prev_footer = tmp->header;
@@ -475,10 +475,8 @@ struct sf_block* get_free_block(int index, size_t payload_size, size_t total_byt
                 // header has the payload size in the first 32 bits,
                 // the entire block size in the next 28 bits, and the allocation
                 // information in the last 4 bits for a total of 64 bits
-                size_t prev_alloc = tmp->body.links.prev->header & 0x8;
-                tmp->header = set_header(payload_size, total_bytes, 1, prev_alloc);
                 // get the next block
-                struct sf_block* next = tmp->body.links.next;
+                struct sf_block* next = (sf_block*)((void*)tmp + total_bytes);
                 // update the block
                 touch_for_heap_update(tmp);
                 // isolate the block
@@ -618,6 +616,13 @@ int free_allocated_block(sf_block* block)
     // the block is not allocated
     if (!alloc)
         return -1;
+    // check if block is before the end of the prologue or after the start of the epilogue
+    if ((((void*)block) < sf_mem_start() + SFMM_SIZES.MIN_BLOCK_SIZE) ||
+        (((void*)block) > sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE) )
+    {
+        // the block is not in the heap
+        return -1;
+    }
     // get the index of the block
     int index = find_allocation_index(block_size);
     // the block is too large
