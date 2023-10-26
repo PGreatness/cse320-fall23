@@ -538,6 +538,14 @@ struct sf_block* get_free_block(int index, size_t payload_size, size_t total_byt
     return get_free_block(index, payload_size, total_bytes);
 }
 
+sf_block* place_in_wilderness(sf_block* blck)
+{
+    size_t alloc = (blck->header & 0x8) >> 3;
+    if (alloc)
+        return NULL;
+    return insert_block(isolate_block(blck), NUM_FREE_LISTS - 1);
+}
+
 double get_utilization()
 {
     void* start = sf_mem_start();
@@ -597,6 +605,7 @@ struct sf_block* find_next_free_block(size_t total_bytes, size_t payload_size)
         return NULL;
     }
     get_utilization();
+    place_in_wilderness(find_last_in_heap());
     sf_heap("Allocating %lu bytes", total_bytes);
     // return the block
     return block;
@@ -647,6 +656,7 @@ int free_allocated_block(sf_block* block)
     // fix the epilogue
     sf_block* last = find_last_in_heap();
     sf_block* epilogue = (sf_block*)(sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE);
+    place_in_wilderness(last);
     epilogue->prev_footer = last->header;
     int is_prev_alloc = (last->header & 0x8) >> 3;
     epilogue->header = is_prev_alloc == 0 ? epilogue->header & 0xFFFFFFFB : epilogue->header | 0x4;
@@ -758,6 +768,7 @@ sf_block* realloc_block(sf_block* sfb, size_t new_block_size, size_t new_payload
     // fix the epilogue
     sf_block* last = find_last_in_heap();
     sf_block* epilogue = (sf_block*)(sf_mem_end() - SFMM_SIZES.ALIGNMENT_SIZE);
+    place_in_wilderness(last);
     epilogue->prev_footer = last->header;
     int is_prev_alloc = (last->header & 0x8) >> 3;
     epilogue->header = is_prev_alloc == 0 ? epilogue->header & 0xFFFFFFFB : epilogue->header | 0x4;
