@@ -43,7 +43,7 @@ int ask_for_input(FILE* stream, char*args[], int* num_args)
         fprintf(stderr, "Error: getline() failed.\n");
         return -1;
     }
-    if (chars_read == 0)
+    if (chars_read < 2)
     {
         free(buffer);
         debug("No input detected.\n");
@@ -58,12 +58,23 @@ int ask_for_input(FILE* stream, char*args[], int* num_args)
     // compare the buffer with the commands available
     // if the command is valid, call the corresponding function
     // if the command is invalid, print an error message
-    // if the command is quit, return 0
+
+    char* buffer_token = strtok(buffer, " ");
+    if (strlen(buffer_token) <= 1)
+    {
+        free(buffer);
+        return -2;
+    }
+    buffer_token = strtok(buffer_token, "\n");
 
     for (int i = 0; i < NUM_CMDS; i++)
     {
-        debug("Comparing %s with %s\n", buffer, commands[i].name);
-        if (strncasecmp(buffer, commands[i].name, strlen(commands[i].name)) == 0)
+        debug("Comparing %s with %s\n", buffer_token, commands[i].name);
+
+        size_t command_length = strlen(commands[i].name);
+        if (strlen(buffer_token) != command_length)
+            continue;
+        if (strncasecmp(buffer_token, commands[i].name, command_length) == 0)
         {
             debug("Command %s found.\n", commands[i].name);
             // count the number of arguments
