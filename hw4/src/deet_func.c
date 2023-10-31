@@ -33,7 +33,7 @@ int ask_for_input(FILE* stream, char*args[], int* num_args)
         fprintf(stderr, "Error: initialization of buffer in input failed.\n");
         exit(1);
     }
-    printf("deet> ");
+    fprintf(stdout,"deet> ");
     // flush the buffer
     fflush(stdout);
     size_t chars_read = getline(&buffer, &size, stream);

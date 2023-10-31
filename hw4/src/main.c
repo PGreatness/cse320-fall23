@@ -3,10 +3,13 @@
 #include "deet.h"
 #include "deet_func.h"
 #include "free_used.h"
+#include "signaling.h"
 
 int main(int argc, char *argv[]) {
     // TO BE IMPLEMENTED
     // Remember: Do not put any functions other than main() in this file.
+    handle_signal(SIGCHLD, sigchild_handler);
+    // block_signal(SIGINT);
     char c;
     char *args[MAX_ARG_SIZE];
     int num_args;
