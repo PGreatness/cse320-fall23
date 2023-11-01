@@ -1,0 +1,26 @@
+rm -rf build bin
+mkdir -p bin
+mkdir -p build
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include -c -o build/read.o src/read.c
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include -c -o build/free.o src/free.c
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include -c -o build/error.o src/error.c
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include -c -o build/allocate.o src/allocate.c
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include -c -o build/main.o src/main.c
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include -c -o build/stats.o src/stats.c
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include -c -o build/sort.o src/sort.c
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include -c -o build/orig_main.o src/orig_main.c
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include -c -o build/err_string.o src/err_string.c
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include -c -o build/normal.o src/normal.c
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include -c -o build/report.o src/report.c
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include -c -o build/write.o src/write.c
+gcc build/read.o build/free.o build/error.o build/allocate.o build/main.o build/stats.o build/sort.o build/orig_main.o build/err_string.o build/normal.o build/report.o build/write.o -o bin/grades -lm
+gcc -Wall -Werror -Wextra -Wno-variadic-macros -ansi -pedantic -MMD -std=c99 -D_DEFAULT_SOURCE -I include build/read.o build/free.o build/error.o build/allocate.o build/stats.o build/sort.o build/orig_main.o build/err_string.o build/normal.o build/report.o build/write.o tests/grading_tests.c tests/basecode_tests.c tests/test_common.c -lcriterion -lm -o bin/grades_tests
+tests/basecode_tests.c: In function ‘basecode_suite_collate_impl’:
+tests/basecode_tests.c:49:5: error: too few arguments to function ‘writecourse’
+   49 |     writecourse(f, c);
+      |     ^~~~~~~~~~~
+In file included from tests/basecode_tests.c:5:
+include/write.h:14:6: note: declared here
+   14 | void writecourse(FILE *fd, Course *c, int nonames);
+      |      ^~~~~~~~~~~
+make: *** [Makefile:47: bin/grades_tests] Error 1
