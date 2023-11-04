@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdio.h>
+#include <errno.h>
 #include <unistd.h>
 #include <string.h>
 
@@ -40,7 +41,7 @@ extern COMMANDS commands[];
  * The number of arguments is stored in `num_args`. If the number
  * of arguments is 0, `args` will not be allocated.
 */
-int ask_for_input(FILE* stream, char*args[], int* num_args);
+int get_input(FILE* stream, char* args[], int* num_args);
 
 /**
  * Prints the help message.

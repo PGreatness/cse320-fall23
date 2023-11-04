@@ -4,16 +4,17 @@
 #include "deet_func.h"
 #include "free_used.h"
 #include "signaling.h"
+#include "child_processes.h"
+#include "track_children.h"
+#include "debug.h"
 
 int main(int argc, char *argv[]) {
     // TO BE IMPLEMENTED
     // Remember: Do not put any functions other than main() in this file.
-    handle_signal(SIGCHLD, sigchild_handler);
-    // block_signal(SIGINT);
     char c;
-    char *args[MAX_ARG_SIZE];
+    char *args[MAX_ARG_SIZE] = {NULL};
     int num_args;
-    while ((c = ask_for_input(stdin, args, &num_args)) != -1)
+    while ((c = get_input(stdin, args, &num_args)) != -1)
     {
         switch (c)
         {
@@ -21,18 +22,29 @@ int main(int argc, char *argv[]) {
                 print_help();
                 break;
             case CMD_QUIT:
-                exit(EXIT_SUCCESS);
-            case CMD_SHOW:
-                break;
-            case CMD_RUN:
-                break;
-            case CMD_STOP:
-                // look at the args array
-                // args[0] is the process id
-                printf("Stopping process %s\n", args[0]);
-                printf("num_args: %d\n", num_args);
                 // free the args array
                 free_args(args, num_args);
+                // free the children
+                free_children();
+                exit(EXIT_SUCCESS);
+            case CMD_SHOW:
+                // show the process specified
+                // UNSAFE: atoi() is not safe, replace later
+                show_child_process(atoi(args[0]), stdout);
+                break;
+            case CMD_RUN:
+                // look at the args array
+                // args[0] is the command
+                // args[1,...] are the arguments
+                // num_args includes the command
+                debug("Running command %s\n", args[0]);
+                run_child_process(args[0], args, num_args);
+                // free the args array
+                free_args(args, num_args);
+                break;
+            case CMD_STOP:
+                // testing: kill the last child
+                kill_child(get_last_child()->pid);
                 break;
             case CMD_CONT:
                 break;
