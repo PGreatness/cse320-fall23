@@ -1,11 +1,39 @@
 #include "signaling.h"
 #include "track_children.h"
 
+int shutdown = 0;
+
 void handle_sigchild(int sig)
 {
+    // block the signal
+    block_signal(SIGCHLD);
+    if (shutdown)
+    {
+        // unblock_signal(SIGCHLD);
+        child_t* s = sentinel.next;
+        while (s != &sentinel)
+        {
+            if (s->status == PSTATE_DEAD)
+            {
+                s = s->next;
+                continue;
+            }
+            set_child_status(s, PSTATE_KILLED);
+            kill(s->pid, SIGKILL);
+            log_signal(sig);
+            set_child_status(s, PSTATE_DEAD);
+            free_child(s);
+            s = s->next;
+        }
+
+        log_shutdown();
+        exit(EXIT_SUCCESS);
+    }
     int status;
-    pid_t child_pid = waitpid(-1, &status, WNOHANG);
-    log_signal(sig);
+    pid_t child_pid;
+    while ((child_pid = waitpid(-1, &status, WNOHANG)) > 0)
+    {
+        log_signal(sig);
     debug("Signal recieved, is we done? %s, child: %i", WIFEXITED(status) ? "yes" : "no", child_pid);
     if (errno)
         perror("waitpid() failed");
@@ -13,6 +41,7 @@ void handle_sigchild(int sig)
     if (child == NULL)
     {
         debug("child not found");
+        unblock_signal(SIGCHLD);
         return;
     }
     if (WTERMSIG(status) == SIGKILL)
@@ -22,6 +51,8 @@ void handle_sigchild(int sig)
         set_child_status(child, PSTATE_DEAD);
         child_summary(child, stdout);
         free_child(child);
+        child->deetId = -1;
+        unblock_signal(SIGCHLD);
         return;
     }
     if (WIFEXITED(status))
@@ -33,12 +64,14 @@ void handle_sigchild(int sig)
         set_child_status(child, PSTATE_DEAD);
         child_summary(child, stdout);
         free_child(child);
+        unblock_signal(SIGCHLD);
         return;
     }
     if (WIFSTOPPED(status))
     {
         set_child_status(child, PSTATE_STOPPED);
         child_summary(child, stdout);
+        unblock_signal(SIGCHLD);
         return;
     }
     if (WIFCONTINUED(status))
@@ -46,8 +79,39 @@ void handle_sigchild(int sig)
         // child is continued, set it to running
         set_child_status(child, PSTATE_RUNNING);
         child_summary(child, stdout);
+        unblock_signal(SIGCHLD);
         return;
     }
+    }
+}
+
+void handle_sigint(int sig)
+{
+    pid_t child_pid;
+    child_t* s = sentinel.next;
+    while (s != &sentinel)
+    {
+        if (s->status != PSTATE_DEAD)
+            kill_child(s->pid);
+        s = s->next;
+    }
+    while ((child_pid = waitpid(-1, NULL, 0)) > 0)
+    {
+        log_signal(sig);
+        child_t *child = get_child(child_pid);
+        if (child == NULL)
+        {
+            debug("child not found");
+            // return;
+            continue;
+        }
+        set_exit_status(child, SIGINT);
+        set_child_status(child, PSTATE_DEAD);
+        child_summary(child, stdout);
+        free_child(child);
+    }
+    log_shutdown();
+    exit(EXIT_SUCCESS);
 }
 
 void block_signal(int sig)

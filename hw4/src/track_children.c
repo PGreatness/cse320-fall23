@@ -33,7 +33,7 @@ child_t* spawn_child(pid_t pid, int trace, char *args[], int num_args)
     new_child->prev = &sentinel;
     new_child->exit_status = -1;
     new_child->trace = trace;
-    new_child->args = malloc(sizeof(char*) * (num_args + 1));
+    new_child->args = calloc(num_args + 1, sizeof(char*));
     if (new_child->args == NULL)
     {
         debug("malloc of args failed");
@@ -41,7 +41,7 @@ child_t* spawn_child(pid_t pid, int trace, char *args[], int num_args)
     }
     for (int i = 0; i < num_args; i++)
     {
-        new_child->args[i] = malloc(sizeof(char) * (strlen(args[i]) + 1));
+        new_child->args[i] = calloc(strlen(args[i]) + 1, sizeof(char));
         if (new_child->args[i] == NULL)
         {
             debug("malloc of args[%d] failed", i);
@@ -89,7 +89,7 @@ int remove_dead_child(child_t* child)
 pid_t kill_child(pid_t pid)
 {
     child_t *child = get_child(pid);
-    debug("Got here!");
+    debug("Got here with %p!", child);
     if (child == NULL)
     {
         debug("child not found");
@@ -97,9 +97,10 @@ pid_t kill_child(pid_t pid)
     }
     pid_t killed_pid = child->pid;
     set_child_status(child, PSTATE_KILLED);
-    ptrace(PTRACE_KILL, killed_pid, NULL, NULL);
-    child->deetId = -1;
-    // next_deet_id--;
+    warn("Killing child %d", killed_pid);
+    kill(killed_pid, SIGKILL);
+    // ptrace(PTRACE_KILL, killed_pid, NULL, NULL);
+    // wait for the child to die from the sigchld handler
     return killed_pid;
 }
 
@@ -183,6 +184,10 @@ int set_child_status(child_t *child, int status)
         debug("unlocked in set_child_status if\n");
         return -1;
     }
+    info("child is %p", child);
+    info("child->pid: %d", child->pid);
+    info("child->status: %d", child->status);
+    info("status: %d", status);
     log_state_change(child->pid, child->status, status, 0);
     child->status = status;
     // unlock the mutex
@@ -275,6 +280,10 @@ void free_child(child_t* child)
     {
         free(child->args[i]);
     }
+    free(child->args);
+    child_t* prev = child->prev;
+    child_t* next = child->next;
+    prev->next = next;
     free(child);
     next_deet_id--;
     // unlock the mutex

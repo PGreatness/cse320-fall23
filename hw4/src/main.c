@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
     int num_args;
     int deet_id;
     log_startup();
+    handle_signal_using_handler(SIGINT, handle_sigint);
     // block the SIGCHLD signal
     block_signal(SIGCHLD);
     while ((c = get_input(stdin, args, &num_args)) != -1)
@@ -32,8 +33,6 @@ int main(int argc, char *argv[]) {
                 free_args(args, num_args);
                 // free the children
                 free_children();
-                log_shutdown();
-                // exit(EXIT_SUCCESS);
                 break;
             case CMD_SHOW:
                 // show the process specified

@@ -10,11 +10,5 @@ void free_args(char* args[], int size)
 
 void free_children()
 {
-    child_t* child = sentinel.next;
-    while (child != NULL)
-    {
-        child_t* next = child->next;
-        kill_child_process(child->deetId);
-        child = next;
-    }
+    kill_all_child_processes();
 }

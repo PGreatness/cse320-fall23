@@ -21,5 +21,7 @@ int continue_child_process(int deet_id);
 
 int kill_child_process(int deet_id);
 
+void kill_all_child_processes();
+
 
 #endif //HW4_CHILD_PROCESSES_H

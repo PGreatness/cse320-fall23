@@ -73,7 +73,8 @@ int get_input(FILE* stream, char* args[], int* num_args)
         exit(1);
     }
     // flush the buffers
-    log_prompt();
+    if (!shutdown)
+        log_prompt();
     unblock_signal(SIGCHLD);
     fprintf(stdout,"deet> ");
     // read the input

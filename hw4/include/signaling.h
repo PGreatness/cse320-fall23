@@ -7,12 +7,16 @@
 #include <errno.h>
 #include <signal.h>
 
+extern int shutdown;
+
 // Handlers
 /**
  * Signal handler for SIGCHLD
  * @param sig The signal number
  */
 void handle_sigchild(int sig);
+
+void handle_sigint(int sig);
 
 void block_signal(int sig);
 void unblock_signal(int sig);
