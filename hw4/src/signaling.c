@@ -6,31 +6,22 @@ void handle_sigchild(int sig)
     int status;
     pid_t child_pid = waitpid(-1, &status, WNOHANG);
     log_signal(sig);
-    // fprintf(stderr, "child_pid = %d\n", child_pid);
-    debug("Signal recieved, is we done? %s", WIFEXITED(status) ? "yes" : "no");
+    debug("Signal recieved, is we done? %s, child: %i", WIFEXITED(status) ? "yes" : "no", child_pid);
+    if (errno)
+        perror("waitpid() failed");
     child_t *child = get_child(child_pid);
     if (child == NULL)
     {
         debug("child not found");
         return;
     }
-    // printf("child status: %s\n", WIFSTOPPED(status) ? "stopped" : "running");
-    if (WIFSTOPPED(status))
+    if (WTERMSIG(status) == SIGKILL)
     {
-        // child is stopped, continue it
-        // kill(child_pid, SIGSTOP);
-        // fprintf(stderr, "changing child status to stopped in handle_sigchild, old = %s\n", child->status == PSTATE_NONE ? "none" : "running");
-        if (child->status == PSTATE_NONE)
-            set_child_status(child, PSTATE_RUNNING);
-        set_child_status(child, PSTATE_STOPPED);
+        // child is killed, set it to killed
+        set_exit_status(child, SIGKILL);
+        set_child_status(child, PSTATE_DEAD);
         child_summary(child, stdout);
-        return;
-    }
-    if (WIFCONTINUED(status))
-    {
-        // child is continued, set it to running
-        set_child_status(child, PSTATE_RUNNING);
-        child_summary(child, stdout);
+        free_child(child);
         return;
     }
     if (WIFEXITED(status))
@@ -41,13 +32,19 @@ void handle_sigchild(int sig)
         set_exit_status(child, exit_status);
         set_child_status(child, PSTATE_DEAD);
         child_summary(child, stdout);
+        free_child(child);
         return;
     }
-    if (WTERMSIG(status) == SIGKILL)
+    if (WIFSTOPPED(status))
     {
-        // child is killed, set it to killed
-        set_exit_status(child, SIGKILL);
-        set_child_status(child, PSTATE_DEAD);
+        set_child_status(child, PSTATE_STOPPED);
+        child_summary(child, stdout);
+        return;
+    }
+    if (WIFCONTINUED(status))
+    {
+        // child is continued, set it to running
+        set_child_status(child, PSTATE_RUNNING);
         child_summary(child, stdout);
         return;
     }

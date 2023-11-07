@@ -74,6 +74,7 @@ int get_input(FILE* stream, char* args[], int* num_args)
     }
     // flush the buffers
     log_prompt();
+    unblock_signal(SIGCHLD);
     fprintf(stdout,"deet> ");
     // read the input
     int chars_read = getline(&buffer, &size, stream);

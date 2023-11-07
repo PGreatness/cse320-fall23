@@ -21,6 +21,7 @@ typedef struct child {
     char *command;
     char **args;
     struct child *next;
+    struct child *prev;
 } child_t;
 
 extern child_t sentinel;
@@ -92,5 +93,8 @@ void child_summary(child_t* child, FILE *stream);
 void set_exit_status(child_t *child, int status);
 
 void free_child(child_t *child);
+
+int decrement_next();
+int increment_next();
 
 #endif //HW4_TRACK_CHILDREN_H

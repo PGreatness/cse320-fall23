@@ -11,6 +11,7 @@
 
 #include "deet.h"
 #include "debug.h"
+#include "signaling.h"
 #include "commands.h"
 
 #define MAX_LINE 256

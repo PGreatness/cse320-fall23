@@ -17,8 +17,11 @@ int main(int argc, char *argv[]) {
     int num_args;
     int deet_id;
     log_startup();
+    // block the SIGCHLD signal
+    block_signal(SIGCHLD);
     while ((c = get_input(stdin, args, &num_args)) != -1)
     {
+        block_signal(SIGCHLD);
         switch (c)
         {
             case CMD_HELP:
@@ -30,7 +33,8 @@ int main(int argc, char *argv[]) {
                 // free the children
                 free_children();
                 log_shutdown();
-                exit(EXIT_SUCCESS);
+                // exit(EXIT_SUCCESS);
+                break;
             case CMD_SHOW:
                 // show the process specified
                 // UNSAFE: atoi() is not safe, replace later

@@ -3,12 +3,16 @@
 child_t sentinel = {
     .pid = 0,
     .status = PSTATE_NONE,
-    .deetId = -1,
+    .deetId = -2,
     .trace = 0,
     .exit_status = -1,
     .command = NULL,
     .args = NULL,
-    .next = NULL};
+    .next = &sentinel,
+    .prev = &sentinel};
+
+child_t* head = &sentinel;
+child_t* tail = &sentinel;
 
 static pid_t next_deet_id = 0;
 
@@ -23,8 +27,10 @@ child_t* spawn_child(pid_t pid, int trace, char *args[], int num_args)
     }
     new_child->pid = pid;
     new_child->status = PSTATE_NONE;
+    new_child->deetId = -1;
     new_child->deetId = next_deet_id++;
-    new_child->next = NULL;
+    new_child->next = &sentinel;
+    new_child->prev = &sentinel;
     new_child->exit_status = -1;
     new_child->trace = trace;
     new_child->args = malloc(sizeof(char*) * (num_args + 1));
@@ -43,15 +49,18 @@ child_t* spawn_child(pid_t pid, int trace, char *args[], int num_args)
         }
         strncpy(new_child->args[i], args[i], strlen(args[i]) + 1);
     }
-    child_t *last = get_last_child();
-    if (last == NULL)
+    child_t* prev_sent = sentinel.prev;
+    prev_sent->next = new_child;
+    sentinel.prev = new_child;
+    new_child->prev = prev_sent;
+    new_child->next = &sentinel;
+    if (head == &sentinel)
     {
-        sentinel.next = new_child;
+        head = new_child;
     }
-    else
-    {
-        last->next = new_child;
-    }
+    tail = new_child;
+    new_child->status = PSTATE_RUNNING;
+    log_state_change(new_child->pid, PSTATE_NONE, PSTATE_RUNNING, 0);
     return new_child;
 }
 
@@ -89,7 +98,8 @@ pid_t kill_child(pid_t pid)
     pid_t killed_pid = child->pid;
     set_child_status(child, PSTATE_KILLED);
     ptrace(PTRACE_KILL, killed_pid, NULL, NULL);
-    next_deet_id--;
+    child->deetId = -1;
+    // next_deet_id--;
     return killed_pid;
 }
 
@@ -98,7 +108,7 @@ int remove_all_dead_children()
     int count = 0;
     child_t *prev = &sentinel;
     child_t *curr = sentinel.next;
-    while (curr != NULL)
+    while (curr != &sentinel)
     {
         if (curr->status == PSTATE_DEAD)
         {
@@ -125,9 +135,9 @@ child_t* get_child(pid_t pid)
     // lock the mutex
     debug("In getchild\n");
     child_t *curr = sentinel.next;
-    while (curr != NULL)
+    while (curr != &sentinel)
     {
-        if (curr->pid == pid && curr->exit_status == -1)
+        if (curr->pid == pid)
         {
             // unlock the mutex
             return curr;
@@ -184,7 +194,7 @@ child_t* get_child_by_deet_id(pid_t deetId)
 {
     // lock the mutex
     child_t *curr = sentinel.next;
-    while (curr != NULL)
+    while (curr && curr != &sentinel)
     {
         if (curr->deetId == deetId && curr->exit_status == -1)
         {
@@ -199,14 +209,7 @@ child_t* get_child_by_deet_id(pid_t deetId)
 
 child_t* get_last_child()
 {
-    child_t *curr = sentinel.next;
-    child_t *last = NULL;
-    while (curr != NULL)
-    {
-        last = curr;
-        curr = curr->next;
-    }
-    return last;
+    return tail;
 }
 
 void child_summary(child_t* child, FILE* stream)
@@ -267,11 +270,13 @@ void free_child(child_t* child)
         // unlock the mutex
         return;
     }
+    child->deetId = -1;
     for (int i = 0; child->args[i] != NULL; i++)
     {
         free(child->args[i]);
     }
     free(child);
+    next_deet_id--;
     // unlock the mutex
 }
 // Path: src/track_children.h
