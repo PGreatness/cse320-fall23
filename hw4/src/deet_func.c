@@ -73,27 +73,43 @@ int get_input(FILE* stream, char* args[], int* num_args)
         exit(1);
     }
     // flush the buffers
+    log_prompt();
     fprintf(stdout,"deet> ");
     // read the input
     int chars_read = getline(&buffer, &size, stream);
+    if (buffer[0] == '\0')
+    {
+        // treat this as a quit
+        args[0] = 0;
+        *num_args = -1;
+        free(buffer);
+        return -2;
+    }
     if (chars_read == -1)
     {
+        args[0] = 0;
+        *num_args = -1;
         free(buffer);
-        perror("Error: getline() failed");
-        return -1;
+        debug("Error: getline() failed");
+        return -2;
     }
     if (chars_read < 2)
     {
+        args[0] = 0;
+        *num_args = 0;
         free(buffer);
         debug("No input detected.\n");
         return -2;
     }
     if (chars_read > MAX_LINE)
     {
+        args[0] = 0;
+        *num_args = 0;
         free(buffer);
-        fprintf(stderr, "Error: input too long.\n");
+        debug("Error: input too long.\n");
         return -1;
     }
+    log_input(buffer);
     // compare the buffer with the commands available
     // if the command is valid, call the corresponding function
     // if the command is invalid, print an error message
@@ -130,5 +146,17 @@ int get_input(FILE* stream, char* args[], int* num_args)
             return commands[i].command;
         }
     }
+    // copy the command into args[0]
+    args[0] = (char*)malloc(sizeof(char) * (strlen(buffer_token) + 1));
+    if (args[0] == NULL)
+    {
+        fprintf(stderr, "Error: initialization of args[0] in input failed.\n");
+        exit(1);
+    }
+    strncpy(args[0], buffer_token, strlen(buffer_token) + 1);
+    // make num_args = 1
+    *num_args = 1;
+    free(buffer);
+    free(tmp_buffer);
     return -2;
 }

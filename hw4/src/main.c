@@ -7,6 +7,7 @@
 #include "child_processes.h"
 #include "track_children.h"
 #include "debug.h"
+#include "util.h"
 
 int main(int argc, char *argv[]) {
     // TO BE IMPLEMENTED
@@ -14,6 +15,8 @@ int main(int argc, char *argv[]) {
     char c;
     char *args[MAX_ARG_SIZE] = {NULL};
     int num_args;
+    int deet_id;
+    log_startup();
     while ((c = get_input(stdin, args, &num_args)) != -1)
     {
         switch (c)
@@ -26,11 +29,17 @@ int main(int argc, char *argv[]) {
                 free_args(args, num_args);
                 // free the children
                 free_children();
+                log_shutdown();
                 exit(EXIT_SUCCESS);
             case CMD_SHOW:
                 // show the process specified
                 // UNSAFE: atoi() is not safe, replace later
-                show_child_process(atoi(args[0]), stdout);
+                if (str_to_int(args[0], &deet_id) == NULL)
+                {
+                    fprintf(stderr, "Error: invalid deet_id of %s\n", args[0]);
+                    break;
+                }
+                show_child_process(deet_id, stdout);
                 break;
             case CMD_RUN:
                 // look at the args array
@@ -47,12 +56,24 @@ int main(int argc, char *argv[]) {
                 kill_child(get_last_child()->pid);
                 break;
             case CMD_CONT:
+                if (str_to_int(args[0], &deet_id) == NULL)
+                {
+                    fprintf(stderr, "Error: invalid deet_id of %s\n", args[0]);
+                    break;
+                }
+                continue_child_process(deet_id);
                 break;
             case CMD_RELEASE:
                 break;
             case CMD_WAIT:
                 break;
             case CMD_KILL:
+                if (str_to_int(args[0], &deet_id) == NULL)
+                {
+                    fprintf(stderr, "Error: invalid deet_id of %s\n", args[0]);
+                    break;
+                }
+                kill_child_process(deet_id);
                 break;
             case CMD_PEEK:
                 break;
@@ -63,7 +84,18 @@ int main(int argc, char *argv[]) {
 
             default:
                 // print out a ?
+                log_error(args[0] != 0 ? args[0] : "");
                 fprintf(stdout, "?\n");
+                // free the args array
+                free_args(args, num_args);
+                if (num_args == -1)
+                {
+                    // an empty input was given, quit the program
+                    // free the children
+                    free_children();
+                    log_shutdown();
+                    exit(EXIT_SUCCESS);
+                }
                 break;
         }
     }

@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/ptrace.h>
+#include <pthread.h>
 
 #include "deet.h"
 #include "debug.h"
@@ -16,12 +18,15 @@ typedef struct child {
     pid_t deetId;
     int status;
     int trace;
+    int exit_status;
     char *command;
     char **args;
     struct child *next;
 } child_t;
 
 extern child_t sentinel;
+
+extern pthread_mutex_t child_lock;
 
 /**
  * @brief Spawn a child process.
@@ -84,5 +89,11 @@ child_t *get_child_by_deet_id(pid_t deetId);
  * @return A pointer to the `child_t` struct for the last child process.
 */
 child_t *get_last_child();
+
+void child_summary(child_t* child, FILE *stream);
+
+void set_exit_status(child_t *child, int status);
+
+void free_child(child_t *child);
 
 #endif //HW4_TRACK_CHILDREN_H

@@ -17,7 +17,7 @@ int run_child_process(char* command, char* args[], int num_args)
     {
         // close stdout and redirect to stderr
         dup2(STDERR_FILENO, STDOUT_FILENO);
-        fprintf(stdout, "I am child with pid %d", getpid());
+        // fprintf(stdout, "I am child with pid %d", getpid());
         // start tracing the child process
         ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         // execute the command with execvp()
@@ -29,56 +29,75 @@ int run_child_process(char* command, char* args[], int num_args)
     }
     handle_signal_using_handler(SIGCHLD, handle_sigchild);
     // add the child to the list of children
-    set_child_status(spawn_child(pid, 1, args, num_args), PSTATE_RUNNING);
+    child_t *child = spawn_child(pid, 1, args, num_args);
+    set_child_status(child, PSTATE_RUNNING);
+    child_summary(child, stdout);
     // we are in the parent process
     return pid;
 }
 
-void show_child_process(pid_t pid, FILE* stream)
+void show_child_process(pid_t deet_id, FILE* stream)
 {
     // get the child process
-    child_t *child = get_child(pid);
+    child_t *child = get_child_by_deet_id(deet_id);
 
 
     // check if the child exists
     if (child == NULL)
     {
-        fprintf(stream, "Child %d not found\n", pid);
+        debug("Child with deet_id %d not found\n", deet_id);
+        return;
     }
 
-    // print out the child's information
-    char *status;
-    switch (child->status)
+    child_summary(child, stream);
+}
+
+int continue_child_process(int deet_id)
+{
+    // get the child process
+    child_t *child = get_child_by_deet_id(deet_id);
+
+    // check if the child exists
+    if (child == NULL)
     {
-        case PSTATE_NONE:
-            status = "none";
-            break;
-        case PSTATE_RUNNING:
-            status = "running";
-            break;
-        case PSTATE_STOPPING:
-            status = "stopping";
-            break;
-        case PSTATE_STOPPED:
-            status = "stopped";
-            break;
-        case PSTATE_CONTINUING:
-            status = "continuing";
-            break;
-        case PSTATE_KILLED:
-            status = "killed";
-            break;
-        case PSTATE_DEAD:
-            status = "dead";
-            break;
-        default:
-            status = "unknown";
-            break;
+        debug("Child with deet_id %d not found\n", deet_id);
+        return -1;
     }
-    fprintf(stream, "%d\t%d\t%c\t%s\t", child->deetId, child->pid, child->trace ? 'T' : 'U', status);
-    for (int i = 0; child->args[i] != NULL; i++)
+
+    // check if the child is stopped
+    if (child->status != PSTATE_STOPPED)
     {
-        fprintf(stream, "%s ", child->args[i]);
+        debug("Child with deet_id %d is not stopped\n", deet_id);
+        return -1;
     }
-    fprintf(stream, "\n");
+
+    // continue the child process
+    ptrace(PTRACE_CONT, child->pid, NULL, NULL);
+    set_child_status(child, PSTATE_RUNNING);
+    child_summary(child, stdout);
+    return 0;
+}
+
+int kill_child_process(int deet_id)
+{
+    // get the child process
+    child_t *child = get_child_by_deet_id(deet_id);
+
+    // check if the child exists
+    if (child == NULL)
+    {
+        debug("Child with deet_id %d not found\n", deet_id);
+        return -1;
+    }
+
+    // check if the child is stopped
+    if (child->status != PSTATE_STOPPED)
+    {
+        debug("Child with deet_id %d is not stopped\n", deet_id);
+        return -1;
+    }
+
+    // kill the child process
+    kill_child(child->pid);
+    return 0;
 }

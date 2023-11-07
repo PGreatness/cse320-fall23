@@ -14,7 +14,8 @@ void free_children()
     while (curr != NULL)
     {
         child_t *next = curr->next;
-        free(curr);
+        kill_child(curr->pid);
+        free_child(curr);
         curr = next;
     }
 }

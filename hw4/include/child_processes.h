@@ -17,5 +17,9 @@ int run_child_process(char* command, char* args[], int num_args);
 
 void show_child_process(pid_t pid, FILE* stream);
 
+int continue_child_process(int deet_id);
+
+int kill_child_process(int deet_id);
+
 
 #endif //HW4_CHILD_PROCESSES_H
