@@ -30,7 +30,6 @@ int run_child_process(char* command, char* args[], int num_args)
     handle_signal_using_handler(SIGCHLD, handle_sigchild);
     // add the child to the list of children
     child_t *child = spawn_child(pid, 1, args, num_args);
-    set_child_status(child, PSTATE_RUNNING);
     child_summary(child, stdout);
     // we are in the parent process
     return pid;

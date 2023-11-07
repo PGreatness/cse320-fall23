@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/ptrace.h>
-#include <pthread.h>
 
 #include "deet.h"
 #include "debug.h"
@@ -25,8 +24,6 @@ typedef struct child {
 } child_t;
 
 extern child_t sentinel;
-
-extern pthread_mutex_t child_lock;
 
 /**
  * @brief Spawn a child process.

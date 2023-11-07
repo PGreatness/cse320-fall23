@@ -12,7 +12,6 @@ child_t sentinel = {
 
 static pid_t next_deet_id = 0;
 
-pthread_mutex_t child_lock = PTHREAD_MUTEX_INITIALIZER;
 
 child_t* spawn_child(pid_t pid, int trace, char *args[], int num_args)
 {
@@ -125,33 +124,17 @@ child_t* get_child(pid_t pid)
 {
     // lock the mutex
     debug("In getchild\n");
-    if (pthread_mutex_lock(&child_lock) != 0)
-    {
-        debug("pthread_mutex_lock failed");
-        exit(1);
-    }
-    debug("Got lock\n");
     child_t *curr = sentinel.next;
     while (curr != NULL)
     {
         if (curr->pid == pid && curr->exit_status == -1)
         {
             // unlock the mutex
-            if (pthread_mutex_unlock(&child_lock) != 0)
-            {
-                debug("pthread_mutex_unlock failed");
-                exit(1);
-            }
             return curr;
         }
         curr = curr->next;
     }
     // unlock the mutex
-    if (pthread_mutex_unlock(&child_lock) != 0)
-    {
-        debug("pthread_mutex_unlock failed");
-        exit(1);
-    }
     return NULL;
 }
 
@@ -181,22 +164,12 @@ int set_child_status_by_pid(pid_t pid, int status)
 int set_child_status(child_t *child, int status)
 {
     // lock the mutex
-    // fprintf(stderr,"In set_child_status\n");
-    if (pthread_mutex_lock(&child_lock) != 0)
-    {
-        debug("pthread_mutex_lock failed");
-        exit(1);
-    }
     debug("locked in set_child_status\n");
+    // log_error("attempting to enter sem_wait");
     if (child == NULL)
     {
         debug("child is null");
         // unlock the mutex
-        if (pthread_mutex_unlock(&child_lock) != 0)
-        {
-            debug("pthread_mutex_unlock failed");
-            exit(1);
-        }
         debug("unlocked in set_child_status if\n");
         return -1;
     }
@@ -204,43 +177,23 @@ int set_child_status(child_t *child, int status)
     child->status = status;
     // unlock the mutex
     debug("unlocked in set_child_status\n");
-    if (pthread_mutex_unlock(&child_lock) != 0)
-    {
-        debug("pthread_mutex_unlock failed");
-        exit(1);
-    }
     return 0;
 }
 
 child_t* get_child_by_deet_id(pid_t deetId)
 {
     // lock the mutex
-    if (pthread_mutex_lock(&child_lock) != 0)
-    {
-        debug("pthread_mutex_lock failed");
-        exit(1);
-    }
     child_t *curr = sentinel.next;
     while (curr != NULL)
     {
         if (curr->deetId == deetId && curr->exit_status == -1)
         {
             // unlock the mutex
-            if (pthread_mutex_unlock(&child_lock) != 0)
-            {
-                debug("pthread_mutex_unlock failed");
-                exit(1);
-            }
             return curr;
         }
         curr = curr->next;
     }
     // unlock the mutex
-    if (pthread_mutex_unlock(&child_lock) != 0)
-    {
-        debug("pthread_mutex_unlock failed");
-        exit(1);
-    }
     return NULL;
 }
 
@@ -308,20 +261,10 @@ void set_exit_status(child_t *child, int status)
 void free_child(child_t* child)
 {
     // lock the mutex
-    if (pthread_mutex_lock(&child_lock) != 0)
-    {
-        debug("pthread_mutex_lock failed");
-        exit(1);
-    }
     if (child == NULL)
     {
         debug("child is null");
         // unlock the mutex
-        if (pthread_mutex_unlock(&child_lock) != 0)
-        {
-            debug("pthread_mutex_unlock failed");
-            exit(1);
-        }
         return;
     }
     for (int i = 0; child->args[i] != NULL; i++)
@@ -330,10 +273,5 @@ void free_child(child_t* child)
     }
     free(child);
     // unlock the mutex
-    if (pthread_mutex_unlock(&child_lock) != 0)
-    {
-        debug("pthread_mutex_unlock failed");
-        exit(1);
-    }
 }
 // Path: src/track_children.h

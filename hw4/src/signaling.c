@@ -20,6 +20,8 @@ void handle_sigchild(int sig)
         // child is stopped, continue it
         // kill(child_pid, SIGSTOP);
         // fprintf(stderr, "changing child status to stopped in handle_sigchild, old = %s\n", child->status == PSTATE_NONE ? "none" : "running");
+        if (child->status == PSTATE_NONE)
+            set_child_status(child, PSTATE_RUNNING);
         set_child_status(child, PSTATE_STOPPED);
         child_summary(child, stdout);
         return;
