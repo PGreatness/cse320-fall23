@@ -13,6 +13,15 @@ int main(int argc, char *argv[]) {
     // TO BE IMPLEMENTED
     // Remember: Do not put any functions other than main() in this file.
     char c;
+    c = getopt(argc, argv, "p");
+    switch (c)
+    {
+        case 'p':
+            suppress = 1;
+            break;
+        default:
+            break;
+    }
     char *args[MAX_ARG_SIZE] = {NULL};
     int num_args;
     int deet_id;
@@ -39,7 +48,7 @@ int main(int argc, char *argv[]) {
                 // UNSAFE: atoi() is not safe, replace later
                 if (str_to_int(args[0], &deet_id) == NULL)
                 {
-                    fprintf(stderr, "Error: invalid deet_id of %s\n", args[0]);
+                    debug(stderr, "Error: invalid deet_id of %s\n", args[0]);
                     break;
                 }
                 show_child_process(deet_id, stdout);
@@ -61,7 +70,7 @@ int main(int argc, char *argv[]) {
             case CMD_CONT:
                 if (str_to_int(args[0], &deet_id) == NULL)
                 {
-                    fprintf(stderr, "Error: invalid deet_id of %s\n", args[0]);
+                    debug(stderr, "Error: invalid deet_id of %s\n", args[0]);
                     break;
                 }
                 continue_child_process(deet_id);
@@ -73,7 +82,7 @@ int main(int argc, char *argv[]) {
             case CMD_KILL:
                 if (str_to_int(args[0], &deet_id) == NULL)
                 {
-                    fprintf(stderr, "Error: invalid deet_id of %s\n", args[0]);
+                    debug(stderr, "Error: invalid deet_id of %s\n", args[0]);
                     break;
                 }
                 kill_child_process(deet_id);
@@ -88,7 +97,7 @@ int main(int argc, char *argv[]) {
             default:
                 // print out a ?
                 log_error(args[0] != 0 ? args[0] : "");
-                fprintf(stdout, "?\n");
+                print_string(STDOUT_FILENO, "?\n");
                 // free the args array
                 free_args(args, num_args);
                 if (num_args == -1)

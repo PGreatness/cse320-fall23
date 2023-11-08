@@ -49,7 +49,7 @@ void handle_sigchild(int sig)
         // child is killed, set it to killed
         set_exit_status(child, SIGKILL);
         set_child_status(child, PSTATE_DEAD);
-        child_summary(child, stdout);
+        child_summary(child, STDOUT_FILENO);
         free_child(child);
         child->deetId = -1;
         unblock_signal(SIGCHLD);
@@ -62,7 +62,7 @@ void handle_sigchild(int sig)
         int exit_status = WEXITSTATUS(status);
         set_exit_status(child, exit_status);
         set_child_status(child, PSTATE_DEAD);
-        child_summary(child, stdout);
+        child_summary(child, STDOUT_FILENO);
         free_child(child);
         unblock_signal(SIGCHLD);
         return;
@@ -70,7 +70,7 @@ void handle_sigchild(int sig)
     if (WIFSTOPPED(status))
     {
         set_child_status(child, PSTATE_STOPPED);
-        child_summary(child, stdout);
+        child_summary(child, STDOUT_FILENO);
         unblock_signal(SIGCHLD);
         return;
     }
@@ -78,7 +78,7 @@ void handle_sigchild(int sig)
     {
         // child is continued, set it to running
         set_child_status(child, PSTATE_RUNNING);
-        child_summary(child, stdout);
+        child_summary(child, STDOUT_FILENO);
         unblock_signal(SIGCHLD);
         return;
     }
@@ -107,7 +107,7 @@ void handle_sigint(int sig)
         }
         set_exit_status(child, SIGINT);
         set_child_status(child, PSTATE_DEAD);
-        child_summary(child, stdout);
+        child_summary(child, STDOUT_FILENO);
         free_child(child);
     }
     log_shutdown();

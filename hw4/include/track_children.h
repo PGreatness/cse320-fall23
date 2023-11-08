@@ -11,6 +11,7 @@
 
 #include "deet.h"
 #include "debug.h"
+#include "util.h"
 
 typedef struct child {
     pid_t pid;
@@ -88,7 +89,7 @@ child_t *get_child_by_deet_id(pid_t deetId);
 */
 child_t *get_last_child();
 
-void child_summary(child_t* child, FILE *stream);
+void child_summary(child_t* child, int filenum);
 
 void set_exit_status(child_t *child, int status);
 

@@ -17,7 +17,6 @@ int run_child_process(char* command, char* args[], int num_args)
     {
         // close stdout and redirect to stderr
         dup2(STDERR_FILENO, STDOUT_FILENO);
-        // fprintf(stdout, "I am child with pid %d", getpid());
         // start tracing the child process
         ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         // execute the command with execvp()
@@ -30,7 +29,7 @@ int run_child_process(char* command, char* args[], int num_args)
     handle_signal_using_handler(SIGCHLD, handle_sigchild);
     // add the child to the list of children
     child_t *child = spawn_child(pid, 1, args, num_args);
-    child_summary(child, stdout);
+    child_summary(child, STDOUT_FILENO);
     // we are in the parent process
     return pid;
 }
@@ -48,7 +47,8 @@ void show_child_process(pid_t deet_id, FILE* stream)
         return;
     }
 
-    child_summary(child, stream);
+    // TODO: update
+    child_summary(child, STDOUT_FILENO);
 }
 
 int continue_child_process(int deet_id)
@@ -73,7 +73,7 @@ int continue_child_process(int deet_id)
     // continue the child process
     ptrace(PTRACE_CONT, child->pid, NULL, NULL);
     set_child_status(child, PSTATE_RUNNING);
-    child_summary(child, stdout);
+    child_summary(child, STDOUT_FILENO);
     return 0;
 }
 

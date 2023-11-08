@@ -1,5 +1,7 @@
 #include "deet_func.h"
 
+int suppress = 0;
+
 int count_and_add_args(char* buffer, char* args[], int* num_args)
 {
     char* token = strtok(buffer, " ");
@@ -13,7 +15,7 @@ int count_and_add_args(char* buffer, char* args[], int* num_args)
         args[i] = (char*)malloc(sizeof(char) * size);
         if (args[i] == NULL)
         {
-            fprintf(stderr, "Error: initialization of args[%d] in count_and_add_args() failed.\n", i);
+            debug(stderr, "Error: initialization of args[%d] in count_and_add_args() failed.\n", i);
             exit(1);
         }
         strncpy(args[i], token, size);
@@ -32,34 +34,34 @@ int count_and_add_args(char* buffer, char* args[], int* num_args)
 
 void print_help()
 {
-    fprintf(stdout, "Available commands:\n");
+    print_string(STDOUT_FILENO, "Available commands:\n");
     for (int i = 0; i < NUM_CMDS; i++)
     {
-        char* arg_range = (char*)malloc(sizeof(char) * 20);
-        if (arg_range == NULL)
-        {
-            fprintf(stderr, "Error: initialization of arg_range in print_help() failed.\n");
-            exit(1);
-        }
+        print_string(STDOUT_FILENO, commands[i].name);
+        print_string(STDOUT_FILENO, " (");
         if (commands[i].min_args == commands[i].max_args)
         {
-            sprintf(arg_range, "%d", commands[i].min_args);
+            print_int(STDOUT_FILENO, commands[i].min_args);
         }
         else if (commands[i].max_args == -1)
         {
-            sprintf(arg_range, ">=%d", commands[i].min_args);
+            print_string(STDOUT_FILENO, ">=");
+            print_int(STDOUT_FILENO, commands[i].min_args);
         }
         else if (commands[i].min_args == -1)
         {
-            sprintf(arg_range, "<=%d", commands[i].max_args);
+            print_string(STDOUT_FILENO, "<=");
+            print_int(STDOUT_FILENO, commands[i].max_args);
         }
         else
         {
-            sprintf(arg_range, "%d-%d", commands[i].min_args, commands[i].max_args);
+            print_int(STDOUT_FILENO, commands[i].min_args);
+            print_string(STDOUT_FILENO, "-");
+            print_int(STDOUT_FILENO, commands[i].max_args);
         }
-
-        fprintf(stdout, "%s (%s args) -- %s\n", commands[i].name, arg_range, commands[i].desc);
-        free(arg_range);
+        print_string(STDOUT_FILENO, " args) -- ");
+        print_string(STDOUT_FILENO, commands[i].desc);
+        print_string(STDOUT_FILENO, "\n");
     }
 }
 
@@ -69,14 +71,15 @@ int get_input(FILE* stream, char* args[], int* num_args)
     char* buffer = (char*)malloc(size);
     if (buffer == NULL)
     {
-        fprintf(stderr, "Error: initialization of buffer in input failed.\n");
+        debug(stderr, "Error: initialization of buffer in input failed.\n");
         exit(1);
     }
     // flush the buffers
     if (!shutdown)
         log_prompt();
     unblock_signal(SIGCHLD);
-    fprintf(stdout,"deet> ");
+    if (!suppress)
+        print_string(STDOUT_FILENO, "deet> ");
     // read the input
     int chars_read = getline(&buffer, &size, stream);
     if (buffer[0] == '\0')
@@ -119,7 +122,7 @@ int get_input(FILE* stream, char* args[], int* num_args)
     char* tmp_buffer = (char*)malloc(sizeof(char) * chars_read);
     if (tmp_buffer == NULL)
     {
-        fprintf(stderr, "Error: initialization of tmp_buffer in input failed.\n");
+        debug(stderr, "Error: initialization of tmp_buffer in input failed.\n");
         exit(1);
     }
     strncpy(tmp_buffer, buffer, chars_read);
@@ -152,7 +155,7 @@ int get_input(FILE* stream, char* args[], int* num_args)
     args[0] = (char*)malloc(sizeof(char) * (strlen(buffer_token) + 1));
     if (args[0] == NULL)
     {
-        fprintf(stderr, "Error: initialization of args[0] in input failed.\n");
+        debug(stderr, "Error: initialization of args[0] in input failed.\n");
         exit(1);
     }
     strncpy(args[0], buffer_token, strlen(buffer_token) + 1);

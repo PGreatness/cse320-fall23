@@ -217,7 +217,7 @@ child_t* get_last_child()
     return tail;
 }
 
-void child_summary(child_t* child, FILE* stream)
+void child_summary(child_t* child, int filenum)
 {
     char *status;
     switch (child->status)
@@ -247,13 +247,29 @@ void child_summary(child_t* child, FILE* stream)
             status = "unknown";
             break;
     }
-    fprintf(stream, "%d\t%d\t%c\t%s\t", child->deetId, child->pid, child->trace ? 'T' : 'U', status);
-    child->exit_status == -1 ? fprintf(stream, "\t") : fprintf(stream, "0x%d\t", child->exit_status);
+    print_int(filenum, child->deetId);
+    print_string(filenum, " \t");
+    print_int(filenum, child->pid);
+    print_string(filenum, " \t");
+    print_string(filenum, child->trace ? "T" : "U");
+    print_string(filenum, " \t");
+    print_string(filenum, status);
+    print_string(filenum, " \t");
+    if (child->exit_status == -1)
+    {
+        print_string(filenum, " \t");
+    }
+    else
+    {
+        print_int(filenum, child->exit_status);
+        print_string(filenum, " \t");
+    }
     for (int i = 0; child->args[i] != NULL; i++)
     {
-        fprintf(stream, "%s ", child->args[i]);
+        print_string(filenum, child->args[i]);
+        print_string(filenum, " ");
     }
-    fprintf(stream, "\n");
+    print_string(filenum, "\n");
 }
 
 void set_exit_status(child_t *child, int status)

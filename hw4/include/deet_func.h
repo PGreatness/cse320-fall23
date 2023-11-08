@@ -13,6 +13,7 @@
 #include "debug.h"
 #include "signaling.h"
 #include "commands.h"
+#include "util.h"
 
 #define MAX_LINE 256
 #define MAX_ARG_SIZE 64
@@ -27,6 +28,7 @@ typedef struct cmds
 } COMMANDS;
 
 extern COMMANDS commands[];
+extern int suppress;
 
 // Function prototypes
 /**

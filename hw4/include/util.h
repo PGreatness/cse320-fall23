@@ -4,8 +4,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
 #include "deet.h"
 
 int* str_to_int(char *str, int *num);
+
+int print_string(int fileno, char *str);
+
+int print_int(int fileno, int var);
 
 #endif //HW4_UTIL_H
