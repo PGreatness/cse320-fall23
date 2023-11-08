@@ -45,13 +45,17 @@ int main(int argc, char *argv[]) {
                 break;
             case CMD_SHOW:
                 // show the process specified
-                // UNSAFE: atoi() is not safe, replace later
-                if (str_to_int(args[0], &deet_id) == NULL)
+                if (num_args == 0)
                 {
-                    debug(stderr, "Error: invalid deet_id of %s\n", args[0]);
+                    show_all_child_processes(STDOUT_FILENO);
                     break;
                 }
-                show_child_process(deet_id, stdout);
+                if (str_to_int(args[0], &deet_id) == NULL)
+                {
+                    debug("Error: invalid deet_id of %s\n", args[0]);
+                    break;
+                }
+                show_child_process(deet_id, STDOUT_FILENO);
                 break;
             case CMD_RUN:
                 // look at the args array
@@ -70,10 +74,10 @@ int main(int argc, char *argv[]) {
             case CMD_CONT:
                 if (str_to_int(args[0], &deet_id) == NULL)
                 {
-                    debug(stderr, "Error: invalid deet_id of %s\n", args[0]);
+                    debug("Error: invalid deet_id of %s\n", args[0]);
                     break;
                 }
-                continue_child_process(deet_id);
+                continue_child_process(deet_id, STDOUT_FILENO);
                 break;
             case CMD_RELEASE:
                 break;
@@ -82,7 +86,7 @@ int main(int argc, char *argv[]) {
             case CMD_KILL:
                 if (str_to_int(args[0], &deet_id) == NULL)
                 {
-                    debug(stderr, "Error: invalid deet_id of %s\n", args[0]);
+                    debug("Error: invalid deet_id of %s\n", args[0]);
                     break;
                 }
                 kill_child_process(deet_id);
@@ -105,8 +109,6 @@ int main(int argc, char *argv[]) {
                     // an empty input was given, quit the program
                     // free the children
                     free_children();
-                    log_shutdown();
-                    exit(EXIT_SUCCESS);
                 }
                 break;
         }

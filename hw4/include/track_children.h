@@ -21,6 +21,7 @@ typedef struct child {
     int exit_status;
     char *command;
     char **args;
+    int argc;
     struct child *next;
     struct child *prev;
 } child_t;
@@ -95,7 +96,8 @@ void set_exit_status(child_t *child, int status);
 
 void free_child(child_t *child);
 
-int decrement_next();
-int increment_next();
+int decrement_next_deet_id();
+int increment_next_deet_id();
+int get_next_deet_id();
 
 #endif //HW4_TRACK_CHILDREN_H

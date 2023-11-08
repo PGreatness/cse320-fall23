@@ -15,9 +15,11 @@
 // Function prototypes
 int run_child_process(char* command, char* args[], int num_args);
 
-void show_child_process(pid_t pid, FILE* stream);
+void show_child_process(pid_t pid, int filenum);
 
-int continue_child_process(int deet_id);
+void show_all_child_processes(int filenum);
+
+int continue_child_process(int deet_id, int filenum);
 
 int kill_child_process(int deet_id);
 

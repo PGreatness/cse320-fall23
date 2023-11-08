@@ -34,7 +34,7 @@ int run_child_process(char* command, char* args[], int num_args)
     return pid;
 }
 
-void show_child_process(pid_t deet_id, FILE* stream)
+void show_child_process(pid_t deet_id, int filenum)
 {
     // get the child process
     child_t *child = get_child_by_deet_id(deet_id);
@@ -47,11 +47,24 @@ void show_child_process(pid_t deet_id, FILE* stream)
         return;
     }
 
-    // TODO: update
-    child_summary(child, STDOUT_FILENO);
+    child_summary(child, filenum);
 }
 
-int continue_child_process(int deet_id)
+void show_all_child_processes(int filenum)
+{
+    // get the first child
+    child_t *child = sentinel.next;
+
+    // iterate over all children
+    while (child != &sentinel)
+    {
+        child_summary(child, filenum);
+        child = child->next;
+    }
+
+}
+
+int continue_child_process(int deet_id, int filenum)
 {
     // get the child process
     child_t *child = get_child_by_deet_id(deet_id);
@@ -73,7 +86,7 @@ int continue_child_process(int deet_id)
     // continue the child process
     ptrace(PTRACE_CONT, child->pid, NULL, NULL);
     set_child_status(child, PSTATE_RUNNING);
-    child_summary(child, STDOUT_FILENO);
+    child_summary(child, filenum);
     return 0;
 }
 

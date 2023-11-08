@@ -8,6 +8,7 @@ child_t sentinel = {
     .exit_status = -1,
     .command = NULL,
     .args = NULL,
+    .argc = 0,
     .next = &sentinel,
     .prev = &sentinel};
 
@@ -16,6 +17,56 @@ child_t* tail = &sentinel;
 
 static pid_t next_deet_id = 0;
 
+int find_next_deet_id()
+{
+    child_t* child = sentinel.next;
+    while (child != &sentinel)
+    {
+        if (child->status == PSTATE_DEAD)
+        {
+            int deetId = child->deetId;
+            free_child(child);
+            return deetId;
+        }
+        child = child->next;
+    }
+    int deetId = next_deet_id;
+    next_deet_id++;
+    return deetId;
+}
+
+void connect_child(child_t* child)
+{
+    int child_id = child->deetId;
+    child_t* curr = sentinel.next;
+    while (curr != &sentinel)
+    {
+        if (curr->deetId < child_id)
+        {
+            if (curr->next == &sentinel)
+            {
+                curr->next = child;
+                child->prev = curr;
+                child->next = &sentinel;
+                sentinel.prev = child;
+                return;
+            }
+            if (curr->next->deetId > child_id)
+            {
+                child->next = curr->next;
+                child->prev = curr;
+                curr->next->prev = child;
+                curr->next = child;
+                return;
+            }
+        }
+        curr = curr->next;
+    }
+    sentinel.next = child;
+    child->prev = &sentinel;
+    child->next = &sentinel;
+    sentinel.prev = child;
+}
 
 child_t* spawn_child(pid_t pid, int trace, char *args[], int num_args)
 {
@@ -27,10 +78,8 @@ child_t* spawn_child(pid_t pid, int trace, char *args[], int num_args)
     }
     new_child->pid = pid;
     new_child->status = PSTATE_NONE;
-    new_child->deetId = -1;
-    new_child->deetId = next_deet_id++;
-    new_child->next = &sentinel;
-    new_child->prev = &sentinel;
+    new_child->deetId = find_next_deet_id();
+    connect_child(new_child);
     new_child->exit_status = -1;
     new_child->trace = trace;
     new_child->args = calloc(num_args + 1, sizeof(char*));
@@ -49,11 +98,7 @@ child_t* spawn_child(pid_t pid, int trace, char *args[], int num_args)
         }
         strncpy(new_child->args[i], args[i], strlen(args[i]) + 1);
     }
-    child_t* prev_sent = sentinel.prev;
-    prev_sent->next = new_child;
-    sentinel.prev = new_child;
-    new_child->prev = prev_sent;
-    new_child->next = &sentinel;
+    new_child->argc = num_args;
     if (head == &sentinel)
     {
         head = new_child;
@@ -261,6 +306,7 @@ void child_summary(child_t* child, int filenum)
     }
     else
     {
+        print_string(filenum, "0x");
         print_int(filenum, child->exit_status);
         print_string(filenum, " \t");
     }
@@ -292,7 +338,7 @@ void free_child(child_t* child)
         return;
     }
     child->deetId = -1;
-    for (int i = 0; child->args[i] != NULL; i++)
+    for (int i = 0; i < child->argc; i++)
     {
         free(child->args[i]);
     }
@@ -300,8 +346,26 @@ void free_child(child_t* child)
     child_t* prev = child->prev;
     child_t* next = child->next;
     prev->next = next;
+    next->prev = prev;
     free(child);
-    next_deet_id--;
+    // next_deet_id--;
     // unlock the mutex
+}
+
+int decrement_next_deet_id()
+{
+    next_deet_id--;
+    return next_deet_id;
+}
+
+int increment_next_deet_id()
+{
+    next_deet_id++;
+    return next_deet_id;
+}
+
+int get_next_deet_id()
+{
+    return next_deet_id;
 }
 // Path: src/track_children.h

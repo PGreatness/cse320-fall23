@@ -15,7 +15,7 @@ int count_and_add_args(char* buffer, char* args[], int* num_args)
         args[i] = (char*)malloc(sizeof(char) * size);
         if (args[i] == NULL)
         {
-            debug(stderr, "Error: initialization of args[%d] in count_and_add_args() failed.\n", i);
+            debug("Error: initialization of args[%d] in count_and_add_args() failed.\n", i);
             exit(1);
         }
         strncpy(args[i], token, size);
@@ -34,34 +34,35 @@ int count_and_add_args(char* buffer, char* args[], int* num_args)
 
 void print_help()
 {
-    print_string(STDOUT_FILENO, "Available commands:\n");
+    int file = STDOUT_FILENO;
+    print_string(file, "Available commands:\n");
     for (int i = 0; i < NUM_CMDS; i++)
     {
-        print_string(STDOUT_FILENO, commands[i].name);
-        print_string(STDOUT_FILENO, " (");
+        print_string(file, commands[i].name);
+        print_string(file, " (");
         if (commands[i].min_args == commands[i].max_args)
         {
-            print_int(STDOUT_FILENO, commands[i].min_args);
+            print_int(file, commands[i].min_args);
         }
         else if (commands[i].max_args == -1)
         {
-            print_string(STDOUT_FILENO, ">=");
-            print_int(STDOUT_FILENO, commands[i].min_args);
+            print_string(file, ">=");
+            print_int(file, commands[i].min_args);
         }
         else if (commands[i].min_args == -1)
         {
-            print_string(STDOUT_FILENO, "<=");
-            print_int(STDOUT_FILENO, commands[i].max_args);
+            print_string(file, "<=");
+            print_int(file, commands[i].max_args);
         }
         else
         {
-            print_int(STDOUT_FILENO, commands[i].min_args);
-            print_string(STDOUT_FILENO, "-");
-            print_int(STDOUT_FILENO, commands[i].max_args);
+            print_int(file, commands[i].min_args);
+            print_string(file, "-");
+            print_int(file, commands[i].max_args);
         }
-        print_string(STDOUT_FILENO, " args) -- ");
-        print_string(STDOUT_FILENO, commands[i].desc);
-        print_string(STDOUT_FILENO, "\n");
+        print_string(file, " args) -- ");
+        print_string(file, commands[i].desc);
+        print_string(file, "\n");
     }
 }
 
@@ -71,7 +72,7 @@ int get_input(FILE* stream, char* args[], int* num_args)
     char* buffer = (char*)malloc(size);
     if (buffer == NULL)
     {
-        debug(stderr, "Error: initialization of buffer in input failed.\n");
+        debug("Error: initialization of buffer in input failed.\n");
         exit(1);
     }
     // flush the buffers
@@ -122,7 +123,7 @@ int get_input(FILE* stream, char* args[], int* num_args)
     char* tmp_buffer = (char*)malloc(sizeof(char) * chars_read);
     if (tmp_buffer == NULL)
     {
-        debug(stderr, "Error: initialization of tmp_buffer in input failed.\n");
+        debug("Error: initialization of tmp_buffer in input failed.\n");
         exit(1);
     }
     strncpy(tmp_buffer, buffer, chars_read);
@@ -155,7 +156,7 @@ int get_input(FILE* stream, char* args[], int* num_args)
     args[0] = (char*)malloc(sizeof(char) * (strlen(buffer_token) + 1));
     if (args[0] == NULL)
     {
-        debug(stderr, "Error: initialization of args[0] in input failed.\n");
+        debug("Error: initialization of args[0] in input failed.\n");
         exit(1);
     }
     strncpy(args[0], buffer_token, strlen(buffer_token) + 1);
