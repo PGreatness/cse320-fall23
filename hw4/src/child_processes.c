@@ -26,7 +26,6 @@ int run_child_process(char* command, char* args[], int num_args)
         perror("execvp() failed");
         exit(EXIT_FAILURE);
     }
-    handle_signal_using_handler(SIGCHLD, handle_sigchild);
     // add the child to the list of children
     child_t *child = spawn_child(pid, 1, args, num_args);
     child_summary(child, STDOUT_FILENO);
@@ -84,8 +83,12 @@ int continue_child_process(int deet_id, int filenum)
     }
 
     // continue the child process
-    ptrace(PTRACE_CONT, child->pid, NULL, NULL);
-    set_child_status(child, PSTATE_RUNNING);
+    set_child_status(child, PSTATE_CONTINUING, 0);
+    if (child->trace)
+        ptrace(PTRACE_CONT, child->pid, NULL, NULL);
+    else
+        kill(child->pid, SIGCONT);
+    set_child_status(child, PSTATE_RUNNING, 0);
     child_summary(child, filenum);
     return 0;
 }
@@ -111,6 +114,36 @@ int kill_child_process(int deet_id)
 
     // kill the child process
     kill_child(child->pid);
+    return 0;
+}
+
+int stop_child_process(int deetId)
+{
+    child_t* child = get_child_by_deet_id_ig(deetId);
+    if (child == NULL)
+    {
+        debug("Child with deet_id %d not found\n", deetId);
+        return -1;
+    }
+    if (child->status == PSTATE_STOPPED)
+    {
+        debug("Child with deet_id %d is already stopped\n", deetId);
+        log_error("Process is already stopped");
+        return -1;
+    }
+    if (child->status == PSTATE_STOPPING)
+    {
+        debug("Child with deet_id %d is already stopping\n", deetId);
+        log_error("Process is already stopping");
+        return -1;
+    }
+    if (child->status == PSTATE_DEAD)
+    {
+        debug("Child with deet_id %d is not running\n", deetId);
+        log_error("Process is dead");
+        return -1;
+    }
+    stop_child(child->pid);
     return 0;
 }
 

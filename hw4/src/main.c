@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
     int deet_id;
     log_startup();
     handle_signal_using_handler(SIGINT, handle_sigint);
+    handle_signal_using_handler(SIGCHLD, handle_sigchild);
     // block the SIGCHLD signal
     block_signal(SIGCHLD);
     while ((c = get_input(stdin, args, &num_args)) != -1)
@@ -68,8 +69,18 @@ int main(int argc, char *argv[]) {
                 free_args(args, num_args);
                 break;
             case CMD_STOP:
-                // testing: kill the last child
-                kill_child(get_last_child()->pid);
+                if (num_args == 0)
+                {
+                    debug("Error: no deet_id specified\n");
+                    log_error("No input specified");
+                    break;
+                }
+                if (str_to_int(args[0], &deet_id) == NULL)
+                {
+                    debug("Error: invalid deet_id of %s\n", args[0]);
+                    break;
+                }
+                stop_child_process(deet_id);
                 break;
             case CMD_CONT:
                 if (str_to_int(args[0], &deet_id) == NULL)

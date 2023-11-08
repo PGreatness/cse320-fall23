@@ -21,6 +21,8 @@ void show_all_child_processes(int filenum);
 
 int continue_child_process(int deet_id, int filenum);
 
+int stop_child_process(int deet_id);
+
 int kill_child_process(int deet_id);
 
 void kill_all_child_processes();

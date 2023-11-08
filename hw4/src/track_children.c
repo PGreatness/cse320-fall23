@@ -106,6 +106,8 @@ child_t* spawn_child(pid_t pid, int trace, char *args[], int num_args)
     tail = new_child;
     new_child->status = PSTATE_RUNNING;
     log_state_change(new_child->pid, PSTATE_NONE, PSTATE_RUNNING, 0);
+    new_child->status = PSTATE_STOPPING;
+    log_state_change(new_child->pid, PSTATE_RUNNING, PSTATE_STOPPING, 0);
     return new_child;
 }
 
@@ -141,12 +143,26 @@ pid_t kill_child(pid_t pid)
         return -1;
     }
     pid_t killed_pid = child->pid;
-    set_child_status(child, PSTATE_KILLED);
+    set_child_status(child, PSTATE_KILLED, 0);
     warn("Killing child %d", killed_pid);
     kill(killed_pid, SIGKILL);
     // ptrace(PTRACE_KILL, killed_pid, NULL, NULL);
     // wait for the child to die from the sigchld handler
     return killed_pid;
+}
+
+pid_t stop_child(pid_t pid)
+{
+    child_t* child = get_child(pid);
+    if (child == NULL)
+    {
+        debug("child not found");
+        return -1;
+    }
+    pid_t stopped_pid = child->pid;
+    set_child_status(child, PSTATE_STOPPING, 0);
+    kill(stopped_pid, SIGSTOP);
+    return stopped_pid;
 }
 
 int remove_all_dead_children()
@@ -217,7 +233,7 @@ int set_child_status_by_pid(pid_t pid, int status)
     return 0;
 }
 
-int set_child_status(child_t *child, int status)
+int set_child_status(child_t *child, int status, int exit_status)
 {
     // lock the mutex
     debug("locked in set_child_status\n");
@@ -233,7 +249,7 @@ int set_child_status(child_t *child, int status)
     info("child->pid: %d", child->pid);
     info("child->status: %d", child->status);
     info("status: %d", status);
-    log_state_change(child->pid, child->status, status, 0);
+    log_state_change(child->pid, child->status, status, exit_status);
     child->status = status;
     // unlock the mutex
     debug("unlocked in set_child_status\n");
@@ -247,6 +263,23 @@ child_t* get_child_by_deet_id(pid_t deetId)
     while (curr && curr != &sentinel)
     {
         if (curr->deetId == deetId && curr->exit_status == -1)
+        {
+            // unlock the mutex
+            return curr;
+        }
+        curr = curr->next;
+    }
+    // unlock the mutex
+    return NULL;
+}
+
+child_t* get_child_by_deet_id_ig(int deetId)
+{
+    // lock the mutex
+    child_t *curr = sentinel.next;
+    while (curr && curr != &sentinel)
+    {
+        if (curr->deetId == deetId)
         {
             // unlock the mutex
             return curr;
