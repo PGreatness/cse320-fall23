@@ -261,10 +261,6 @@ int set_child_status(child_t *child, int status, int exit_status)
         debug("unlocked in set_child_status if\n");
         return -1;
     }
-    info("child is %p", child);
-    info("child->pid: %d", child->pid);
-    info("child->status: %d", child->status);
-    info("status: %d", status);
     log_state_change(child->pid, child->status, status, exit_status);
     child->status = status;
     // unlock the mutex

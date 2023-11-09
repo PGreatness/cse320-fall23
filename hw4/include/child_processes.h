@@ -27,6 +27,8 @@ int kill_child_process(int deet_id);
 
 int release_child_process(int deet_id);
 
+int wait_for_child_process(int deetId, int state);
+
 void kill_all_child_processes();
 
 

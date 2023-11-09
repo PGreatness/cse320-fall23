@@ -1,6 +1,36 @@
 #include "deet_func.h"
 
 int suppress = 0;
+state_t all_states[] = {
+    {
+        PSTATE_NONE,
+        "none"
+    },
+    {
+        PSTATE_RUNNING,
+        "running"
+    },
+    {
+        PSTATE_STOPPED,
+        "stopped"
+    },
+    {
+        PSTATE_CONTINUING,
+        "continuing"
+    },
+    {
+        PSTATE_DEAD,
+        "dead"
+    },
+    {
+        PSTATE_STOPPING,
+        "stopping"
+    },
+    {
+        PSTATE_KILLED,
+        "killed"
+    }
+};
 
 int count_and_add_args(char* buffer, char* args[], int* num_args)
 {
@@ -79,7 +109,7 @@ int get_input(FILE* stream, char* args[], int* num_args)
     // flush the buffers
     if (!shutdown)
         log_prompt();
-    unblock_signal(SIGCHLD);
+    unblock_signal(SIGCHLD, NULL);
     if (!suppress)
         print_string(STDOUT_FILENO, "deet> ");
     // read the input

@@ -18,8 +18,11 @@ void handle_sigchild(int sig);
 
 void handle_sigint(int sig);
 
-void block_signal(int sig);
-void unblock_signal(int sig);
+void block_signal(int sig, sigset_t *set);
+void unblock_signal(int sig, sigset_t *set);
+
+int suspend_until_state(int deetId, int state);
+
 void handle_signal_using_handler(int sig, void (*handler)(int));
 
 

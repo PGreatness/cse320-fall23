@@ -50,46 +50,70 @@ void handle_sigchild(int sig)
     if (WTERMSIG(status) == SIGKILL)
     {
         // child is killed, set it to killed
-        block_signal(SIGCHLD);
+        block_signal(SIGCHLD, NULL);
         set_exit_status(child, SIGKILL);
         set_child_status(child, PSTATE_DEAD, status);
         child_summary(child, STDOUT_FILENO);
         free_child(child);
         child->deetId = -1;
-        unblock_signal(SIGCHLD);
+        unblock_signal(SIGCHLD, NULL);
         return;
     }
     if (WIFEXITED(status))
     {
         // child is exited, set it to dead
         // check the child's exit status
-        block_signal(SIGCHLD);
+        block_signal(SIGCHLD, NULL);
         int exit_status = WEXITSTATUS(status);
         set_exit_status(child, exit_status);
         set_child_status(child, PSTATE_DEAD, exit_status);
         child_summary(child, STDOUT_FILENO);
         // free_child(child);
         decrement_next_deet_id();
-        unblock_signal(SIGCHLD);
+        unblock_signal(SIGCHLD, NULL);
         return;
     }
     if (WIFSTOPPED(status))
     {
-        block_signal(SIGCHLD);
+        block_signal(SIGCHLD, NULL);
         set_child_status(child, PSTATE_STOPPED, 0);
         child_summary(child, STDOUT_FILENO);
-        unblock_signal(SIGCHLD);
+        unblock_signal(SIGCHLD, NULL);
         return;
     }
     if (WIFCONTINUED(status))
     {
         // child is continued, set it to running
-        block_signal(SIGCHLD);
+        block_signal(SIGCHLD, NULL);
         set_child_status(child, PSTATE_RUNNING, 0);
         child_summary(child, STDOUT_FILENO);
-        unblock_signal(SIGCHLD);
+        unblock_signal(SIGCHLD, NULL);
         return;
     }
+    }
+}
+
+int suspend_until_state(int deetId, int state)
+{
+    child_t* child = get_child_by_deet_id(deetId);
+    if (child == NULL)
+        return -1;
+    sigset_t mask, oldmask;
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGCHLD);
+    sigaddset(&mask, SIGINT);
+    while (1)
+    {
+        ptrace(PTRACE_ATTACH, child->pid, NULL, NULL);
+        if (child->status == state)
+        {
+            kill(getpid(), SIGCHLD);
+            return 0;
+        }
+        ptrace(PTRACE_DETACH, child->pid, NULL, NULL);
+        block_signal(SIGCHLD, NULL);
+        sigsuspend(&oldmask);
+        unblock_signal(SIGCHLD, NULL);
     }
 }
 
@@ -97,24 +121,24 @@ void handle_sigint(int sig)
 {
     shutdown = 1;
     log_signal(sig);
-    unblock_signal(SIGCHLD);
+    unblock_signal(SIGCHLD, NULL);
     kill(getpid(), SIGCHLD);
 }
 
-void block_signal(int sig)
+void block_signal(int sig, sigset_t* old)
 {
     sigset_t mask;
     sigemptyset(&mask);
     sigaddset(&mask, sig);
-    sigprocmask(SIG_BLOCK, &mask, NULL);
+    sigprocmask(SIG_BLOCK, &mask, old);
 }
 
-void unblock_signal(int sig)
+void unblock_signal(int sig, sigset_t* old)
 {
     sigset_t mask;
     sigemptyset(&mask);
     sigaddset(&mask, sig);
-    sigprocmask(SIG_UNBLOCK, &mask, NULL);
+    sigprocmask(SIG_UNBLOCK, &mask, old);
 }
 
 void handle_signal_using_handler(int sig, void (*handler)(int))

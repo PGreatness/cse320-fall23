@@ -29,10 +29,10 @@ int main(int argc, char *argv[]) {
     handle_signal_using_handler(SIGINT, handle_sigint);
     handle_signal_using_handler(SIGCHLD, handle_sigchild);
     // block the SIGCHLD signal
-    block_signal(SIGCHLD);
+    block_signal(SIGCHLD, NULL);
     while ((c = get_input(stdin, args, &num_args)) != -1)
     {
-        block_signal(SIGCHLD);
+        block_signal(SIGCHLD, NULL);
         switch (c)
         {
             case CMD_HELP:
@@ -124,6 +124,25 @@ int main(int argc, char *argv[]) {
                 release_child_process(deet_id);
                 break;
             case CMD_WAIT:
+                if (num_args < 1)
+                {
+                    debug("Error: no deet_id specified\n");
+                    log_error(commands[CMD_WAIT].name);
+                    break;
+                }
+                if (str_to_int(args[0], &deet_id) == NULL)
+                {
+                    debug("Error: invalid deet_id of %s\n", args[0]);
+                    break;
+                }
+                int state = PSTATE_DEAD;
+                if (num_args > 1 && (state = contains_state(args[1])) == -1)
+                {
+                    debug("Error: invalid command %s\n", args[1]);
+                    log_error(commands[CMD_WAIT].name);
+                    break;
+                }
+                wait_for_child_process(deet_id, state);
                 break;
             case CMD_KILL:
                 if (num_args == 0)

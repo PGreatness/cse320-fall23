@@ -78,3 +78,13 @@ char* trim_string(char* str)
         *w = '\0';
     return str;
 }
+
+int contains_state(char* str)
+{
+    for (int i = 0; i < NUM_STATES; i++)
+    {
+        if (strcmp(str, all_states[i].name) == 0)
+            return all_states[i].state;
+    }
+    return -1;
+}

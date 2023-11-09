@@ -169,3 +169,8 @@ int release_child_process(int deetId)
     }
     return release_child(child->pid);
 }
+
+int wait_for_child_process(int deetId, int state)
+{
+    return suspend_until_state(deetId, state);
+}

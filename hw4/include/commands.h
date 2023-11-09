@@ -1,6 +1,15 @@
 #ifndef HW4_COMMANDS_H
 #define HW4_COMMANDS_H
 
+typedef struct cmds
+{
+    int command;
+    char* name;
+    char* desc;
+    int min_args;
+    int max_args;
+} COMMANDS;
+
 #define CMD_HELP 0
 #define CMD_QUIT 1
 #define CMD_SHOW 2

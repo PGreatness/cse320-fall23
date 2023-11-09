@@ -18,17 +18,16 @@
 #define MAX_LINE 256
 #define MAX_ARG_SIZE 64
 
-typedef struct cmds
-{
-    int command;
+typedef struct state {
+    int state;
     char* name;
-    char* desc;
-    int min_args;
-    int max_args;
-} COMMANDS;
+} state_t;
 
 extern COMMANDS commands[];
 extern int suppress;
+extern state_t all_states[];
+
+#define NUM_STATES 7
 
 // Function prototypes
 /**
