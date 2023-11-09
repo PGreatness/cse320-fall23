@@ -83,12 +83,17 @@ int continue_child_process(int deet_id, int filenum)
     }
 
     // continue the child process
-    set_child_status(child, PSTATE_CONTINUING, 0);
+    // set_child_status(child, PSTATE_CONTINUING, 0);
+    int state = PSTATE_RUNNING;
     if (child->trace)
+    {
         ptrace(PTRACE_CONT, child->pid, NULL, NULL);
-    else
+    }
+    else{
+        state = PSTATE_CONTINUING;
         kill(child->pid, SIGCONT);
-    set_child_status(child, PSTATE_RUNNING, 0);
+    }
+    set_child_status(child, state, 0);
     child_summary(child, filenum);
     return 0;
 }
@@ -102,13 +107,6 @@ int kill_child_process(int deet_id)
     if (child == NULL)
     {
         debug("Child with deet_id %d not found\n", deet_id);
-        return -1;
-    }
-
-    // check if the child is stopped
-    if (child->status != PSTATE_STOPPED)
-    {
-        debug("Child with deet_id %d is not stopped\n", deet_id);
         return -1;
     }
 
@@ -128,19 +126,16 @@ int stop_child_process(int deetId)
     if (child->status == PSTATE_STOPPED)
     {
         debug("Child with deet_id %d is already stopped\n", deetId);
-        log_error("Process is already stopped");
         return -1;
     }
     if (child->status == PSTATE_STOPPING)
     {
         debug("Child with deet_id %d is already stopping\n", deetId);
-        log_error("Process is already stopping");
         return -1;
     }
     if (child->status == PSTATE_DEAD)
     {
         debug("Child with deet_id %d is not running\n", deetId);
-        log_error("Process is dead");
         return -1;
     }
     stop_child(child->pid);
@@ -152,4 +147,25 @@ void kill_all_child_processes()
     // set the shutdown flag
     shutdown = 1;
     kill(getpid(), SIGCHLD);
+}
+
+int release_child_process(int deetId)
+{
+    child_t* child = get_child_by_deet_id_ig(deetId);
+    if (child == NULL)
+    {
+        debug("Child with deet_id %d not found\n", deetId);
+        return -1;
+    }
+    if (child->status == PSTATE_DEAD)
+    {
+        debug("Child with deet_id %d is already dead\n", deetId);
+        return -1;
+    }
+    if (!(child->trace))
+    {
+        debug("Child with deet_id %d is not being traced\n", deetId);
+        return -1;
+    }
+    return release_child(child->pid);
 }

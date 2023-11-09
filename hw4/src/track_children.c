@@ -106,8 +106,6 @@ child_t* spawn_child(pid_t pid, int trace, char *args[], int num_args)
     tail = new_child;
     new_child->status = PSTATE_RUNNING;
     log_state_change(new_child->pid, PSTATE_NONE, PSTATE_RUNNING, 0);
-    new_child->status = PSTATE_STOPPING;
-    log_state_change(new_child->pid, PSTATE_RUNNING, PSTATE_STOPPING, 0);
     return new_child;
 }
 
@@ -161,8 +159,26 @@ pid_t stop_child(pid_t pid)
     }
     pid_t stopped_pid = child->pid;
     set_child_status(child, PSTATE_STOPPING, 0);
+    child_summary(child, STDERR_FILENO);
     kill(stopped_pid, SIGSTOP);
     return stopped_pid;
+}
+
+pid_t release_child(int pid)
+{
+    child_t* child = get_child(pid);
+    if (child == NULL)
+    {
+        debug("child not found");
+        return -1;
+    }
+    pid_t released_pid = child->pid;
+    child->trace = 0;
+    set_child_status(child, PSTATE_RUNNING, 0);
+    child_summary(child, STDERR_FILENO);
+    ptrace(PTRACE_DETACH, released_pid, NULL, NULL);
+    return released_pid;
+
 }
 
 int remove_all_dead_children()
@@ -326,22 +342,22 @@ void child_summary(child_t* child, int filenum)
             break;
     }
     print_int(filenum, child->deetId);
-    print_string(filenum, " \t");
+    print_string(filenum, "\t");
     print_int(filenum, child->pid);
-    print_string(filenum, " \t");
+    print_string(filenum, "\t");
     print_string(filenum, child->trace ? "T" : "U");
-    print_string(filenum, " \t");
+    print_string(filenum, "\t");
     print_string(filenum, status);
-    print_string(filenum, " \t");
+    print_string(filenum, "\t");
     if (child->exit_status == -1)
     {
-        print_string(filenum, " \t");
+        print_string(filenum, "\t");
     }
     else
     {
         print_string(filenum, "0x");
         print_int(filenum, child->exit_status);
-        print_string(filenum, " \t");
+        print_string(filenum, "\t");
     }
     for (int i = 0; child->args[i] != NULL; i++)
     {

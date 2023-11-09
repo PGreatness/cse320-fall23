@@ -36,19 +36,13 @@ int main(int argc, char *argv[]) {
         switch (c)
         {
             case CMD_HELP:
-                if (num_args != 0)
-                {
-                    debug("Error: help command does not take arguments\n");
-                    log_error("Help command does not take arguments");
-                    break;
-                }
                 print_help();
                 break;
             case CMD_QUIT:
                 if (num_args != 0)
                 {
                     debug("Error: quit command does not take arguments\n");
-                    log_error("Quit command does not take arguments");
+                    log_error(commands[CMD_QUIT].name);
                     break;
                 }
                 // free the args array
@@ -66,6 +60,7 @@ int main(int argc, char *argv[]) {
                 if (str_to_int(args[0], &deet_id) == NULL)
                 {
                     debug("Error: invalid deet_id of %s\n", args[0]);
+                    log_error(commands[CMD_SHOW].name);
                     break;
                 }
                 show_child_process(deet_id, STDOUT_FILENO);
@@ -78,7 +73,7 @@ int main(int argc, char *argv[]) {
                 if (num_args == 0)
                 {
                     debug("Error: no command specified\n");
-                    log_error("No command specified");
+                    log_error(commands[CMD_RUN].name);
                     break;
                 }
                 debug("Running command %s\n", args[0]);
@@ -90,7 +85,7 @@ int main(int argc, char *argv[]) {
                 if (num_args == 0)
                 {
                     debug("Error: no deet_id specified\n");
-                    log_error("No input specified");
+                    log_error(commands[CMD_STOP].name);
                     break;
                 }
                 if (str_to_int(args[0], &deet_id) == NULL)
@@ -104,18 +99,29 @@ int main(int argc, char *argv[]) {
                 if (num_args == 0)
                 {
                     debug("Error: no deet_id specified\n");
-                    log_error("No process specified");
+                    log_error(commands[CMD_CONT].name);
                     break;
                 }
                 if (str_to_int(args[0], &deet_id) == NULL)
                 {
                     debug("Error: invalid deet_id of %s\n", args[0]);
-                    log_error("Invalid process id");
                     break;
                 }
                 continue_child_process(deet_id, STDOUT_FILENO);
                 break;
             case CMD_RELEASE:
+                if (num_args == 0)
+                {
+                    debug("Error: no deet_id specified\n");
+                    log_error(commands[CMD_RELEASE].name);
+                    break;
+                }
+                if (str_to_int(args[0], &deet_id) == NULL)
+                {
+                    debug("Error: invalid deet_id of %s\n", args[0]);
+                    break;
+                }
+                release_child_process(deet_id);
                 break;
             case CMD_WAIT:
                 break;
@@ -123,7 +129,7 @@ int main(int argc, char *argv[]) {
                 if (num_args == 0)
                 {
                     debug("Error: no deet_id specified\n");
-                    log_error("No process specified");
+                    log_error(commands[CMD_KILL].name);
                     break;
                 }
                 if (str_to_int(args[0], &deet_id) == NULL)

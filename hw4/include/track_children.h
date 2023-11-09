@@ -96,6 +96,8 @@ child_t *get_last_child();
 
 pid_t stop_child(pid_t pid);
 
+pid_t release_child(pid_t pid);
+
 void child_summary(child_t* child, int filenum);
 
 void set_exit_status(child_t *child, int status);

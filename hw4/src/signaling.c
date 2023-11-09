@@ -35,7 +35,7 @@ void handle_sigchild(int sig)
     }
     int status;
     pid_t child_pid;
-    while ((child_pid = waitpid(-1, &status, WNOHANG)) > 0)
+    while ((child_pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED)) > 0)
     {
         log_signal(sig);
     debug("Signal recieved, is we done? %s, child: %i", WIFEXITED(status) ? "yes" : "no", child_pid);
