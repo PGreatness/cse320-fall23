@@ -14,4 +14,6 @@ int print_string(int fileno, char *str);
 
 int print_int(int fileno, int var);
 
+char* trim_string(char *str);
+
 #endif //HW4_UTIL_H

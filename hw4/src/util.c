@@ -68,3 +68,13 @@ int print_int(int fileno, int var)
     free(i);
     return 0;
 }
+
+char* trim_string(char* str)
+{
+    char* w = str;
+    while(*w != ' ' && *w != '\0' && *w != '\n')
+        w++;
+    if (*w == ' ')
+        *w = '\0';
+    return str;
+}

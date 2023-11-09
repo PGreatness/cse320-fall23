@@ -152,9 +152,4 @@ void kill_all_child_processes()
     // set the shutdown flag
     shutdown = 1;
     kill(getpid(), SIGCHLD);
-    if (sentinel.next == &sentinel)
-    {
-        log_shutdown();
-        exit(EXIT_SUCCESS);
-    }
 }

@@ -11,6 +11,7 @@ int count_and_add_args(char* buffer, char* args[], int* num_args)
     while (token != NULL)
     {
         // copy the token into the args array
+        token = trim_string(token);
         size_t size = strlen(token) + 1;
         args[i] = (char*)malloc(sizeof(char) * size);
         if (args[i] == NULL)

@@ -36,9 +36,21 @@ int main(int argc, char *argv[]) {
         switch (c)
         {
             case CMD_HELP:
+                if (num_args != 0)
+                {
+                    debug("Error: help command does not take arguments\n");
+                    log_error("Help command does not take arguments");
+                    break;
+                }
                 print_help();
                 break;
             case CMD_QUIT:
+                if (num_args != 0)
+                {
+                    debug("Error: quit command does not take arguments\n");
+                    log_error("Quit command does not take arguments");
+                    break;
+                }
                 // free the args array
                 free_args(args, num_args);
                 // free the children
@@ -63,6 +75,12 @@ int main(int argc, char *argv[]) {
                 // args[0] is the command
                 // args[1,...] are the arguments
                 // num_args includes the command
+                if (num_args == 0)
+                {
+                    debug("Error: no command specified\n");
+                    log_error("No command specified");
+                    break;
+                }
                 debug("Running command %s\n", args[0]);
                 run_child_process(args[0], args, num_args);
                 // free the args array
@@ -83,9 +101,16 @@ int main(int argc, char *argv[]) {
                 stop_child_process(deet_id);
                 break;
             case CMD_CONT:
+                if (num_args == 0)
+                {
+                    debug("Error: no deet_id specified\n");
+                    log_error("No process specified");
+                    break;
+                }
                 if (str_to_int(args[0], &deet_id) == NULL)
                 {
                     debug("Error: invalid deet_id of %s\n", args[0]);
+                    log_error("Invalid process id");
                     break;
                 }
                 continue_child_process(deet_id, STDOUT_FILENO);
@@ -95,9 +120,16 @@ int main(int argc, char *argv[]) {
             case CMD_WAIT:
                 break;
             case CMD_KILL:
+                if (num_args == 0)
+                {
+                    debug("Error: no deet_id specified\n");
+                    log_error("No process specified");
+                    break;
+                }
                 if (str_to_int(args[0], &deet_id) == NULL)
                 {
                     debug("Error: invalid deet_id of %s\n", args[0]);
+                    log_error("Invalid process id");
                     break;
                 }
                 kill_child_process(deet_id);

@@ -11,12 +11,12 @@ void handle_sigchild(int sig)
         int has_children = 0;
         while (s != &sentinel)
         {
+            has_children = 1;
             if (s->status == PSTATE_DEAD)
             {
                 s = s->next;
                 continue;
             }
-            has_children = 1;
             log_signal(sig);
             set_child_status(s, PSTATE_KILLED, 0);
             kill(s->pid, SIGKILL);
