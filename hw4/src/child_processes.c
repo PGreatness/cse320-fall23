@@ -23,7 +23,7 @@ int run_child_process(char* command, char* args[], int num_args)
         execvp(command, args);
 
         // if we get here, execlp() failed
-        perror("execvp() failed");
+        // perror("execvp() failed");
         exit(EXIT_FAILURE);
     }
     // add the child to the list of children
