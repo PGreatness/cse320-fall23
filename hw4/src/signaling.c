@@ -17,7 +17,7 @@ void handle_sigchild(int sig)
                 s = s->next;
                 continue;
             }
-            log_signal(sig);
+            // log_signal(sig);
             set_child_status(s, PSTATE_KILLED, 0);
             kill(s->pid, SIGKILL);
             int status;
