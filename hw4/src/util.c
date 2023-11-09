@@ -17,6 +17,18 @@ int* str_to_int(char* str, int* num)
     return num;
 }
 
+unsigned long hex_str_to_long(char* hex_str)
+{
+    char* end;
+    if (hex_str[0] == '\0' || hex_str[0] == '\n')
+        return 0;
+    if (strlen(hex_str) < 2)
+        return 0;
+    if (hex_str[0] == '0' && hex_str[1] == 'x')
+        hex_str += 2;
+    return strtoul(hex_str, &end, 16);
+}
+
 int print_string(int fileno, char* str)
 {
     ssize_t bytes_written;
@@ -66,6 +78,19 @@ int print_int(int fileno, int var)
         return -1;
     }
     free(i);
+    return 0;
+}
+
+int print_long_as_hex(int fileno, unsigned long long_num)
+{
+    char* hex_str = calloc(17, sizeof(char));
+    sprintf(hex_str, "%016lx", long_num);
+    if (print_string(fileno, hex_str) == -1)
+    {
+        free(hex_str);
+        return -1;
+    }
+    free(hex_str);
     return 0;
 }
 

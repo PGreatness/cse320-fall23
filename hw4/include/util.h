@@ -11,9 +11,13 @@
 
 int* str_to_int(char *str, int *num);
 
+unsigned long hex_str_to_long(char *hex_str);
+
 int print_string(int fileno, char *str);
 
 int print_int(int fileno, int var);
+
+int print_long_as_hex(int fileno, unsigned long var);
 
 int contains_state(char* str);
 

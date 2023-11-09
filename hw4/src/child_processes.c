@@ -174,3 +174,81 @@ void wait_for_child_process(int deetId, int state)
 {
     suspend_until_state(deetId, state);
 }
+
+int peek_in_process(int deetId, unsigned long addr, int amnt, int filenum)
+{
+    child_t* child = get_child_by_deet_id_ig(deetId);
+    if (child == NULL)
+    {
+        debug("Child with deet_id %d not found\n", deetId);
+        return -1;
+    }
+    int i = 0;
+    unsigned long tmp = addr;
+    unsigned long data = ptrace(PTRACE_PEEKDATA, child->pid, tmp, NULL);
+    if (data == -1)
+    {
+        debug("Error peeking at address %p\n", (void*)tmp);
+        return -1;
+    }
+    while (i < amnt)
+    {
+        print_long_as_hex(filenum, tmp);
+        print_string(filenum, "\t");
+        print_long_as_hex(filenum, data);
+        print_string(filenum, "\n");
+        tmp += 8;
+        data = ptrace(PTRACE_PEEKDATA, child->pid, tmp, NULL);
+        if (data == -1)
+        {
+            debug("Error peeking at address %p\n", (void*)tmp);
+            return -1;
+        }
+        i++;
+    }
+    return 0;
+}
+
+int backtrace_child_process(int deetId, int limit, int filenum)
+{
+    child_t* child = get_child_by_deet_id_ig(deetId);
+    if (child == NULL)
+    {
+        debug("Child with deet_id %d not found\n", deetId);
+        return -1;
+    }
+    if (child->status == PSTATE_DEAD)
+    {
+        debug("Child with deet_id %d is dead\n", deetId);
+        return -1;
+    }
+    if (!(child->trace))
+    {
+        debug("Child with deet_id %d is not being traced\n", deetId);
+        return -1;
+    }
+    struct user_regs_struct regs;
+    if (ptrace(PTRACE_GETREGS, child->pid, NULL, &regs) < 0)
+    {
+        debug("Error getting registers for child with deet_id %d\n", deetId);
+        return -1;
+    }
+    // get the current stack frame and the return address stored in that frame
+    unsigned long frame = regs.rbp;
+    unsigned long ret_addr = regs.rip;
+    // keep going until we reach the end of the stack or reach limit
+    int i = 0;
+    while (frame > 1 && i < limit)
+    {
+        // print the current frame
+        print_long_as_hex(filenum, frame);
+        print_string(filenum, "\t");
+        print_long_as_hex(filenum, ret_addr);
+        print_string(filenum, "\n");
+        // get the next frame and return address
+        ret_addr = ptrace(PTRACE_PEEKDATA, child->pid, frame + 8, NULL);
+        frame = ptrace(PTRACE_PEEKDATA, child->pid, frame, NULL);
+        i++;
+    }
+    return 0;
+}

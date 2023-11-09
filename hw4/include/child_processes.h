@@ -7,11 +7,13 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/ptrace.h>
+#include <sys/user.h>
 
 #include "deet.h"
 #include "track_children.h"
 #include "signaling.h"
 
+#define WORD_SIZE_BYTES 2
 // Function prototypes
 int run_child_process(char* command, char* args[], int num_args);
 
@@ -31,5 +33,9 @@ void wait_for_child_process(int deetId, int state);
 
 void kill_all_child_processes();
 
+int peek_in_process(int deetId, unsigned long addr, int amnt, int filenum);
+
+
+int backtrace_child_process(int deetId, int limit, int filenum);
 
 #endif //HW4_CHILD_PROCESSES_H

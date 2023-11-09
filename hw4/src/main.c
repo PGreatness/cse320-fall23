@@ -25,6 +25,9 @@ int main(int argc, char *argv[]) {
     char *args[MAX_ARG_SIZE] = {NULL};
     int num_args;
     int deet_id;
+    unsigned long addr;
+    int limit;
+    int state;
     log_startup();
     handle_signal_using_handler(SIGINT, handle_sigint);
     handle_signal_using_handler(SIGCHLD, handle_sigchild);
@@ -32,6 +35,7 @@ int main(int argc, char *argv[]) {
     block_signal(SIGCHLD, NULL);
     while ((c = get_input(stdin, args, &num_args)) != -1)
     {
+        state = PSTATE_DEAD;
         block_signal(SIGCHLD, NULL);
         switch (c)
         {
@@ -147,7 +151,6 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     break;
                 }
-                int state = PSTATE_DEAD;
                 if (num_args > 1 && (state = contains_state(args[1])) < 0)
                 {
                     debug("Error: invalid command %s\n", args[1]);
@@ -176,10 +179,68 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case CMD_PEEK:
+                if (num_args < 2 || num_args > 3)
+                {
+                    debug("Error: no deet_id or address specified\n");
+                    log_error(commands[CMD_PEEK].name);
+                    break;
+                }
+                limit = 1;
+                if (num_args == 3)
+                {
+                    if (str_to_int(args[2], &limit) == NULL)
+                    {
+                        debug("Error: invalid limit of %s\n", args[2]);
+                        log_error(commands[CMD_PEEK].name);
+                        break;
+                    }
+                }
+                if (str_to_int(args[0], &deet_id) == NULL)
+                {
+                    debug("Error: invalid deet_id of %s\n", args[0]);
+                    log_error(commands[CMD_PEEK].name);
+                    break;
+                }
+                // peek at the address
+                if ((addr = hex_str_to_long(args[1])) == 0)
+                {
+                    debug("Error: invalid address of %s\n", args[1]);
+                    log_error(commands[CMD_PEEK].name);
+                    break;
+                }
+                if (peek_in_process(deet_id, addr, limit, STDOUT_FILENO) < 0)
+                {
+                    debug("Error: peeking error\n", deet_id);
+                    log_error(commands[CMD_PEEK].name);
+                }
                 break;
             case CMD_POKE:
                 break;
             case CMD_BT:
+                if (num_args < 1 || num_args > 2)
+                {
+                    debug("Error: no deet_id specified\n");
+                    log_error(commands[CMD_BT].name);
+                    break;
+                }
+                if (str_to_int(args[0], &deet_id) == NULL)
+                {
+                    debug("Error: invalid deet_id of %s\n", args[0]);
+                    log_error(commands[CMD_BT].name);
+                    break;
+                }
+                limit = 10;
+                if (num_args == 2 && (str_to_int(args[1], &limit) == NULL))
+                {
+                    debug("Error: invalid limit of %s\n", args[1]);
+                    log_error(commands[CMD_BT].name);
+                    break;
+                }
+                if (backtrace_child_process(deet_id, limit, STDOUT_FILENO) < 0)
+                {
+                    debug("Error: deet_id %d is not running\n", deet_id);
+                    log_error(commands[CMD_BT].name);
+                }
                 break;
 
             default:
