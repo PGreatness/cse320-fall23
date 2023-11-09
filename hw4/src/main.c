@@ -93,7 +93,11 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     break;
                 }
-                stop_child_process(deet_id);
+                if (stop_child_process(deet_id) < 0)
+                {
+                    debug("Error: deet_id %d is not running\n", deet_id);
+                    log_error(commands[CMD_STOP].name);
+                }
                 break;
             case CMD_CONT:
                 if (num_args == 0)
@@ -107,7 +111,11 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     break;
                 }
-                continue_child_process(deet_id, STDOUT_FILENO);
+                if (continue_child_process(deet_id, STDOUT_FILENO) < 0)
+                {
+                    debug("Error: deet_id %d is not stopped\n", deet_id);
+                    log_error(commands[CMD_CONT].name);
+                }
                 break;
             case CMD_RELEASE:
                 if (num_args == 0)
@@ -121,7 +129,11 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     break;
                 }
-                release_child_process(deet_id);
+                if (release_child_process(deet_id) < 0)
+                {
+                    debug("Error: deet_id %d is not stopped\n", deet_id);
+                    log_error(commands[CMD_RELEASE].name);
+                }
                 break;
             case CMD_WAIT:
                 if (num_args < 1)
@@ -136,7 +148,7 @@ int main(int argc, char *argv[]) {
                     break;
                 }
                 int state = PSTATE_DEAD;
-                if (num_args > 1 && (state = contains_state(args[1])) == -1)
+                if (num_args > 1 && (state = contains_state(args[1])) < 0)
                 {
                     debug("Error: invalid command %s\n", args[1]);
                     log_error(commands[CMD_WAIT].name);
@@ -157,7 +169,11 @@ int main(int argc, char *argv[]) {
                     log_error("Invalid process id");
                     break;
                 }
-                kill_child_process(deet_id);
+                if (kill_child_process(deet_id) < 0)
+                {
+                    debug("Error: deet_id %d is not running\n", deet_id);
+                    log_error(commands[CMD_KILL].name);
+                }
                 break;
             case CMD_PEEK:
                 break;
