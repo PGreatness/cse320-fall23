@@ -183,28 +183,23 @@ int peek_in_process(int deetId, unsigned long addr, int amnt, int filenum)
         debug("Child with deet_id %d not found\n", deetId);
         return -1;
     }
-    int i = 0;
-    unsigned long tmp = addr;
-    unsigned long data = ptrace(PTRACE_PEEKDATA, child->pid, tmp, NULL);
-    if (data == -1)
+    if (child->status == PSTATE_DEAD)
     {
-        debug("Error peeking at address %p\n", (void*)tmp);
+        debug("Child with deet_id %d is dead\n", deetId);
         return -1;
     }
-    while (i < amnt)
+    if (!(child->trace))
     {
-        print_long_as_hex(filenum, tmp);
+        debug("Child with deet_id %d is not being traced\n", deetId);
+        return -1;
+    }
+    for (int i = 0; i < amnt; i++)
+    {
+        print_long_as_hex(filenum, addr + (i * 8));
         print_string(filenum, "\t");
+        unsigned long data = ptrace(PTRACE_PEEKDATA, child->pid, addr + (i * 8), NULL);
         print_long_as_hex(filenum, data);
         print_string(filenum, "\n");
-        tmp += 8;
-        data = ptrace(PTRACE_PEEKDATA, child->pid, tmp, NULL);
-        if (data == -1)
-        {
-            debug("Error peeking at address %p\n", (void*)tmp);
-            return -1;
-        }
-        i++;
     }
     return 0;
 }

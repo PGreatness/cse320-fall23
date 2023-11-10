@@ -2,6 +2,7 @@
 #include "track_children.h"
 
 int shutdown = 0;
+int eof_flag = 0;
 
 void handle_sigchild(int sig)
 {
@@ -28,7 +29,7 @@ void handle_sigchild(int sig)
             s = s->next;
         }
 
-        if (!has_children)
+        if (!has_children && !eof_flag)
             log_signal(sig);
         log_shutdown();
         exit(EXIT_SUCCESS);
@@ -57,6 +58,7 @@ void handle_sigchild(int sig)
         free_child(child);
         child->deetId = -1;
         unblock_signal(SIGCHLD, NULL);
+        kill(getpid(), SIGCHLD);
         return;
     }
     if (WIFEXITED(status))
@@ -71,6 +73,7 @@ void handle_sigchild(int sig)
         // free_child(child);
         decrement_next_deet_id();
         unblock_signal(SIGCHLD, NULL);
+        kill(getpid(), SIGCHLD);
         return;
     }
     if (WIFSTOPPED(status))
@@ -102,18 +105,21 @@ int suspend_until_state(int deetId, int state)
     sigemptyset(&mask);
     sigaddset(&mask, SIGCHLD);
     sigaddset(&mask, SIGINT);
+    sigaddset(&mask, SIGTSTP);
+    sigaddset(&mask, SIGCONT);
+    sigaddset(&mask, SIGKILL);
     while (1)
     {
-        ptrace(PTRACE_ATTACH, child->pid, NULL, NULL);
+        ptrace(PTRACE_INTERRUPT, child->pid, NULL, NULL);
         if (child->status == state)
         {
             kill(getpid(), SIGCHLD);
             return 0;
         }
-        ptrace(PTRACE_DETACH, child->pid, NULL, NULL);
-        block_signal(SIGCHLD, NULL);
-        sigsuspend(&oldmask);
+        // block_signal(SIGCHLD, NULL);
         unblock_signal(SIGCHLD, NULL);
+        ptrace(PTRACE_DETACH, child->pid, NULL, NULL);
+        sigsuspend(&oldmask);
     }
 }
 

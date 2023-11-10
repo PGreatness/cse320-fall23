@@ -120,7 +120,7 @@ int get_input(FILE* stream, char* args[], int* num_args)
         args[0] = 0;
         *num_args = -1;
         free(buffer);
-        return -2;
+        return -1;
     }
     if (chars_read == -1)
     {
@@ -130,7 +130,7 @@ int get_input(FILE* stream, char* args[], int* num_args)
         debug("Error: getline() failed");
         return -2;
     }
-    if (chars_read < 2)
+    if (chars_read < 1)
     {
         args[0] = 0;
         *num_args = 0;
@@ -144,9 +144,16 @@ int get_input(FILE* stream, char* args[], int* num_args)
         *num_args = 0;
         free(buffer);
         debug("Error: input too long.\n");
-        return -1;
+        return -2;
     }
     log_input(buffer);
+    if (buffer[0] == '\n')
+    {
+        args[0] = 0;
+        *num_args = 0;
+        free(buffer);
+        return -1;
+    }
     // compare the buffer with the commands available
     // if the command is valid, call the corresponding function
     // if the command is invalid, print an error message

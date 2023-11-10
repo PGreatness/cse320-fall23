@@ -8,6 +8,7 @@
 #include <signal.h>
 
 extern int shutdown;
+extern int eof_flag;
 
 // Handlers
 /**

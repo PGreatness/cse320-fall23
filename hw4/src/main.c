@@ -12,7 +12,7 @@
 int main(int argc, char *argv[]) {
     // TO BE IMPLEMENTED
     // Remember: Do not put any functions other than main() in this file.
-    char c;
+    int c;
     c = getopt(argc, argv, "p");
     switch (c)
     {
@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
         default:
             break;
     }
+    c = -1;
     char *args[MAX_ARG_SIZE] = {NULL};
     int num_args;
     int deet_id;
@@ -33,7 +34,7 @@ int main(int argc, char *argv[]) {
     handle_signal_using_handler(SIGCHLD, handle_sigchild);
     // block the SIGCHLD signal
     block_signal(SIGCHLD, NULL);
-    while ((c = get_input(stdin, args, &num_args)) != -1)
+    while ((c = get_input(stdin, args, &num_args)))
     {
         state = PSTATE_DEAD;
         block_signal(SIGCHLD, NULL);
@@ -52,6 +53,7 @@ int main(int argc, char *argv[]) {
                 // free the args array
                 free_args(args, num_args);
                 // free the children
+                eof_flag = 1;
                 free_children();
                 break;
             case CMD_SHOW:
@@ -151,6 +153,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     break;
                 }
+                state = PSTATE_DEAD;
                 if (num_args > 1 && (state = contains_state(args[1])) < 0)
                 {
                     debug("Error: invalid command %s\n", args[1]);
@@ -245,15 +248,21 @@ int main(int argc, char *argv[]) {
 
             default:
                 // print out a ?
-                log_error(args[0] != 0 ? args[0] : "");
-                print_string(STDOUT_FILENO, "?\n");
-                // free the args array
                 free_args(args, num_args);
+                if (c == -1 && num_args == 0)
+                {
+                    // an empty input was given, quit the program
+                    break;
+                }
+                // free the args array
                 if (num_args == -1)
                 {
                     // an empty input was given, quit the program
                     // free the children
+                    eof_flag = 1;
                     free_children();
+                } else {
+                    log_error(args[0] != 0 ? args[0] : "");
                 }
                 break;
         }
