@@ -62,10 +62,11 @@ void connect_child(child_t* child)
         }
         curr = curr->next;
     }
-    sentinel.next = child;
+    child_t* n = sentinel.next;
+    n->prev = child;
+    child->next = n;
     child->prev = &sentinel;
-    child->next = &sentinel;
-    sentinel.prev = child;
+    sentinel.next = child;
 }
 
 child_t* spawn_child(pid_t pid, int trace, char *args[], int num_args)

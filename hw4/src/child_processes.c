@@ -204,6 +204,28 @@ int peek_in_process(int deetId, unsigned long addr, int amnt, int filenum)
     return 0;
 }
 
+int poke_in_process(int deetId, unsigned long addr, unsigned long value)
+{
+    child_t* child = get_child_by_deet_id_ig(deetId);
+    if (child == NULL)
+    {
+        debug("Child with deet_id %d not found\n", deetId);
+        return -1;
+    }
+    if (child->status == PSTATE_DEAD)
+    {
+        debug("Child with deet_id %d is dead\n", deetId);
+        return -1;
+    }
+    if (!(child->trace))
+    {
+        debug("Child with deet_id %d is not being traced\n", deetId);
+        return -1;
+    }
+    ptrace(PTRACE_POKEDATA, child->pid, addr, value);
+    return 0;
+}
+
 int backtrace_child_process(int deetId, int limit, int filenum)
 {
     child_t* child = get_child_by_deet_id_ig(deetId);

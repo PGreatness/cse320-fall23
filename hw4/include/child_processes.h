@@ -35,6 +35,7 @@ void kill_all_child_processes();
 
 int peek_in_process(int deetId, unsigned long addr, int amnt, int filenum);
 
+int poke_in_process(int deetId, unsigned long addr, unsigned long value);
 
 int backtrace_child_process(int deetId, int limit, int filenum);
 

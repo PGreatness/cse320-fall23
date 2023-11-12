@@ -55,8 +55,8 @@ void handle_sigchild(int sig)
         set_exit_status(child, SIGKILL);
         set_child_status(child, PSTATE_DEAD, status);
         child_summary(child, STDOUT_FILENO);
-        free_child(child);
-        child->deetId = -1;
+        // free_child(child);
+        // child->deetId = -1;
         unblock_signal(SIGCHLD, NULL);
         kill(getpid(), SIGCHLD);
         return;
