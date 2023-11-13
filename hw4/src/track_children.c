@@ -25,6 +25,7 @@ int find_next_deet_id()
         if (child->status == PSTATE_DEAD)
         {
             int deetId = child->deetId;
+            set_child_status(child, PSTATE_NONE, 0);
             free_child(child);
             return deetId;
         }
