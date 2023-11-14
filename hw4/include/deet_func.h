@@ -37,11 +37,16 @@ extern state_t all_states[];
  * @param num_args The number of arguments found.
  * @return The command number corresponding to the input.
  * These numbers are defined in `commands.h`. If the input is
- * valid but not a command, return `-2`. If the input is invalid,
- * return `-1`. Empty inputs return `-2`. The function will allocate
+ * valid but not a command, if the input is too large or too small,
+ * or if `getline` returned an error, return `-2`. If the input is valid
+ * and the first character is either a newline or a null terminator,
+ * return `-1` and set `num_args` to `0` and `-1` respectively.
+ * Empty inputs return `-1`. The function will allocate
  * memory for the arguments, so the caller must free the memory.
  * The number of arguments is stored in `num_args`. If the number
- * of arguments is 0, `args` will not be allocated.
+ * of arguments is 0, `args` will not be allocated. Note that this
+ * function can be called in a loop to get multiple inputs by
+ * checking for return greater than -3.
 */
 int get_input(FILE* stream, char* args[], int* num_args);
 
