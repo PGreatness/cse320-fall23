@@ -39,7 +39,7 @@ extern state_t all_states[];
  * These numbers are defined in `commands.h`. If the input is
  * valid but not a command, if the input is too large or too small,
  * or if `getline` returned an error, return `-2`. If the input is valid
- * and the first character is either a newline or a null terminator,
+ * and the first character is either a newline or a null terminator (signifying EOF),
  * return `-1` and set `num_args` to `0` and `-1` respectively.
  * Empty inputs return `-1`. The function will allocate
  * memory for the arguments, so the caller must free the memory.
