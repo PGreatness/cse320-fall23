@@ -25,7 +25,7 @@ int find_next_deet_id()
         if (child->status == PSTATE_DEAD)
         {
             int deetId = child->deetId;
-            set_child_status(child, PSTATE_NONE, 0);
+            set_child_status(child, PSTATE_NONE, -1);
             free_child(child);
             return deetId;
         }
@@ -143,7 +143,7 @@ pid_t kill_child(pid_t pid)
         return -1;
     }
     pid_t killed_pid = child->pid;
-    set_child_status(child, PSTATE_KILLED, 0);
+    set_child_status(child, PSTATE_KILLED, -1);
     warn("Killing child %d", killed_pid);
     kill(killed_pid, SIGKILL);
     // ptrace(PTRACE_KILL, killed_pid, NULL, NULL);
@@ -160,7 +160,7 @@ pid_t stop_child(pid_t pid)
         return -1;
     }
     pid_t stopped_pid = child->pid;
-    set_child_status(child, PSTATE_STOPPING, 0);
+    set_child_status(child, PSTATE_STOPPING, -1);
     child_summary(child, STDERR_FILENO);
     kill(stopped_pid, SIGSTOP);
     return stopped_pid;
@@ -176,7 +176,7 @@ pid_t release_child(int pid)
     }
     pid_t released_pid = child->pid;
     child->trace = 0;
-    set_child_status(child, PSTATE_RUNNING, 0);
+    set_child_status(child, PSTATE_RUNNING, -1);
     child_summary(child, STDERR_FILENO);
     ptrace(PTRACE_DETACH, released_pid, NULL, NULL);
     return released_pid;
@@ -263,8 +263,10 @@ int set_child_status(child_t *child, int status, int exit_status)
         debug("unlocked in set_child_status if\n");
         return -1;
     }
-    log_state_change(child->pid, child->status, status, exit_status);
+    int old_status = child->status;
     child->status = status;
+    child->exit_status = exit_status;
+    log_state_change(child->pid, old_status, status, exit_status);
     // unlock the mutex
     debug("unlocked in set_child_status\n");
     return 0;

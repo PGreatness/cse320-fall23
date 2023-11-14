@@ -19,12 +19,14 @@ void handle_sigchild(int sig)
                 continue;
             }
             // log_signal(sig);
-            set_child_status(s, PSTATE_KILLED, 0);
+            set_child_status(s, PSTATE_KILLED, -1);
+            child_summary(s, STDOUT_FILENO);
             kill(s->pid, SIGKILL);
             int status;
             waitpid(s->pid, &status, 0);
             log_signal(sig);
             set_child_status(s, PSTATE_DEAD, status);
+            child_summary(s, STDOUT_FILENO);
             free_child(s);
             s = s->next;
         }
@@ -79,7 +81,7 @@ void handle_sigchild(int sig)
     if (WIFSTOPPED(status))
     {
         block_signal(SIGCHLD, NULL);
-        set_child_status(child, PSTATE_STOPPED, 0);
+        set_child_status(child, PSTATE_STOPPED, -1);
         child_summary(child, STDOUT_FILENO);
         unblock_signal(SIGCHLD, NULL);
         return;
@@ -88,7 +90,7 @@ void handle_sigchild(int sig)
     {
         // child is continued, set it to running
         block_signal(SIGCHLD, NULL);
-        set_child_status(child, PSTATE_RUNNING, 0);
+        set_child_status(child, PSTATE_RUNNING, -1);
         child_summary(child, STDOUT_FILENO);
         unblock_signal(SIGCHLD, NULL);
         return;

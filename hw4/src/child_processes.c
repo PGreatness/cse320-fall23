@@ -93,7 +93,7 @@ int continue_child_process(int deet_id, int filenum)
         state = PSTATE_CONTINUING;
         kill(child->pid, SIGCONT);
     }
-    set_child_status(child, state, 0);
+    set_child_status(child, state, -1);
     child_summary(child, filenum);
     return 0;
 }
