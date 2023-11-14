@@ -4,7 +4,7 @@
 int shutdown = 0;
 int eof_flag = 0;
 
-void handle_sigchild(int sig)
+void handle_shutdown(int sig)
 {
     if (shutdown)
     {
@@ -36,6 +36,11 @@ void handle_sigchild(int sig)
         log_shutdown();
         exit(EXIT_SUCCESS);
     }
+}
+
+void handle_sigchild(int sig)
+{
+    handle_shutdown(sig);
     int status;
     pid_t child_pid;
     while ((child_pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED)) > 0)
