@@ -11,7 +11,7 @@
 
 int* str_to_int(char *str, int *num);
 
-unsigned long hex_str_to_long(char *hex_str);
+long hex_str_to_long(char *hex_str);
 
 int print_string(int fileno, char *str);
 

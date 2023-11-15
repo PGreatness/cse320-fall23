@@ -28,6 +28,7 @@ void handle_shutdown(int sig)
         return;
     child_t* s = sentinel.next;
     info("Shutting down");
+    sigset_t mask;
     int has_children = 0;
     while (s != &sentinel)
     {
@@ -37,10 +38,14 @@ void handle_shutdown(int sig)
             s = s->next;
             continue;
         }
+        mask = block_all_signals();
         if (s->trace)
             ptrace(PTRACE_KILL, s->pid, NULL, NULL);
         else
             kill(s->pid, SIGKILL);
+        set_child_status(s, PSTATE_KILLED, -1);
+        child_summary(s, STDOUT_FILENO);
+        reset_signals(&mask);
         s = s->next;
     }
 
@@ -57,12 +62,11 @@ void handle_shutdown(int sig)
             return;
         }
         // block_signal(SIGCHLD, NULL);
-        set_child_status(child, PSTATE_KILLED, -1);
-        child_summary(child, STDOUT_FILENO);
+        mask = block_all_signals();
         set_child_status(child, PSTATE_DEAD, status);
         child_summary(child, STDOUT_FILENO);
         free_child(child);
-        // unblock_signal(SIGCHLD, NULL);
+        reset_signals(&mask);
     }
     // only the dead children remain
     // free them
@@ -162,7 +166,7 @@ int suspend_until_state(int deetId, int state)
         }
         // block_signal(SIGCHLD, NULL);
         unblock_signal(SIGCHLD, NULL);
-        ptrace(PTRACE_DETACH, child->pid, NULL, NULL);
+        ptrace(PTRACE_DETACH, child->pid, NULL, NULL); // TODO: Remove
         sigsuspend(&oldmask);
     }
 }

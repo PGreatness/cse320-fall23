@@ -18,11 +18,11 @@ int* str_to_int(char* str, int* num)
     return num;
 }
 
-unsigned long hex_str_to_long(char* hex_str)
+long hex_str_to_long(char* hex_str)
 {
     char* end;
     if (hex_str[0] == '\0' || hex_str[0] == '\n')
-        return 0;
+        return -1;
     if (strlen(hex_str) < 2)
         return 0;
     if (hex_str[0] == '0' && hex_str[1] == 'x')

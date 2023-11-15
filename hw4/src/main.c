@@ -307,7 +307,8 @@ int main(int argc, char *argv[]) {
                 // use limit as a temporary variable for the new value
                 limit = 0;
                 warn("args[2] = %s\n", args[2]);
-                if (str_to_int(args[2], &limit) == NULL)
+                long amnt;
+                if ((amnt = hex_str_to_long(args[2])) == -1)
                 {
                     debug("Error: invalid value of %s\n", args[2]);
                     log_error(commands[CMD_POKE].name);
@@ -324,7 +325,6 @@ int main(int argc, char *argv[]) {
                     free_args(args, num_args);
                     break;
                 }
-                unsigned long amnt = limit;
                 warn("amnt = %lu\n", amnt);
                 if (poke_in_process(deet_id, addr, amnt) < 0)
                 {
