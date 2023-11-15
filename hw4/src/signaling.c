@@ -4,38 +4,68 @@
 int shutdown = 0;
 int eof_flag = 0;
 
+sigset_t block_all_signals()
+{
+    sigset_t mask, oldmask;
+    sigfillset(&mask);
+    sigprocmask(SIG_BLOCK, &mask, &oldmask);
+    return oldmask;
+}
+
+sigset_t reset_signals(sigset_t* oldmask)
+{
+    sigset_t mask;
+    sigemptyset(&mask);
+    sigprocmask(SIG_SETMASK, oldmask, NULL);
+    return mask;
+}
+
 void handle_shutdown(int sig)
 {
-    if (shutdown)
+    int status;
+    pid_t child_pid;
+    if (!shutdown)
+        return;
+    child_t* s = sentinel.next;
+    info("Shutting down");
+    int has_children = 0;
+    while (s != &sentinel)
     {
-        child_t* s = sentinel.next;
-        int has_children = 0;
-        while (s != &sentinel)
+        has_children = 1;
+        if (s->status == PSTATE_DEAD)
         {
-            has_children = 1;
-            if (s->status == PSTATE_DEAD)
-            {
-                s = s->next;
-                continue;
-            }
-            // log_signal(sig);
-            set_child_status(s, PSTATE_KILLED, -1);
-            child_summary(s, STDOUT_FILENO);
-            kill(s->pid, SIGKILL);
-            int status;
-            waitpid(s->pid, &status, 0);
-            log_signal(sig);
-            set_child_status(s, PSTATE_DEAD, status);
-            child_summary(s, STDOUT_FILENO);
-            free_child(s);
             s = s->next;
+            continue;
         }
-
-        if (!has_children && !eof_flag)
-            log_signal(sig);
-        log_shutdown();
-        exit(EXIT_SUCCESS);
+        if (s->trace)
+            ptrace(PTRACE_KILL, s->pid, NULL, NULL);
+        else
+            kill(s->pid, SIGKILL);
+        s = s->next;
     }
+
+    info("Waiting for children, do we have?: %i", has_children);
+    while (has_children && (child_pid = waitpid(-1, &status, 0)) > 0)
+    {
+        log_signal(sig);
+        // printf("HERE\n");
+        warn("Child %i exited with status %i", child_pid, status);
+        child_t *child = get_child(child_pid);
+        if (child == NULL)
+        {
+            debug("child not found");
+            return;
+        }
+        // block_signal(SIGCHLD, NULL);
+        set_child_status(child, PSTATE_KILLED, -1);
+        child_summary(child, STDOUT_FILENO);
+        set_child_status(child, PSTATE_DEAD, status);
+        child_summary(child, STDOUT_FILENO);
+        // unblock_signal(SIGCHLD, NULL);
+    }
+    info("All children dead");
+    log_shutdown();
+    exit(EXIT_SUCCESS);
 }
 
 void handle_sigchild(int sig)
@@ -43,12 +73,11 @@ void handle_sigchild(int sig)
     handle_shutdown(sig);
     int status;
     pid_t child_pid;
+    sigset_t block;
     while ((child_pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED)) > 0)
     {
         log_signal(sig);
     debug("Signal recieved, is we done? %s, child: %i", WIFEXITED(status) ? "yes" : "no", child_pid);
-    // if (errno)
-    //     perror("waitpid() failed");
     child_t *child = get_child(child_pid);
     if (child == NULL)
     {
@@ -58,47 +87,48 @@ void handle_sigchild(int sig)
     if (WTERMSIG(status) == SIGKILL)
     {
         // child is killed, set it to killed
-        block_signal(SIGCHLD, NULL);
+        block = block_all_signals();
+        // block_signal(SIGCHLD, NULL);
         set_exit_status(child, SIGKILL);
         set_child_status(child, PSTATE_DEAD, status);
         child_summary(child, STDOUT_FILENO);
-        // free_child(child);
-        // child->deetId = -1;
-        unblock_signal(SIGCHLD, NULL);
+        // unblock_signal(SIGCHLD, NULL);
+        reset_signals(&block);
         kill(getpid(), SIGCHLD);
-        return;
     }
     if (WIFEXITED(status))
     {
         // child is exited, set it to dead
         // check the child's exit status
-        block_signal(SIGCHLD, NULL);
+        // block_signal(SIGCHLD, NULL);
+        block = block_all_signals();
         int exit_status = WEXITSTATUS(status);
         set_exit_status(child, exit_status);
         set_child_status(child, PSTATE_DEAD, exit_status);
         child_summary(child, STDOUT_FILENO);
-        // free_child(child);
         decrement_next_deet_id();
-        unblock_signal(SIGCHLD, NULL);
+        // unblock_signal(SIGCHLD, NULL);
+        reset_signals(&block);
         kill(getpid(), SIGCHLD);
-        return;
     }
     if (WIFSTOPPED(status))
     {
-        block_signal(SIGCHLD, NULL);
+        // block_signal(SIGCHLD, NULL);
+        block = block_all_signals();
         set_child_status(child, PSTATE_STOPPED, -1);
         child_summary(child, STDOUT_FILENO);
-        unblock_signal(SIGCHLD, NULL);
-        return;
+        // unblock_signal(SIGCHLD, NULL);
+        reset_signals(&block);
     }
     if (WIFCONTINUED(status))
     {
         // child is continued, set it to running
-        block_signal(SIGCHLD, NULL);
+        // block_signal(SIGCHLD, NULL);
+        block = block_all_signals();
         set_child_status(child, PSTATE_RUNNING, -1);
         child_summary(child, STDOUT_FILENO);
-        unblock_signal(SIGCHLD, NULL);
-        return;
+        // unblock_signal(SIGCHLD, NULL);
+        reset_signals(&block);
     }
     }
 }
@@ -112,8 +142,6 @@ int suspend_until_state(int deetId, int state)
     sigemptyset(&mask);
     sigaddset(&mask, SIGCHLD);
     sigaddset(&mask, SIGINT);
-    sigaddset(&mask, SIGTSTP);
-    sigaddset(&mask, SIGCONT);
     sigaddset(&mask, SIGKILL);
     while (1)
     {

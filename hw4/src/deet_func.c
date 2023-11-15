@@ -106,14 +106,14 @@ int get_input(FILE* stream, char* args[], int* num_args)
         debug("Error: initialization of buffer in input failed.\n");
         exit(1);
     }
-    // flush the buffers
+    // block_signal(SIGCHLD, NULL);
     if (!shutdown)
         log_prompt();
-    unblock_signal(SIGCHLD, NULL);
     if (!suppress)
         print_string(STDOUT_FILENO, "deet> ");
-    // read the input
     int chars_read = getline(&buffer, &size, stream);
+    // unblock_signal(SIGCHLD, NULL);
+    // read the input
     if (buffer[0] == '\0')
     {
         // treat this as a quit

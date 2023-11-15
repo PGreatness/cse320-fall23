@@ -1,4 +1,5 @@
 #include "util.h"
+#include "signaling.h"
 
 int* str_to_int(char* str, int* num)
 {
@@ -31,6 +32,10 @@ unsigned long hex_str_to_long(char* hex_str)
 
 int print_string(int fileno, char* str)
 {
+    // FILE* fd = fdopen(fileno, "w");
+    printf("%s", str);
+    // close(fileno);
+    return 0;
     ssize_t bytes_written;
     size_t len = strlen(str);
     while (len > 0)

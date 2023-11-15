@@ -27,8 +27,12 @@ int run_child_process(char* command, char* args[], int num_args)
         exit(EXIT_FAILURE);
     }
     // add the child to the list of children
+    // block_signal(SIGCHLD, NULL);
+    sigset_t mask = block_all_signals();
     child_t *child = spawn_child(pid, 1, args, num_args);
     child_summary(child, STDOUT_FILENO);
+    // unblock_signal(SIGCHLD, NULL);
+    reset_signals(&mask);
     // we are in the parent process
     return pid;
 }

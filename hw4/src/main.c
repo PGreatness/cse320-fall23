@@ -33,11 +33,11 @@ int main(int argc, char *argv[]) {
     handle_signal_using_handler(SIGINT, handle_sigint);
     handle_signal_using_handler(SIGCHLD, handle_sigchild);
     // block the SIGCHLD signal
-    block_signal(SIGCHLD, NULL);
+    // block_signal(SIGCHLD, NULL);
     while ((c = get_input(stdin, args, &num_args)) > -3)
     {
         state = PSTATE_DEAD;
-        block_signal(SIGCHLD, NULL);
+        // block_signal(SIGCHLD, NULL);
         switch (c)
         {
             case CMD_HELP:
@@ -324,7 +324,6 @@ int main(int argc, char *argv[]) {
 
             default:
                 // print out a ?
-                free_args(args, num_args);
                 if (c == -1 && num_args == 0)
                 {
                     // an empty input was given, quit the program
@@ -341,6 +340,7 @@ int main(int argc, char *argv[]) {
                     log_error(args[0] != 0 ? args[0] : "");
                     print_string(STDOUT_FILENO, "?\n");
                 }
+                free_args(args, num_args);
                 break;
         }
     }
