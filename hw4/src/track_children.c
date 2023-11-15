@@ -356,7 +356,8 @@ void child_summary(child_t* child, int filenum)
     else
     {
         print_string(filenum, "0x");
-        print_int(filenum, child->exit_status);
+        print_int_as_hex(filenum, child->exit_status);
+        // print_int(filenum, child->exit_status);
         print_string(filenum, "\t");
     }
     for (int i = 0; child->args[i] != NULL; i++)

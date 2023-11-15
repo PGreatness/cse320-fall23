@@ -86,6 +86,19 @@ int print_int(int fileno, int var)
     return 0;
 }
 
+int print_int_as_hex(int fileno, int var)
+{
+    char* hex_str = calloc(9, sizeof(char));
+    sprintf(hex_str, "%x", var);
+    if (print_string(fileno, hex_str) == -1)
+    {
+        free(hex_str);
+        return -1;
+    }
+    free(hex_str);
+    return 0;
+}
+
 int print_long_as_hex(int fileno, unsigned long long_num)
 {
     char* hex_str = calloc(17, sizeof(char));

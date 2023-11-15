@@ -17,6 +17,8 @@ int print_string(int fileno, char *str);
 
 int print_int(int fileno, int var);
 
+int print_int_as_hex(int fileno, int var);
+
 int print_long_as_hex(int fileno, unsigned long var);
 
 int contains_state(char* str);

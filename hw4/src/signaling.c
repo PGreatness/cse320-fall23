@@ -102,9 +102,8 @@ void handle_sigchild(int sig)
         // check the child's exit status
         // block_signal(SIGCHLD, NULL);
         block = block_all_signals();
-        int exit_status = WEXITSTATUS(status);
-        set_exit_status(child, exit_status);
-        set_child_status(child, PSTATE_DEAD, exit_status);
+        // int exit_status = WEXITSTATUS(status);
+        set_child_status(child, PSTATE_DEAD, status);
         child_summary(child, STDOUT_FILENO);
         decrement_next_deet_id();
         // unblock_signal(SIGCHLD, NULL);
