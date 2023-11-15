@@ -42,6 +42,7 @@ int main(int argc, char *argv[]) {
         {
             case CMD_HELP:
                 print_help();
+                free_args(args, num_args);
                 break;
             case CMD_QUIT:
                 if (num_args != 0)
@@ -49,6 +50,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: quit command does not take arguments\n");
                     log_error(commands[CMD_QUIT].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 // free the args array
@@ -62,6 +64,7 @@ int main(int argc, char *argv[]) {
                 if (num_args == 0)
                 {
                     show_all_child_processes(STDOUT_FILENO);
+                    free_args(args, num_args);
                     break;
                 }
                 if (str_to_int(args[0], &deet_id) == NULL)
@@ -69,9 +72,11 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     log_error(commands[CMD_SHOW].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 show_child_process(deet_id, STDOUT_FILENO);
+                free_args(args, num_args);
                 break;
             case CMD_RUN:
                 // look at the args array
@@ -83,6 +88,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: no command specified\n");
                     log_error(commands[CMD_RUN].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 debug("Running command %s\n", args[0]);
@@ -91,6 +97,8 @@ int main(int argc, char *argv[]) {
                     debug("Error with running command %s\n", args[0]);
                     log_error(commands[CMD_RUN].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
+                    break;
                 }
                 // free the args array
                 free_args(args, num_args);
@@ -101,6 +109,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: no deet_id specified\n");
                     log_error(commands[CMD_STOP].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (str_to_int(args[0], &deet_id) == NULL)
@@ -108,6 +117,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     log_error(commands[CMD_STOP].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (stop_child_process(deet_id) < 0)
@@ -115,7 +125,10 @@ int main(int argc, char *argv[]) {
                     debug("Error: deet_id %d is not running\n", deet_id);
                     log_error(commands[CMD_STOP].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
+                    break;
                 }
+                free_args(args, num_args);
                 break;
             case CMD_CONT:
                 if (num_args == 0)
@@ -123,6 +136,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: no deet_id specified\n");
                     log_error(commands[CMD_CONT].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (str_to_int(args[0], &deet_id) == NULL)
@@ -130,6 +144,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     log_error(commands[CMD_CONT].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (continue_child_process(deet_id, STDOUT_FILENO) < 0)
@@ -137,7 +152,10 @@ int main(int argc, char *argv[]) {
                     debug("Error: deet_id %d is not stopped\n", deet_id);
                     log_error(commands[CMD_CONT].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
+                    break;
                 }
+                free_args(args, num_args);
                 break;
             case CMD_RELEASE:
                 if (num_args == 0)
@@ -145,6 +163,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: no deet_id specified\n");
                     log_error(commands[CMD_RELEASE].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (str_to_int(args[0], &deet_id) == NULL)
@@ -152,6 +171,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     log_error(commands[CMD_RELEASE].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (release_child_process(deet_id) < 0)
@@ -159,7 +179,10 @@ int main(int argc, char *argv[]) {
                     debug("Error: deet_id %d is not stopped\n", deet_id);
                     log_error(commands[CMD_RELEASE].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
+                    break;
                 }
+                free_args(args, num_args);
                 break;
             case CMD_WAIT:
                 if (num_args < 1)
@@ -167,6 +190,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: no deet_id specified\n");
                     log_error(commands[CMD_WAIT].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (str_to_int(args[0], &deet_id) == NULL)
@@ -174,6 +198,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     log_error(commands[CMD_WAIT].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 state = PSTATE_DEAD;
@@ -182,6 +207,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid command %s\n", args[1]);
                     log_error(commands[CMD_WAIT].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 wait_for_child_process(deet_id, state);
@@ -192,6 +218,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: no deet_id specified\n");
                     log_error(commands[CMD_KILL].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (str_to_int(args[0], &deet_id) == NULL)
@@ -199,6 +226,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     log_error("Invalid process id");
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (kill_child_process(deet_id) < 0)
@@ -206,7 +234,10 @@ int main(int argc, char *argv[]) {
                     debug("Error: deet_id %d is not running\n", deet_id);
                     log_error(commands[CMD_KILL].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
+                    break;
                 }
+                free_args(args, num_args);
                 break;
             case CMD_PEEK:
                 if (num_args < 2 || num_args > 3)
@@ -214,6 +245,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: no deet_id or address specified\n");
                     log_error(commands[CMD_PEEK].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 limit = 1;
@@ -224,6 +256,7 @@ int main(int argc, char *argv[]) {
                         debug("Error: invalid limit of %s\n", args[2]);
                         log_error(commands[CMD_PEEK].name);
                         print_string(STDOUT_FILENO, "?\n");
+                        free_args(args, num_args);
                         break;
                     }
                 }
@@ -232,6 +265,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     log_error(commands[CMD_PEEK].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 // peek at the address
@@ -240,6 +274,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid address of %s\n", args[1]);
                     log_error(commands[CMD_PEEK].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (peek_in_process(deet_id, addr, limit, STDOUT_FILENO) < 0)
@@ -247,7 +282,10 @@ int main(int argc, char *argv[]) {
                     debug("Error: peeking error\n");
                     log_error(commands[CMD_PEEK].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
+                    break;
                 }
+                free_args(args, num_args);
                 break;
             case CMD_POKE:
                 if (num_args != 3)
@@ -255,6 +293,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: no deet_id or address specified\n");
                     log_error(commands[CMD_POKE].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (str_to_int(args[0], &deet_id) == NULL)
@@ -262,6 +301,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     log_error(commands[CMD_POKE].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 // use limit as a temporary variable for the new value
@@ -272,6 +312,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid value of %s\n", args[2]);
                     log_error(commands[CMD_POKE].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 // peek at the address
@@ -280,6 +321,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid address of %s\n", args[1]);
                     log_error(commands[CMD_POKE].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 unsigned long amnt = limit;
@@ -289,7 +331,10 @@ int main(int argc, char *argv[]) {
                     debug("Error: poking error\n");
                     log_error(commands[CMD_POKE].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
+                    break;
                 }
+                free_args(args, num_args);
                 break;
             case CMD_BT:
                 if (num_args < 1 || num_args > 2)
@@ -297,6 +342,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: no deet_id specified\n");
                     log_error(commands[CMD_BT].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (str_to_int(args[0], &deet_id) == NULL)
@@ -304,6 +350,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid deet_id of %s\n", args[0]);
                     log_error(commands[CMD_BT].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 limit = 10;
@@ -312,6 +359,7 @@ int main(int argc, char *argv[]) {
                     debug("Error: invalid limit of %s\n", args[1]);
                     log_error(commands[CMD_BT].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
                     break;
                 }
                 if (backtrace_child_process(deet_id, limit, STDOUT_FILENO) < 0)
@@ -319,7 +367,10 @@ int main(int argc, char *argv[]) {
                     debug("Error: deet_id %d is not running\n", deet_id);
                     log_error(commands[CMD_BT].name);
                     print_string(STDOUT_FILENO, "?\n");
+                    free_args(args, num_args);
+                    break;
                 }
+                free_args(args, num_args);
                 break;
 
             default:
@@ -335,7 +386,9 @@ int main(int argc, char *argv[]) {
                     // an empty input was given, quit the program
                     // free the children
                     eof_flag = 1;
+                    free_args(args, num_args);
                     free_children();
+                    break;
                 } else {
                     log_error(args[0] != 0 ? args[0] : "");
                     print_string(STDOUT_FILENO, "?\n");

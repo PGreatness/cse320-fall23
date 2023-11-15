@@ -26,6 +26,7 @@ typedef struct state {
 extern COMMANDS commands[];
 extern int suppress;
 extern state_t all_states[];
+extern char* getline_buffer;
 
 #define NUM_STATES 7
 

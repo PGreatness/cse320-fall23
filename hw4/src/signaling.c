@@ -61,7 +61,17 @@ void handle_shutdown(int sig)
         child_summary(child, STDOUT_FILENO);
         set_child_status(child, PSTATE_DEAD, status);
         child_summary(child, STDOUT_FILENO);
+        free_child(child);
         // unblock_signal(SIGCHLD, NULL);
+    }
+    // only the dead children remain
+    // free them
+    s = sentinel.next;
+    while (s != &sentinel)
+    {
+        child_t* next = s->next;
+        free_child(s);
+        s = next;
     }
     info("All children dead");
     log_shutdown();
@@ -161,6 +171,8 @@ void handle_sigint(int sig)
 {
     shutdown = 1;
     log_signal(sig);
+    // free the getline buffer
+    free(getline_buffer);
     unblock_signal(SIGCHLD, NULL);
     kill(getpid(), SIGCHLD);
 }
