@@ -39,15 +39,14 @@ void handle_shutdown(int sig)
             continue;
         }
         mask = block_all_signals();
-        if (s->trace)
-            ptrace(PTRACE_KILL, s->pid, NULL, NULL);
-        else
-            kill(s->pid, SIGKILL);
+        kill(s->pid, SIGKILL);
         set_child_status(s, PSTATE_KILLED, -1);
-        child_summary(s, STDOUT_FILENO);
+        // child_summary(s, STDOUT_FILENO);
         reset_signals(&mask);
         s = s->next;
     }
+
+    child_summaries_in_state(PSTATE_KILLED, STDOUT_FILENO);
 
     info("Waiting for children, do we have?: %i", has_children);
     while (has_children && (child_pid = waitpid(-1, &status, 0)) > 0)

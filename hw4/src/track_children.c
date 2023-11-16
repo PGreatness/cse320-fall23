@@ -20,6 +20,7 @@ static pid_t next_deet_id = 0;
 int find_next_deet_id()
 {
     child_t* child = sentinel.next;
+    int i = 0;
     while (child != &sentinel)
     {
         if (child->status == PSTATE_DEAD)
@@ -30,9 +31,10 @@ int find_next_deet_id()
             return deetId;
         }
         child = child->next;
+        i++;
     }
-    int deetId = next_deet_id;
-    next_deet_id++;
+    int deetId = i;
+    next_deet_id = i + 1;
     return deetId;
 }
 
@@ -309,6 +311,19 @@ child_t* get_child_by_deet_id_ig(int deetId)
 child_t* get_last_child()
 {
     return tail;
+}
+
+void child_summaries_in_state(int state, int filenum)
+{
+    child_t* child = sentinel.next;
+    while (child != &sentinel)
+    {
+        if (child->status == state)
+        {
+            child_summary(child, filenum);
+        }
+        child = child->next;
+    }
 }
 
 void child_summary(child_t* child, int filenum)

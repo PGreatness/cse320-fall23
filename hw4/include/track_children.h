@@ -98,6 +98,8 @@ pid_t stop_child(pid_t pid);
 
 pid_t release_child(pid_t pid);
 
+void child_summaries_in_state(int state, int filenum);
+
 void child_summary(child_t* child, int filenum);
 
 void set_exit_status(child_t *child, int status);
