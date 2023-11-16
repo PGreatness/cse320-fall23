@@ -7,18 +7,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/ptrace.h>
 
 #include "deet.h"
 #include "debug.h"
+#include "util.h"
 
 typedef struct child {
     pid_t pid;
     pid_t deetId;
     int status;
     int trace;
+    int exit_status;
     char *command;
     char **args;
+    int argc;
     struct child *next;
+    struct child *prev;
 } child_t;
 
 extern child_t sentinel;
@@ -68,9 +73,11 @@ int set_child_status_by_pid(pid_t pid, int status);
  * @brief Set the status of the child process.
  * @param child A pointer to the `child_t` struct for the child process.
  * @param status The status of the child process.
+ * @param exit_status The exit status of the child process. Can be 0 if
+ * the child process did not exit.
  * @return 0 if successful, -1 otherwise.
 */
-int set_child_status(child_t *child, int status);
+int set_child_status(child_t *child, int status, int exit_status);
 
 /**
  * @brief Get the child process with the given deet ID.
@@ -79,10 +86,26 @@ int set_child_status(child_t *child, int status);
 */
 child_t *get_child_by_deet_id(pid_t deetId);
 
+child_t *get_child_by_deet_id_ig(pid_t deetId);
+
 /**
  * @brief Get the last child process.
  * @return A pointer to the `child_t` struct for the last child process.
 */
 child_t *get_last_child();
+
+pid_t stop_child(pid_t pid);
+
+pid_t release_child(pid_t pid);
+
+void child_summary(child_t* child, int filenum);
+
+void set_exit_status(child_t *child, int status);
+
+void free_child(child_t *child);
+
+int decrement_next_deet_id();
+int increment_next_deet_id();
+int get_next_deet_id();
 
 #endif //HW4_TRACK_CHILDREN_H

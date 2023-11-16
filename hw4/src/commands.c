@@ -37,5 +37,5 @@ COMMANDS commands[] = {
         3, 3},
         {CMD_BT, "bt",
                 "Show a stack trace for a traced process",
-        1, 1}
+        1, 2}
 };

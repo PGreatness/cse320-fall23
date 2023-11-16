@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "debug.h"
 #include "track_children.h"
+#include "child_processes.h"
 
 void free_args(char *args[], int size);
 

@@ -7,6 +7,9 @@
 #include <errno.h>
 #include <signal.h>
 
+extern int shutdown;
+extern int eof_flag;
+
 // Handlers
 /**
  * Signal handler for SIGCHLD
@@ -14,8 +17,16 @@
  */
 void handle_sigchild(int sig);
 
-void block_signal(int sig);
-void unblock_signal(int sig);
+void handle_sigint(int sig);
+
+sigset_t block_all_signals();
+sigset_t reset_signals(sigset_t* oldmask);
+
+void block_signal(int sig, sigset_t *set);
+void unblock_signal(int sig, sigset_t *set);
+
+int suspend_until_state(int deetId, int state);
+
 void handle_signal_using_handler(int sig, void (*handler)(int));
 
 
