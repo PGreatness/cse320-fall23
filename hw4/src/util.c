@@ -48,23 +48,7 @@ long hex_str_to_long(char* hex_str)
 
 int print_string(int fileno, char* str)
 {
-    // FILE* fd = fdopen(fileno, "w");
     printf("%s", str);
-    // close(fileno);
-    return 0;
-    ssize_t bytes_written;
-    size_t len = strlen(str);
-    while (len > 0)
-    {
-        do
-        {
-            bytes_written = write(fileno, str, len);
-        } while ((bytes_written < 0) && (errno == EINTR));
-        if (bytes_written < 0)
-            return -1;
-        len -= bytes_written;
-        str += bytes_written;
-    }
     return 0;
 }
 
