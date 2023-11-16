@@ -363,7 +363,8 @@ void child_summary(child_t* child, int filenum)
     for (int i = 0; child->args[i] != NULL; i++)
     {
         print_string(filenum, child->args[i]);
-        print_string(filenum, " ");
+        if (child->args[i + 1] != NULL)
+            print_string(filenum, " ");
     }
     print_string(filenum, "\n");
 }
