@@ -19,6 +19,8 @@ void handle_sigchild(int sig);
 
 void handle_sigint(int sig);
 
+void handle_shutdown(int sig);
+
 sigset_t block_all_signals();
 sigset_t reset_signals(sigset_t* oldmask);
 
