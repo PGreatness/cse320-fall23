@@ -9,6 +9,8 @@
 #include "deet.h"
 #include "deet_func.h"
 
+int replace_tabs_with_space(char *str);
+
 int* str_to_int(char *str, int *num);
 
 long hex_str_to_long(char *hex_str);

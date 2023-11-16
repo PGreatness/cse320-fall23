@@ -1,6 +1,22 @@
 #include "util.h"
 #include "signaling.h"
 
+int replace_tabs_with_space(char* str)
+{
+    int num_tabs = 0;
+    char* w = str;
+    while (*w != '\0' && *w != '\n')
+    {
+        if (*w == '\t')
+        {
+            *w = ' ';
+            num_tabs++;
+        }
+        w++;
+    }
+    return num_tabs;
+}
+
 int* str_to_int(char* str, int* num)
 {
     int result = 0;

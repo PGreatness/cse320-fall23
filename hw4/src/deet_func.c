@@ -148,6 +148,7 @@ int get_input(FILE* stream, char* args[], int* num_args)
         return -2;
     }
     log_input(getline_buffer);
+    replace_tabs_with_space(getline_buffer);
     if (getline_buffer[0] == '\n')
     {
         args[0] = 0;
