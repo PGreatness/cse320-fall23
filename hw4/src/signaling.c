@@ -91,58 +91,58 @@ void handle_sigchild(int sig)
     while ((child_pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED)) > 0)
     {
         log_signal(sig);
-    debug("Signal recieved, is we done? %s, child: %i", WIFEXITED(status) ? "yes" : "no", child_pid);
-    child_t *child = get_child(child_pid);
-    if (child == NULL)
-    {
-        debug("child not found");
-        return;
-    }
-    if (WTERMSIG(status) == SIGKILL)
-    {
-        // child is killed, set it to killed
-        block = block_all_signals();
-        // block_signal(SIGCHLD, NULL);
-        set_exit_status(child, SIGKILL);
-        set_child_status(child, PSTATE_DEAD, status);
-        child_summary(child, STDOUT_FILENO);
-        // unblock_signal(SIGCHLD, NULL);
-        reset_signals(&block);
-        kill(getpid(), SIGCHLD);
-    }
-    if (WIFEXITED(status))
-    {
-        // child is exited, set it to dead
-        // check the child's exit status
-        // block_signal(SIGCHLD, NULL);
-        block = block_all_signals();
-        // int exit_status = WEXITSTATUS(status);
-        set_child_status(child, PSTATE_DEAD, status);
-        child_summary(child, STDOUT_FILENO);
-        decrement_next_deet_id();
-        // unblock_signal(SIGCHLD, NULL);
-        reset_signals(&block);
-        kill(getpid(), SIGCHLD);
-    }
-    if (WIFSTOPPED(status))
-    {
-        // block_signal(SIGCHLD, NULL);
-        block = block_all_signals();
-        set_child_status(child, PSTATE_STOPPED, -1);
-        child_summary(child, STDOUT_FILENO);
-        // unblock_signal(SIGCHLD, NULL);
-        reset_signals(&block);
-    }
-    if (WIFCONTINUED(status))
-    {
-        // child is continued, set it to running
-        // block_signal(SIGCHLD, NULL);
-        block = block_all_signals();
-        set_child_status(child, PSTATE_RUNNING, -1);
-        child_summary(child, STDOUT_FILENO);
-        // unblock_signal(SIGCHLD, NULL);
-        reset_signals(&block);
-    }
+        debug("Signal recieved, is we done? %s, child: %i", WIFEXITED(status) ? "yes" : "no", child_pid);
+        child_t *child = get_child(child_pid);
+        if (child == NULL)
+        {
+            debug("child not found");
+            return;
+        }
+        if (WTERMSIG(status) == SIGKILL)
+        {
+            // child is killed, set it to killed
+            block = block_all_signals();
+            // block_signal(SIGCHLD, NULL);
+            set_exit_status(child, SIGKILL);
+            set_child_status(child, PSTATE_DEAD, status);
+            child_summary(child, STDOUT_FILENO);
+            // unblock_signal(SIGCHLD, NULL);
+            reset_signals(&block);
+            kill(getpid(), SIGCHLD);
+        }
+        if (WIFEXITED(status))
+        {
+            // child is exited, set it to dead
+            // check the child's exit status
+            // block_signal(SIGCHLD, NULL);
+            block = block_all_signals();
+            // int exit_status = WEXITSTATUS(status);
+            set_child_status(child, PSTATE_DEAD, status);
+            child_summary(child, STDOUT_FILENO);
+            decrement_next_deet_id();
+            // unblock_signal(SIGCHLD, NULL);
+            reset_signals(&block);
+            kill(getpid(), SIGCHLD);
+        }
+        if (WIFSTOPPED(status))
+        {
+            // block_signal(SIGCHLD, NULL);
+            block = block_all_signals();
+            set_child_status(child, PSTATE_STOPPED, -1);
+            child_summary(child, STDOUT_FILENO);
+            // unblock_signal(SIGCHLD, NULL);
+            reset_signals(&block);
+        }
+        if (WIFCONTINUED(status))
+        {
+            // child is continued, set it to running
+            // block_signal(SIGCHLD, NULL);
+            block = block_all_signals();
+            set_child_status(child, PSTATE_RUNNING, -1);
+            child_summary(child, STDOUT_FILENO);
+            // unblock_signal(SIGCHLD, NULL);
+            reset_signals(&block);
+        }
     }
 }
 
