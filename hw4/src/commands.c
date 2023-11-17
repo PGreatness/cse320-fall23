@@ -24,7 +24,7 @@ COMMANDS commands[] = {
                 "Stop tracing a process, allowing it to continue normally",
         1, 1},
         {CMD_WAIT, "wait",
-                "Wait for a process to enter a specified state",
+                "Wait for a process to enter a specified state or terminate",
         1, 2},
         {CMD_KILL, "kill",
                 "Forcibly terminate a process",
