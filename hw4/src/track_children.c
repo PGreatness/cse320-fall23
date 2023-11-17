@@ -21,6 +21,7 @@ int find_next_deet_id()
 {
     child_t* child = sentinel.next;
     int i = 0;
+    int id = -1;
     while (child != &sentinel)
     {
         if (child->status == PSTATE_DEAD)
@@ -28,11 +29,12 @@ int find_next_deet_id()
             int deetId = child->deetId;
             set_child_status(child, PSTATE_NONE, -1);
             free_child(child);
-            return deetId;
+            if (id == -1) id = deetId;
         }
         child = child->next;
         i++;
     }
+    if (id != -1) return id;
     int deetId = i;
     next_deet_id = i + 1;
     return deetId;
@@ -146,6 +148,7 @@ pid_t kill_child(pid_t pid)
     }
     pid_t killed_pid = child->pid;
     set_child_status(child, PSTATE_KILLED, -1);
+    child_summary(child, STDERR_FILENO);
     warn("Killing child %d", killed_pid);
     kill(killed_pid, SIGKILL);
     // ptrace(PTRACE_KILL, killed_pid, NULL, NULL);
