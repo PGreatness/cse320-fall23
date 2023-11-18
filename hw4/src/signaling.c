@@ -3,6 +3,7 @@
 
 int shutdown = 0;
 int eof_flag = 0;
+int free_flag = 1;
 
 sigset_t block_all_signals()
 {
@@ -72,6 +73,7 @@ void handle_shutdown(int sig)
     s = sentinel.next;
     while (s != &sentinel)
     {
+        // printf("HERE\n");
         child_t* next = s->next;
         free_child(s);
         s = next;
@@ -89,6 +91,7 @@ void handle_sigchild(int sig)
     sigset_t block;
     while ((child_pid = waitpid(-1, &status, WNOHANG | WUNTRACED | WCONTINUED)) > 0)
     {
+        can_print = 0;
         log_signal(sig);
         debug("Signal recieved, is we done? %s, child: %i", WIFEXITED(status) ? "yes" : "no", child_pid);
         child_t *child = get_child(child_pid);
@@ -142,6 +145,7 @@ void handle_sigchild(int sig)
             // unblock_signal(SIGCHLD, NULL);
             reset_signals(&block);
         }
+        can_print = 1;
     }
 }
 
@@ -150,23 +154,17 @@ int suspend_until_state(int deetId, int state)
     child_t* child = get_child_by_deet_id(deetId);
     if (child == NULL)
         return -1;
-    sigset_t mask, oldmask;
+    sigset_t mask;
     sigemptyset(&mask);
-    sigaddset(&mask, SIGCHLD);
-    sigaddset(&mask, SIGINT);
-    sigaddset(&mask, SIGKILL);
+    free_flag = 0;
     while (1)
     {
-        ptrace(PTRACE_INTERRUPT, child->pid, NULL, NULL);
         if (child->status == state)
         {
-            kill(getpid(), SIGCHLD);
+            free_flag = 1;
             return 0;
         }
-        // block_signal(SIGCHLD, NULL);
-        unblock_signal(SIGCHLD, NULL);
-        ptrace(PTRACE_DETACH, child->pid, NULL, NULL); // TODO: Remove
-        sigsuspend(&oldmask);
+        sigsuspend(&mask);
     }
 }
 
@@ -175,7 +173,7 @@ void handle_sigint(int sig)
     shutdown = 1;
     log_signal(sig);
     // free the getline buffer
-    free(getline_buffer);
+    if (free_flag) free(getline_buffer);
     unblock_signal(SIGCHLD, NULL);
     kill(getpid(), SIGCHLD);
 }

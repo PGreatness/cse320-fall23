@@ -27,6 +27,7 @@ extern COMMANDS commands[];
 extern int suppress;
 extern state_t all_states[];
 extern char* getline_buffer;
+extern volatile int can_print;
 
 #define NUM_STATES 7
 

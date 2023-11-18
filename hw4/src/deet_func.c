@@ -2,6 +2,7 @@
 
 int suppress = 0;
 char* getline_buffer;
+volatile int can_print = 1;
 state_t all_states[] = {
     {
         PSTATE_NONE,
@@ -108,6 +109,7 @@ int get_input(FILE* stream, char* args[], int* num_args)
         exit(1);
     }
     // block_signal(SIGCHLD, NULL);
+    while (!can_print);
     if (!shutdown)
         log_prompt();
     if (!suppress)

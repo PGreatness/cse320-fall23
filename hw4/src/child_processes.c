@@ -31,6 +31,7 @@ int run_child_process(char* command, char* args[], int num_args)
     sigset_t mask = block_all_signals();
     child_t *child = spawn_child(pid, 1, args, num_args);
     child_summary(child, STDOUT_FILENO);
+    can_print = 0;
     // unblock_signal(SIGCHLD, NULL);
     reset_signals(&mask);
     // we are in the parent process
@@ -58,12 +59,14 @@ void show_all_child_processes(int filenum)
     // get the first child
     child_t *child = sentinel.next;
 
+    can_print = 0;
     // iterate over all children
     while (child != &sentinel)
     {
         child_summary(child, filenum);
         child = child->next;
     }
+    can_print = 1;
 
 }
 
@@ -99,6 +102,7 @@ int continue_child_process(int deet_id, int filenum)
     }
     set_child_status(child, state, -1);
     child_summary(child, filenum);
+    can_print = 1;
     return 0;
 }
 
@@ -115,7 +119,10 @@ int kill_child_process(int deet_id)
     }
 
     // kill the child process
+    sigset_t mask = block_all_signals();
     kill_child(child->pid);
+    can_print = 0;
+    reset_signals(&mask);
     return 0;
 }
 
@@ -176,7 +183,9 @@ int release_child_process(int deetId)
 
 void wait_for_child_process(int deetId, int state)
 {
+    can_print = 0;
     suspend_until_state(deetId, state);
+    can_print = 1;
 }
 
 int peek_in_process(int deetId, unsigned long addr, int amnt, int filenum)
