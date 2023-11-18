@@ -55,6 +55,13 @@ int remove_all_dead_children();
  * @return A pointer to the `child_t` struct for the child process.
 */
 child_t *get_child(pid_t pid);
+
+/**
+ * @brief Get the number of child processes in the given state.
+ * @param state The state to check for.
+ * @return The number of child processes in the given state.
+*/
+int count_in_state(int state);
 /**
  * @brief Get the status of the child process with the given PID.
  * @param pid The PID of the child process.

@@ -23,17 +23,13 @@ sigset_t reset_signals(sigset_t* oldmask)
 
 void handle_shutdown(int sig)
 {
-    int status;
-    pid_t child_pid;
     if (!shutdown)
         return;
     child_t* s = sentinel.next;
     info("Shutting down");
     sigset_t mask;
-    int has_children = 0;
     while (s != &sentinel)
     {
-        has_children = 1;
         if (s->status == PSTATE_DEAD)
         {
             s = s->next;
@@ -48,32 +44,20 @@ void handle_shutdown(int sig)
     }
 
     child_summaries_in_state(PSTATE_KILLED, STDOUT_FILENO);
+    // stops the program from relooping and attempting to kill the children again
+    shutdown = 0;
 
-    info("Waiting for children, do we have?: %i", has_children);
-    while (has_children && (child_pid = waitpid(-1, &status, 0)) > 0)
-    {
-        log_signal(sig);
-        // printf("HERE\n");
-        warn("Child %i exited with status %i", child_pid, status);
-        child_t *child = get_child(child_pid);
-        if (child == NULL)
-        {
-            debug("child not found");
-            return;
-        }
-        // block_signal(SIGCHLD, NULL);
-        mask = block_all_signals();
-        set_child_status(child, PSTATE_DEAD, status);
-        child_summary(child, STDOUT_FILENO);
-        free_child(child);
-        reset_signals(&mask);
-    }
+    sigset_t mask2;
+    sigemptyset(&mask2);
+    sigaddset(&mask2, SIGINT);
+
+    while (count_in_state(PSTATE_KILLED) > 0) sigsuspend(&mask2);
+
     // only the dead children remain
     // free them
     s = sentinel.next;
     while (s != &sentinel)
     {
-        // printf("HERE\n");
         child_t* next = s->next;
         free_child(s);
         s = next;

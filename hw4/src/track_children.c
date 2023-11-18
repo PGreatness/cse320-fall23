@@ -316,6 +316,21 @@ child_t* get_last_child()
     return tail;
 }
 
+int count_in_state(int state)
+{
+    int count = 0;
+    child_t* child = sentinel.next;
+    while (child != &sentinel)
+    {
+        if (child->status == state)
+        {
+            count++;
+        }
+        child = child->next;
+    }
+    return count;
+}
+
 void child_summaries_in_state(int state, int filenum)
 {
     child_t* child = sentinel.next;
