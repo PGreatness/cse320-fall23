@@ -25,6 +25,7 @@ void handle_shutdown(int sig)
 {
     if (!shutdown)
         return;
+    if (shutdown > 1) log_signal(sig);
     child_t* s = sentinel.next;
     info("Shutting down");
     sigset_t mask;
@@ -154,7 +155,7 @@ int suspend_until_state(int deetId, int state)
 
 void handle_sigint(int sig)
 {
-    shutdown = 1;
+    shutdown = 2;
     log_signal(sig);
     // free the getline buffer
     if (free_flag) free(getline_buffer);
