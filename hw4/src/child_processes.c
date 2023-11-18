@@ -94,14 +94,16 @@ int continue_child_process(int deet_id, int filenum)
     int state = PSTATE_RUNNING;
     if (child->trace)
     {
+        set_child_status(child, state, -1);
+        child_summary(child, filenum);
         ptrace(PTRACE_CONT, child->pid, NULL, NULL);
     }
     else{
         state = PSTATE_CONTINUING;
+        set_child_status(child, state, -1);
+        child_summary(child, filenum);
         kill(child->pid, SIGCONT);
     }
-    set_child_status(child, state, -1);
-    child_summary(child, filenum);
     can_print = 1;
     return 0;
 }
