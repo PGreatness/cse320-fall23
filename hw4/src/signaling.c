@@ -156,21 +156,14 @@ int suspend_until_state(int deetId, int state)
         return -1;
     sigset_t mask;
     sigemptyset(&mask);
-    // sigaddset(&mask, SIGCHLD);
-    // sigaddset(&mask, SIGINT);
-    // sigaddset(&mask, SIGKILL);
     free_flag = 0;
     while (1)
     {
-        // ptrace(PTRACE_INTERRUPT, child->pid, NULL, NULL);
         if (child->status == state)
         {
-            kill(getpid(), SIGCHLD);
             free_flag = 1;
             return 0;
         }
-        // block_signal(SIGCHLD, NULL);
-        // ptrace(PTRACE_DETACH, child->pid, NULL, NULL); // TODO: Remove
         sigsuspend(&mask);
     }
 }
