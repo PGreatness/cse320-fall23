@@ -73,7 +73,7 @@ int main(int argc, char* argv[]){
     // shutdown of the server.
 
     // Install SIGHUP handler
-    install_signal_handler(SIGHUP, sighup_handler, SA_RESTART);
+    install_signal_handler(SIGHUP, terminate, SA_RESTART);
     // loop to accept connections
     while (1)
     {
