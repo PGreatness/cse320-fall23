@@ -22,8 +22,8 @@ void process_connection(int connfd)
         debug("error: proto_recv_packet, rc: %d\n", rc);
         exit(EXIT_FAILURE);
     }
-    debug("Received packet with type: %d\n", pkt->type);
-    debug("Buffer: %s\n", (char *)data);
+    warn("Received packet with type: %d and serial: %d\n", pkt->type, pkt->serial);
+    warn("Buffer: %s\n", (char *)data);
     // send a reply
     XACTO_PACKET *reply = malloc(sizeof(XACTO_PACKET));
     reply->type = XACTO_REPLY_PKT;
@@ -32,6 +32,7 @@ void process_connection(int connfd)
     reply->size = 0;
     reply->timestamp_sec = 0;
     reply->timestamp_nsec = 0;
+    reply->serial = pkt->serial;
     if ((rc = proto_send_packet(connfd, reply, NULL)) < 0) {
         debug("error: proto_send_packet, rc: %d\n", rc);
         exit(EXIT_FAILURE);

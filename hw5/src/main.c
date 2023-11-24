@@ -24,8 +24,6 @@ int main(int argc, char* argv[]){
     int opt_index = 0;
 
     int port = -1;
-    char *hostname = NULL;
-    int is_quiet = 0;
 
     while ((opt = getopt_long(argc, argv, STUDENT_SHORT_OPTIONS, STUDENT_LONG_OPTIONS, &opt_index)) != -1)
     {
@@ -38,27 +36,19 @@ int main(int argc, char* argv[]){
                 exit(EXIT_FAILURE);
             }
             break;
-        case 'h':
-            hostname = optarg;
-            break;
-        case 'q':
-            is_quiet = 1;
-            break;
         default:
-            fprintf(stderr, "Usage: %s -p <port> [-h <hostname>] [-q]\n", argv[0]);
+            fprintf(stderr, "Usage: %s -p <port>\n", argv[0]);
             exit(EXIT_FAILURE);
         }
     }
 
     if (port < 0)
     {
-        fprintf(stderr, "Usage: %s -p <port> [-h <hostname>] [-q]\n", argv[0]);
+        fprintf(stderr, "Usage: %s -p <port>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
-    printf("port: %d\n", port);
-    printf("hostname: %s\n", hostname);
-    printf("is_quiet: %d\n", is_quiet);
+    info("running on port: %d", port);
 
     // Perform required initializations of the client_registry,
     // transaction manager, and object store.

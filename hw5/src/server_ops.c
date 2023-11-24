@@ -19,7 +19,7 @@ int listen_for_connections(int port)
     }
 }
 
-void *xacto_client_service(void *arg)
+/* void *xacto_client_service(void *arg)
 {
     int connfd = *((int *)arg);
     free(arg);
@@ -31,4 +31,4 @@ void *xacto_client_service(void *arg)
         exit(EXIT_FAILURE);
     }
     return NULL;
-}
+} */
