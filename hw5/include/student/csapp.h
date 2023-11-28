@@ -82,6 +82,7 @@ void Readline_rinit(int fd, void *ptr, size_t maxlen, Rline *rptr);
 /* Our own client/server helper functions */
 int open_clientfd(char *hostname, int portno);
 int open_listenfd(int portno);
+void Close(int fd);
 /* $end csapp.h */
 
 

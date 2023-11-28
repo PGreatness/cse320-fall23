@@ -134,3 +134,14 @@ void Setsockopt(int s, int level, int optname, const void *optval, int optlen)
         exit(EXIT_FAILURE);
     }
 }
+
+void Close(int fd)
+{
+    int rc;
+
+    if ((rc = close(fd)) < 0)
+    {
+        debug("error: close, rc: %d\n", rc);
+        exit(EXIT_FAILURE);
+    }
+}

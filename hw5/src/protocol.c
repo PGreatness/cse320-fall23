@@ -44,8 +44,16 @@ int proto_send_packet(int fd, XACTO_PACKET *pkt, void *data)
         debug("sent payload of size %d", htonl(pkt->size));
     } else {
         debug("Send a special null data value, which has no content");
+        sent = writen(fd, NULL, 0);
+        if (sent < 0)
+        {
+            debug("Error sending payload");
+            errno = EIO;
+            return -1;
+        }
+        debug("sent payload of size %d", 0);
         // sent = write(fd, NULL, 0);
-        XACTO_PACKET xdata = {0};
+        /* XACTO_PACKET xdata = {0};
         xdata.null = 1;
         sent = writen(fd, &xdata, sizeof(XACTO_PACKET));
         if (sent < 0)
@@ -55,7 +63,7 @@ int proto_send_packet(int fd, XACTO_PACKET *pkt, void *data)
             errno = EIO;
             return -1;
         }
-        debug("sent payload of size %li", sizeof(XACTO_PACKET));
+        debug("sent payload of size %li", sizeof(XACTO_PACKET)); */
     }
     debug("Sent packet");
 
@@ -71,8 +79,16 @@ int proto_recv_packet(int fd, XACTO_PACKET *pkt, void **datap)
     if (received < 0)
     {
         debug("Error receiving packet");
-        perror("read");
+        // perror("read");
         errno = EIO;
+        return -1;
+    }
+    // check for eof
+    if (received == 0)
+    {
+        debug("EOF received");
+        // close the connection
+        Close(fd);
         return -1;
     }
 
@@ -93,6 +109,12 @@ int proto_recv_packet(int fd, XACTO_PACKET *pkt, void **datap)
         if (size > 0)
         {
             *datap = malloc(size + 1);
+            if (*datap == NULL)
+            {
+                debug("Error allocating memory for payload");
+                errno = ENOMEM;
+                return -1;
+            }
             // received = read(fd, *datap, size);
             received = readn(fd, *datap, size);
             if (received < 0)

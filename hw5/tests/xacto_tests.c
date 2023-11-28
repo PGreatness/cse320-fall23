@@ -13,6 +13,7 @@ static void init() {
     do { // Wait for server to start
 	ret = system("netstat -an | fgrep '0.0.0.0:9999' > /dev/null");
 	sleep(1);
+    fprintf(stderr, "Waiting for server to start... %d\n", i);
     } while(++i < 30 && WEXITSTATUS(ret));
 #endif
 }

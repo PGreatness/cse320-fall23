@@ -1,10 +1,5 @@
 #include "student/signaling.h"
-
-void sighup_handler(int sig)
-{
-    printf("SIGHUP received\n");
-    exit(EXIT_SUCCESS);
-}
+#include "debug.h"
 
 void install_signal_handler(int signum, void (*handler)(int), int flags)
 {
