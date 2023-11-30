@@ -45,14 +45,14 @@ int main(int argc, char* argv[]){
             break;
         default:
             fprintf(stderr, "Usage: %s -p <port>\n", argv[0]);
-            exit(EXIT_FAILURE);
+            exit(EXIT_SUCCESS);
         }
     }
 
     if (port < 0)
     {
         fprintf(stderr, "Usage: %s -p <port>\n", argv[0]);
-        exit(EXIT_FAILURE);
+        exit(EXIT_SUCCESS);
     }
 
     info("running on port: %d", port);
