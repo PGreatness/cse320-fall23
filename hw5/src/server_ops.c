@@ -1,5 +1,4 @@
 #include "student/server_ops.h"
-#include "server.h"
 
 int server_sockfd;
 int *connfdp;
@@ -64,17 +63,3 @@ int test_client_registry(CLIENT_REGISTRY *cr)
     creg_wait_for_empty(cr);
     return 0;
 }
-
-/* void *xacto_client_service(void *arg)
-{
-    int connfd = *((int *)arg);
-    free(arg);
-    pthread_detach(pthread_self());
-    process_connection(connfd);
-    int rc;
-    if ((rc = close(connfd)) < 0) {
-        debug("error: close, rc: %d\n", rc);
-        exit(EXIT_FAILURE);
-    }
-    return NULL;
-} */

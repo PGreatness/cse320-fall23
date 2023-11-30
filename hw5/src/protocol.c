@@ -10,16 +10,17 @@
 int proto_send_packet(int fd, XACTO_PACKET *pkt, void *data)
 {
     // Convert multi-byte fields to network byte order
-    /* debug("serial: %d", htonl(pkt->serial));
+    pkt->null = data == NULL ? 1 : 0;
+
+    uint32_t size = pkt->size;
+    // Send the packet
+    debug("Sending packet:\ntype: %d,\nstatus: %d,\nnull: %d,\nserial: %d,\nsize: %d,\ntimestamp_sec: %d,\ntimestamp_nsec: %d",
+        pkt->type, pkt->status, pkt->null, pkt->serial, pkt->size, pkt->timestamp_sec, pkt->timestamp_nsec);
+    // debug("serial: %d", htonl(pkt->serial));
     pkt->serial = htonl(pkt->serial);
     pkt->size = htonl(pkt->size);
     pkt->timestamp_sec = htonl(pkt->timestamp_sec);
-    pkt->timestamp_nsec = htonl(pkt->timestamp_nsec); */
-    pkt->null = data == NULL ? 1 : 0;
-
-    // Send the packet
-    debug("Sending packet:\ntype: %d,\nstatus: %d,\nnull: %d,\nserial: %d,\nsize: %d,\ntimestamp_sec: %d,\ntimestamp_nsec: %d",
-        pkt->type, pkt->status, pkt->null, htonl(pkt->serial), htonl(pkt->size), htonl(pkt->timestamp_sec), htonl(pkt->timestamp_nsec));
+    pkt->timestamp_nsec = htonl(pkt->timestamp_nsec);
     // int sent = write(fd, pkt, sizeof(XACTO_PACKET));
     int sent = writen(fd, pkt, sizeof(XACTO_PACKET));
     if (sent < 0)
@@ -34,14 +35,15 @@ int proto_send_packet(int fd, XACTO_PACKET *pkt, void *data)
     {
         debug("Sending payload");
         // sent = write(fd, data, htonl(pkt->size));
-        sent = writen(fd, data, htonl(pkt->size));
+        sent = writen(fd, data, size);
         if (sent < 0)
         {
-            debug("Error sending payload");
+            perror("write");
+            debug("Error sending payload %s of size %d to %d", (char*) data, size, fd);
             errno = EIO;
             return -1;
         }
-        debug("sent payload of size %d", htonl(pkt->size));
+        debug("sent payload [%s] of size %d", (char*) data, size);
     } else {
         debug("Send a special null data value, which has no content");
         sent = writen(fd, NULL, 0);
@@ -93,18 +95,19 @@ int proto_recv_packet(int fd, XACTO_PACKET *pkt, void **datap)
     }
 
     // Convert multi-byte fields to host byte order
-    // pkt->serial = ntohl(pkt->serial);
-    // pkt->size = ntohl(pkt->size);
-    // pkt->timestamp_sec = ntohl(pkt->timestamp_sec);
-    // pkt->timestamp_nsec = ntohl(pkt->timestamp_nsec);
 
     debug("Received packet:\ntype: %d,\nstatus: %d,\nnull: %d,\nserial: %d,\nsize: %d,\ntimestamp_sec: %d,\ntimestamp_nsec: %d",
         pkt->type, pkt->status, pkt->null, ntohl(pkt->serial), ntohl(pkt->size), ntohl(pkt->timestamp_sec), ntohl(pkt->timestamp_nsec));
 
+    pkt->serial = ntohl(pkt->serial);
+    pkt->size = ntohl(pkt->size);
+    pkt->timestamp_sec = ntohl(pkt->timestamp_sec);
+    pkt->timestamp_nsec = ntohl(pkt->timestamp_nsec);
+
     if (ntohl(pkt->size))
     {
         // Receive the key
-        uint32_t size = ntohl(pkt->size);
+        uint32_t size = pkt->size;
         debug("Receiving key of size %d", size);
         if (size > 0)
         {

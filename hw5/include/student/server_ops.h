@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "server.h"
 #include "student/csapp.h"
 #include "student/thread_ops.h"
 #include "client_registry.h"
