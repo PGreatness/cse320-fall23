@@ -65,6 +65,9 @@ void blob_unref(BLOB *blob, char* why)
         free(blob->content);
         free(blob->prefix);
         free(blob);
+        pthread_mutex_unlock(&blob->mutex);
+        pthread_mutex_destroy(&blob->mutex);
+        return;
     }
     pthread_mutex_unlock(&blob->mutex);
 }
