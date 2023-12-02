@@ -10,6 +10,93 @@
 
 CLIENT_REGISTRY *client_registry;
 
+void send_reply_packet(int fd, XACTO_PACKET* request, int status)
+{
+    XACTO_PACKET *response = malloc(sizeof(XACTO_PACKET));
+    if (response == NULL) {
+        debug("response is null");
+        return;
+    }
+    response->type = XACTO_REPLY_PKT;
+    response->serial = request->serial;
+    response->size = 0;
+    response->status = status;
+    response->timestamp_sec = request->timestamp_sec;
+    response->timestamp_nsec = request->timestamp_nsec;
+
+    // convert to network byte order
+    response->serial = htonl(response->serial);
+    response->size = htonl(response->size);
+    response->timestamp_sec = htonl(response->timestamp_sec);
+    response->timestamp_nsec = htonl(response->timestamp_nsec);
+
+    int write_success = proto_send_packet(fd, response, NULL);
+    if (write_success < 0) {
+        debug("Error writing response packet");
+        return;
+    }
+    // free the response packet
+    free(response);
+}
+
+void send_key_packet(int fd, XACTO_PACKET* request, void* payload, int status)
+{
+    XACTO_PACKET *response = malloc(sizeof(XACTO_PACKET));
+    if (response == NULL) {
+        debug("response is null");
+        return;
+    }
+    response->type = XACTO_KEY_PKT;
+    response->serial = request->serial;
+    response->size = request->size;
+    response->status = status;
+    response->timestamp_sec = request->timestamp_sec;
+    response->timestamp_nsec = request->timestamp_nsec;
+
+    // convert to network byte order
+    response->serial = htonl(response->serial);
+    response->size = htonl(response->size);
+    response->timestamp_sec = htonl(response->timestamp_sec);
+    response->timestamp_nsec = htonl(response->timestamp_nsec);
+
+    int write_success = proto_send_packet(fd, response, payload);
+    if (write_success < 0) {
+        debug("Error writing response packet");
+        return;
+    }
+    // free the response packet
+    free(response);
+}
+
+void send_value_packet(int fd, XACTO_PACKET* request, void* payload, int size, int status)
+{
+    XACTO_PACKET *response = malloc(sizeof(XACTO_PACKET));
+    if (response == NULL) {
+        debug("response is null");
+        return;
+    }
+    response->type = XACTO_VALUE_PKT;
+    response->serial = request->serial;
+    response->size = size;
+    response->status = status;
+    response->timestamp_sec = request->timestamp_sec;
+    response->timestamp_nsec = request->timestamp_nsec;
+
+    // convert to network byte order
+    response->serial = htonl(response->serial);
+    response->size = htonl(response->size);
+    response->timestamp_sec = htonl(response->timestamp_sec);
+    response->timestamp_nsec = htonl(response->timestamp_nsec);
+
+    int write_success = proto_send_packet(fd, response, payload);
+    if (write_success < 0) {
+        debug("Error writing response packet");
+        return;
+    }
+    // free the response packet
+    free(response);
+}
+
 void *xacto_client_service(void *arg)
 {
     int fd = *((int *)arg);
@@ -41,6 +128,8 @@ void *xacto_client_service(void *arg)
         void **payload = malloc(sizeof(void *));
         if (payload == NULL) {
             debug("payload is null");
+            // free the request packet
+            free(request);
             return NULL;
         }
         // read the request packet
@@ -48,8 +137,19 @@ void *xacto_client_service(void *arg)
         int read_success = proto_recv_packet(fd, request, payload);
         if (read_success < 0) {
             debug("Error reading request packet");
+            // free the request packet
+            free(request);
+            // free the payload
+            free(payload);
+            // unregister the client
+            creg_unregister(client_registry, fd);
             return NULL;
         }
+        // convert to host byte order
+        request->serial = ntohl(request->serial);
+        request->size = ntohl(request->size);
+        request->timestamp_sec = ntohl(request->timestamp_sec);
+        request->timestamp_nsec = ntohl(request->timestamp_nsec);
         // handle the request
         switch (request->type)
         {
@@ -173,29 +273,14 @@ void *xacto_client_service(void *arg)
         }
 
         if (!send_packet) continue;
-        // send the response packet
-        XACTO_PACKET *response = malloc(sizeof(XACTO_PACKET));
-        if (response == NULL) {
-            debug("response is null");
-            return NULL;
-        }
-        response->type = XACTO_REPLY_PKT;
-        response->status = transaction_stat;
-        response->null = type == XACTO_GET_PKT ? 0 : 1;
-        response->size = type == XACTO_GET_PKT ? value->size : 0;
-        response->serial = request->serial;
-        response->timestamp_sec = request->timestamp_sec;
-        response->timestamp_nsec = request->timestamp_nsec;
-        if (type == XACTO_GET_PKT) info("value->content: %s", value->content);
-        int write_success = proto_send_packet(fd, response, type == XACTO_GET_PKT ? value->content : NULL);
-        if (write_success < 0) {
-            debug("Error writing response packet");
-            return NULL;
+        send_reply_packet(fd, request, transaction_stat);
+        if (type == XACTO_GET_PKT)
+        {
+            info("value got: %s", value->content);
+            send_value_packet(fd, request, value->content, strlen(value->content), transaction_stat);
         }
         // free the request packet
         free(request);
-        // free the response packet
-        free(response);
         // reset the type
         type = XACTO_NO_PKT;
         // reset the send_packet flag
