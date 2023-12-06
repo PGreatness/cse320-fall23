@@ -2,14 +2,6 @@
 #include "protocol.h"
 #include <errno.h>
 
-void create_thread(pthread_t *thread, pthread_attr_t *attrp, void *(*start_routine) (void *), void *arg)
-{
-    int rc;
-    if ((rc = pthread_create(thread, attrp, start_routine, arg)) != 0) {
-        debug("error: pthread_create, rc: %d\n", rc);
-        exit(EXIT_FAILURE);
-    }
-}
 
 void process_connection(int connfd)
 {

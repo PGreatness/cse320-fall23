@@ -57,6 +57,7 @@ void blob_unref(BLOB *blob, char* why)
     // info("GOT IN BLOB_UNREF");
     pthread_mutex_lock(&blob->mutex);
     info("blob_unref: %s", blob->content);
+    info("blob_unref: %p", blob);
     blob->refcnt--;
     blob->prefix = why;
     if (blob->refcnt == 0)
@@ -64,9 +65,9 @@ void blob_unref(BLOB *blob, char* why)
         warn("freeing blob");
         free(blob->content);
         free(blob->prefix);
-        free(blob);
         pthread_mutex_unlock(&blob->mutex);
         pthread_mutex_destroy(&blob->mutex);
+        free(blob);
         return;
     }
     pthread_mutex_unlock(&blob->mutex);
@@ -118,16 +119,17 @@ int key_compare(KEY *kp1, KEY *kp2)
 
 VERSION *version_create(TRANSACTION *tp, BLOB *bp)
 {
-    debug("version_create: %s", bp->content);
+    // debug("version_create: %s", bp->content);
     VERSION *vp = malloc(sizeof(VERSION));
     if (vp == NULL) return NULL;
-    vp->blob = blob_ref(bp, bp->prefix);
+    vp->blob = bp;
+    if (bp) blob_ref(bp, bp->prefix);
     vp->creator = tp;
     return vp;
 }
 
 void version_dispose(VERSION *vp)
 {
-    blob_unref(vp->blob, vp->blob->prefix);
+    if (vp->blob) blob_unref(vp->blob, vp->blob->prefix);
     free(vp);
 }

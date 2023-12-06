@@ -1,8 +1,5 @@
 #include "student/server_ops.h"
 
-int server_sockfd;
-int *connfdp;
-
 struct args {
     CLIENT_REGISTRY *cr;
     int fd;
@@ -10,6 +7,7 @@ struct args {
 
 int listen_for_connections(int port)
 {
+    int *connfdp;
     int listenfd;
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
@@ -17,10 +15,18 @@ int listen_for_connections(int port)
 
     listenfd = open_listenfd(port);
     while (1) {
+        debug("listening for connections");
         clientlen = sizeof(struct sockaddr_storage);
         connfdp = malloc(sizeof(int));
         *connfdp = Accept(listenfd, (SA *)&clientaddr, &clientlen);
-        create_thread(&tid, NULL, xacto_client_service, connfdp);
+        debug("connection accepted on fd %i", *connfdp);
+        if (*connfdp < 0) {
+            free(connfdp);
+            debug("connection failed");
+            break;
+        }
+        // create_thread(&tid, NULL, &xacto_client_service, connfdp);
+        pthread_create(&tid, NULL, &xacto_client_service, connfdp);
     }
     Close(listenfd);
     return 0;
@@ -55,7 +61,7 @@ int test_client_registry(CLIENT_REGISTRY *cr)
         arg->cr = cr;
         arg->fd = fd;
         debug("creating thread %d with fd of %i\n", i, fd);
-        create_thread(&tid[i], NULL, create_client, arg);
+        pthread_create(&tid[i], NULL, &create_client, arg);
     }
     // client registry should have num_threads clients
     // with each thread registering a client and running detached

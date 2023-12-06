@@ -14,11 +14,22 @@
 
 static void terminate(int status);
 
+void install_signal_handler(int signum, void (*handler)(int), int flags)
+{
+    struct sigaction sa;
+    sa.sa_handler = handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = flags;
+    if (sigaction(signum, &sa, NULL) == -1)
+    {
+        exit(EXIT_FAILURE);
+    }
+}
+
 void sighup_handler(int sig)
 {
-    free(connfdp);
     debug("SIGHUP received, terminating");
-    terminate(EXIT_SUCCESS);
+    // terminate(EXIT_SUCCESS);
 }
 
 CLIENT_REGISTRY *client_registry;
@@ -70,21 +81,12 @@ int main(int argc, char* argv[]){
     // shutdown of the server.
 
     // Install SIGHUP handler
-    install_signal_handler(SIGHUP, sighup_handler, SA_RESTART);
-    // int i = 1;
+    install_signal_handler(SIGHUP, sighup_handler, 0);
     // loop to accept connections
-    // while (1)
-    // {
-        listen_for_connections(port);
-    // }
-    debug("SIGHUP received, terminating");
+    listen_for_connections(port);
+    // exited from loop, terminate
+    debug("Terminated from main loop");
     terminate(EXIT_SUCCESS);
-    /* while (i--)
-    {
-        // listen_for_connections(port);
-        test_client_registry(client_registry);
-        terminate(EXIT_SUCCESS);
-    } */
 }
 
 /*

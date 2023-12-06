@@ -84,6 +84,13 @@ int proto_recv_packet(int fd, XACTO_PACKET *pkt, void **datap)
         errno = EIO;
         return -1;
     }
+    // check for timeout
+    if (ntohl(pkt->size) < 0 || ntohl(pkt->size) > sizeof(XACTO_PACKET))
+    {
+        debug("Timeout received");
+        errno = ETIMEDOUT;
+        return -1;
+    }
     // check for eof
     if (received == 0)
     {

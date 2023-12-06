@@ -12,10 +12,6 @@
 #include "student/thread_ops.h"
 #include "client_registry.h"
 
-extern int server_sockfd;
-extern int *connfdp;
-
-
 int listen_for_connections(int port);
 
 int test_client_registry(CLIENT_REGISTRY *cr);

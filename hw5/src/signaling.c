@@ -1,18 +1,6 @@
 #include "student/signaling.h"
 #include "debug.h"
 
-void install_signal_handler(int signum, void (*handler)(int), int flags)
-{
-    struct sigaction sa;
-    sa.sa_handler = handler;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = flags;
-    if (sigaction(signum, &sa, NULL) == -1)
-    {
-        exit(EXIT_FAILURE);
-    }
-}
-
 sigset_t block_signal(int signum)
 {
     sigset_t current_mask;

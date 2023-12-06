@@ -119,7 +119,7 @@ int Accept(int s, struct sockaddr *addr, unsigned int *addrlen)
     if ((rc = accept(s, addr, addrlen)) < 0)
     {
         debug("error: accept, rc: %d\n", rc);
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
     }
     return rc;
 }

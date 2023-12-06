@@ -17,6 +17,7 @@ void send_reply_packet(int fd, XACTO_PACKET* request, int status)
         debug("response is null");
         return;
     }
+    memset(response, 0, sizeof(XACTO_PACKET));
     response->type = XACTO_REPLY_PKT;
     response->serial = request->serial;
     response->size = 0;
@@ -32,42 +33,11 @@ void send_reply_packet(int fd, XACTO_PACKET* request, int status)
     response->timestamp_nsec = htonl(response->timestamp_nsec);
 
     int write_success = proto_send_packet(fd, response, NULL);
+    free(response);
     if (write_success < 0) {
         debug("Error writing response packet");
         return;
     }
-    // free the response packet
-    free(response);
-}
-
-void send_key_packet(int fd, XACTO_PACKET* request, void* payload, int status)
-{
-    XACTO_PACKET *response = malloc(sizeof(XACTO_PACKET));
-    if (response == NULL) {
-        debug("response is null");
-        return;
-    }
-    response->type = XACTO_KEY_PKT;
-    response->serial = request->serial;
-    response->size = request->size;
-    response->null = 0;
-    response->status = status;
-    response->timestamp_sec = request->timestamp_sec;
-    response->timestamp_nsec = request->timestamp_nsec;
-
-    // convert to network byte order
-    response->serial = htonl(response->serial);
-    response->size = htonl(response->size);
-    response->timestamp_sec = htonl(response->timestamp_sec);
-    response->timestamp_nsec = htonl(response->timestamp_nsec);
-
-    int write_success = proto_send_packet(fd, response, payload);
-    if (write_success < 0) {
-        debug("Error writing response packet");
-        return;
-    }
-    // free the response packet
-    free(response);
 }
 
 void send_value_packet(int fd, XACTO_PACKET* request, void* payload, int size, int status)
@@ -77,6 +47,7 @@ void send_value_packet(int fd, XACTO_PACKET* request, void* payload, int size, i
         debug("response is null");
         return;
     }
+    memset(response, 0, sizeof(XACTO_PACKET));
     response->type = XACTO_VALUE_PKT;
     response->serial = request->serial;
     response->size = size;
@@ -92,394 +63,218 @@ void send_value_packet(int fd, XACTO_PACKET* request, void* payload, int size, i
     response->timestamp_nsec = htonl(response->timestamp_nsec);
 
     int write_success = proto_send_packet(fd, response, payload);
+    free(response);
     if (write_success < 0) {
         debug("Error writing response packet");
         return;
     }
-    // free the response packet
-    free(response);
 }
 
 void *xacto_client_service(void *arg)
 {
-    int fd = *((int *)arg);
+    int fd = *(int *)arg;
     free(arg);
     pthread_detach(pthread_self());
-    debug("xacto_client_service started for fd %d", fd);
-    // register the client
-    creg_register(client_registry, fd);
-    // create a transaction for the client
-    TRANSACTION *client_transaction = trans_create();
-    if (client_transaction == NULL) {
-        debug("client transaction is null\n");
+    debug("xacto_client_service: fd %d", fd);
+    if (creg_register(client_registry, fd) < 0)
+    {
+        debug("Error registering client");
         return NULL;
     }
-    int type = XACTO_NO_PKT;
-    BLOB *tmp = (BLOB*)NULL;
-    int key_allocated = 0;
-    KEY *key;
-    BLOB *value;
-    TRANS_STATUS transaction_stat;
-    int send_packet = 0;
-    // enter a loop to read requests from the client file descriptor
+    TRANSACTION *cl_trans = trans_create();
+    debug("Created a transaction for client %d", fd);
+    if (cl_trans == NULL)
+    {
+        debug("Error creating transaction");
+        creg_unregister(client_registry, fd);
+        return NULL;
+    }
+    int read_key_success;
+    int read_value_success;
     while (1)
     {
-        XACTO_PACKET *request = malloc(sizeof(XACTO_PACKET));
-        if (request == NULL) {
-            debug("request is null");
-            if (key_allocated) {
-                free(key);
-            }
-            // unregister the client
-            creg_unregister(client_registry, fd);
-            // unreference the transaction
-            trans_unref(client_transaction, "ending client transaction");
-            return NULL;
-        }
-        void **payload = malloc(sizeof(void *));
-        if (payload == NULL) {
-            debug("payload is null");
-            // free the request packet
-            free(request);
-            if (key_allocated) {
-                free(key);
-            }
-            // unregister the client
-            creg_unregister(client_registry, fd);
-            // unreference the transaction
-            trans_unref(client_transaction, "unreferencing client transaction");
-            return NULL;
-        }
-        // read the request packet
-        debug("Reading request packet");
-        int read_success = proto_recv_packet(fd, request, payload);
-        if (read_success < 0) {
-            debug("Error reading request packet");
-            // free the request packet
-            free(request);
-            if (key_allocated) {
-                free(key);
-            }
-            // free the payload
-            free(payload);
-            // unregister the client
-            creg_unregister(client_registry, fd);
-            // unreference the transaction
-            trans_unref(client_transaction, "unreferencing client transaction");
-            return NULL;
-        }
-        // convert to host byte order
-        request->serial = ntohl(request->serial);
-        request->size = ntohl(request->size);
-        request->timestamp_sec = ntohl(request->timestamp_sec);
-        request->timestamp_nsec = ntohl(request->timestamp_nsec);
-        // handle the request
-        switch (request->type)
+        XACTO_PACKET *req_pkt = malloc(sizeof(XACTO_PACKET));
+        if (req_pkt == NULL)
         {
-            case XACTO_GET_PKT:
-                debug("Received GET request");
-                if (type != XACTO_NO_PKT) {
-                    debug("Error: transaction already in progress");
-                    // free the payload
-                    free(payload);
-                    if (key_allocated) {
-                        free(key);
-                    }
-                    // free the request packet
-                    free(request);
-                    // unregister the client
-                    creg_unregister(client_registry, fd);
-                    return NULL;
-                }
-                type = XACTO_GET_PKT;
-                break;
+            debug("Error allocating memory for request packet");
+            creg_unregister(client_registry, fd);
+            trans_abort(cl_trans);
+            return NULL;
+        }
+        void **datap = malloc(sizeof(void *));
+        if (datap == NULL)
+        {
+            debug("Error allocating memory for datap");
+            free(req_pkt);
+            creg_unregister(client_registry, fd);
+            trans_abort(cl_trans);
+            return NULL;
+        }
+        debug("Waiting for request packet");
+        int read_success = proto_recv_packet(fd, req_pkt, datap);
+        if (read_success < 0)
+        {
+            debug("Error reading request packet");
+            free(req_pkt);
+            free(datap);
+            creg_unregister(client_registry, fd);
+            trans_abort(cl_trans);
+            return NULL;
+        }
+        debug("Received request packet");
+        // convert to host byte order
+        req_pkt->serial = ntohl(req_pkt->serial);
+        req_pkt->size = ntohl(req_pkt->size);
+        req_pkt->timestamp_sec = ntohl(req_pkt->timestamp_sec);
+        req_pkt->timestamp_nsec = ntohl(req_pkt->timestamp_nsec);
+
+        switch (req_pkt->type)
+        {
             case XACTO_PUT_PKT:
                 debug("Received PUT request");
-                if (type != XACTO_NO_PKT)
+                memset(req_pkt, 0, sizeof(XACTO_PACKET));
+                // read the key
+                read_key_success = proto_recv_packet(fd, req_pkt, datap);
+                if (read_key_success < 0)
                 {
-                    debug("Error: transaction already in progress");
-                    // free the payload
-                    free(payload);
-                    if (key_allocated) {
-                        free(key);
-                    }
-                    // free the request packet
-                    free(request);
-                    // unregister the client
+                    debug("Fail to read key for PUT request");
+                    free(req_pkt);
+                    free(datap);
+                    creg_unregister(client_registry, fd);
+                    trans_abort(cl_trans);
+                    return NULL;
+                }
+                debug("Received key of size %d", ntohl(req_pkt->size));
+                // convert to host byte order
+                req_pkt->serial = ntohl(req_pkt->serial);
+                req_pkt->size = ntohl(req_pkt->size);
+                req_pkt->timestamp_sec = ntohl(req_pkt->timestamp_sec);
+                req_pkt->timestamp_nsec = ntohl(req_pkt->timestamp_nsec);
+                // make a key
+                BLOB *tmp_blob = blob_create(*datap, req_pkt->size);
+                KEY *key = key_create(tmp_blob);
+                // free the datap
+                free(*datap);
+                // read the value
+                memset(req_pkt, 0, sizeof(XACTO_PACKET));
+                read_value_success = proto_recv_packet(fd, req_pkt, datap);
+                if (read_value_success < 0)
+                {
+                    debug("Fail to read value for PUT request");
+                    key_dispose(key);
+                    blob_unref(tmp_blob, tmp_blob->prefix);
+                    free(req_pkt);
+                    free(datap);
+                    creg_unregister(client_registry, fd);
+                    trans_abort(cl_trans);
+                    return NULL;
+                }
+                debug("Received value of size %d", ntohl(req_pkt->size));
+                // convert to host byte order
+                req_pkt->serial = ntohl(req_pkt->serial);
+                req_pkt->size = ntohl(req_pkt->size);
+                req_pkt->timestamp_sec = ntohl(req_pkt->timestamp_sec);
+                req_pkt->timestamp_nsec = ntohl(req_pkt->timestamp_nsec);
+                // make a blob
+                BLOB *value = blob_create(*datap, req_pkt->size);
+                // put the key and value into the store
+                TRANS_STATUS put_in_store = store_put(cl_trans, key, value);
+                if (put_in_store == TRANS_ABORTED)
+                {
+                    debug("Transaction aborted while putting key and value into store");
+                    key_dispose(key);
+                    blob_unref(tmp_blob, tmp_blob->prefix);
+                    blob_unref(value, tmp_blob->prefix);
+                    free(req_pkt);
+                    free(*datap);
+                    free(datap);
                     creg_unregister(client_registry, fd);
                     return NULL;
                 }
-                type = XACTO_PUT_PKT;
+                // send reply packet
+                send_reply_packet(fd, req_pkt, put_in_store);
+                // free memory
+                // key_dispose(key); // THIS LINE IS CAUSING SEGFAULT BUT WHY?
+                debug("unrefing tmp_blob in PUT");
+                blob_unref(value, value->prefix);
+                debug("unrefing value in PUT");
+                blob_unref(tmp_blob, tmp_blob->prefix);
+                free(req_pkt);
+                free(*datap);
+                free(datap);
+                break;
+            case XACTO_GET_PKT:
+                debug("Received GET request");
+                memset(req_pkt, 0, sizeof(XACTO_PACKET));
+                // read the value
+                read_value_success = proto_recv_packet(fd, req_pkt, datap);
+                if (read_value_success < 0)
+                {
+                    debug("Fail to read value for GET request");
+                    free(req_pkt);
+                    free(datap);
+                    creg_unregister(client_registry, fd);
+                    trans_abort(cl_trans);
+                    return NULL;
+                }
+                debug("Received value of size %d", ntohl(req_pkt->size));
+                // convert to host byte order
+                req_pkt->serial = ntohl(req_pkt->serial);
+                req_pkt->size = ntohl(req_pkt->size);
+                req_pkt->timestamp_sec = ntohl(req_pkt->timestamp_sec);
+                req_pkt->timestamp_nsec = ntohl(req_pkt->timestamp_nsec);
+                // make a key to get the value
+                BLOB *tmp_blob2 = blob_create(*datap, req_pkt->size);
+                KEY *key2 = key_create(tmp_blob2);
+                BLOB *value2 = NULL;
+                // get the value from the store
+                TRANS_STATUS get_value_stat = store_get(cl_trans, key2, &value2);
+                if (get_value_stat == TRANS_ABORTED)
+                {
+                    debug("Transaction aborted while getting value from store");
+                    // key_dispose(key2);
+                    blob_unref(tmp_blob2, tmp_blob2->prefix);
+                    blob_unref(value2, value2->prefix);
+                    free(req_pkt);
+                    free(*datap);
+                    free(datap);
+                    creg_unregister(client_registry, fd);
+                    return NULL;
+                }
+                // send reply packet
+                send_reply_packet(fd, req_pkt, get_value_stat);
+                // send value packet
+                send_value_packet(fd, req_pkt, value2 ? value2->content : NULL, value2 ? value2->size : 0, get_value_stat);
+                // free memory
+                blob_unref(tmp_blob2, tmp_blob2->prefix);
+                if (value2) blob_unref(value2, value2->prefix);
+                free(req_pkt);
+                free(*datap);
+                free(datap);
                 break;
             case XACTO_COMMIT_PKT:
                 debug("Received COMMIT request");
-                if (type != XACTO_NO_PKT)
+                // commit the transaction
+                TRANS_STATUS commit_stat = trans_commit(cl_trans);
+                if (commit_stat == TRANS_ABORTED)
                 {
-                    debug("Error; transaction already in progress");
-                    // free the payload
-                    free(payload);
-                    if (key_allocated) {
-                        free(key);
-                    }
-                    // free the request packet
-                    free(request);
-                    // unregister the client
+                    debug("Transaction aborted while committing");
+                    free(req_pkt);
+                    free(datap);
                     creg_unregister(client_registry, fd);
                     return NULL;
                 }
-                type = XACTO_COMMIT_PKT;
-                if ((transaction_stat = trans_commit(client_transaction)) == TRANS_ABORTED)
-                {
-                    debug("Error: transaction aborted");
-                }else{
-                    debug("Transaction committed");
-                }
-                send_packet = 1;
-                break;
-            case XACTO_KEY_PKT:
-                debug("Received a key");
-                if (type == XACTO_NO_PKT)
-                {
-                    debug("Error: no transaction in progress");
-                    // free the request packet
-                    free(request);
-                    if (payload != NULL)
-                    {
-                        // free the payload
-                        free(payload);
-                    }
-                    // unregister the client
-                    creg_unregister(client_registry, fd);
-                    return NULL;
-                }
-                if (payload == NULL)
-                {
-                    debug("Error: no key payload");
-                    if (payload != NULL)
-                    {
-                        // free the payload
-                        free(payload);
-                    }
-                    if (key_allocated) {
-                        free(key);
-                    }
-                    // free the request packet
-                    free(request);
-                    // unregister the client
-                    creg_unregister(client_registry, fd);
-                    return NULL;
-                }
-                tmp = blob_create(*payload, request->size);
-                if (tmp == NULL)
-                {
-                    debug("Error: blob_create failed");
-                    // free the payload
-                    free(payload);
-                    if (key_allocated) {
-                        free(key);
-                    }
-                    // free the request packet
-                    free(request);
-                    // unregister the client
-                    creg_unregister(client_registry, fd);
-                    return NULL;
-                }
-                KEY* tmp_key = key_create(tmp);
-                if (tmp_key == NULL)
-                {
-                    debug("Error: key_create failed");
-                    // free the payload
-                    free(payload);
-                    if (key_allocated) {
-                        free(key);
-                    }
-                    // free the request packet
-                    free(request);
-                    // unregister the client
-                    creg_unregister(client_registry, fd);
-                    blob_unref(tmp, *payload);
-                    return NULL;
-                }
-                key = malloc(sizeof(KEY));
-                if (key == NULL)
-                {
-                    debug("Error: malloc failed");
-                    // free the payload
-                    free(payload);
-                    // free the request packet
-                    free(request);
-                    // unregister the client
-                    creg_unregister(client_registry, fd);
-                    blob_unref(tmp, *payload);
-                    return NULL;
-                }
-                memcpy(key, tmp_key, sizeof(KEY));
-                key_allocated = 1;
-                if (type == XACTO_GET_PKT)
-                {
-                    transaction_stat = store_get(client_transaction, tmp_key, &value);
-                    if (transaction_stat != TRANS_ABORTED)
-                    {
-                        blob_unref(tmp, *payload);
-                    }else{
-                        debug("Error with get: transaction aborted");
-                    }
-                    send_packet = 1;
-                }
-                key_dispose(tmp_key);
-                warn("blob reference count key: %d", tmp->refcnt);
-                blob_unref(tmp, *payload);
-                break;
-            case XACTO_VALUE_PKT:
-                debug("Received a value");
-                if (type == XACTO_NO_PKT)
-                {
-                    debug("Error: no transaction in progress");
-                    if (payload != NULL)
-                    {
-                        // free the payload
-                        free(payload);
-                    }
-                    // free the request packet
-                    free(request);
-                    if (key_allocated) {
-                        free(key);
-                    }
-                    // unregister the client
-                    creg_unregister(client_registry, fd);
-                    return NULL;
-                }
-                if (payload == NULL)
-                {
-                    debug("Error: no value payload");
-                    // free the request packet
-                    free(request);
-                    if (key_allocated) {
-                        free(key);
-                    }
-                    // unregister the client
-                    creg_unregister(client_registry, fd);
-                    return NULL;
-                }
-                tmp = blob_create(*payload, request->size);
-                if (tmp == NULL)
-                {
-                    debug("Error: blob_create failed");
-                    // free the payload
-                    free(payload);
-                    // free the request packet
-                    free(request);
-                    if (key_allocated) {
-                        free(key);
-                    }
-                    // unregister the client
-                    creg_unregister(client_registry, fd);
-                    return NULL;
-                }
-                if (type == XACTO_GET_PKT)
-                {
-                    // get the value from the store
-                    value = malloc(sizeof(BLOB));
-                    if (value == NULL)
-                    {
-                        debug("Error: malloc failed");
-                        blob_unref(tmp, *payload);
-                        // free the payload
-                        free(payload);
-                        // free the request packet
-                        free(request);
-                        if (key_allocated) {
-                            free(key);
-                        }
-                        // unregister the client
-                        creg_unregister(client_registry, fd);
-                        return NULL;
-                    }
-                    debug("Getting value from store");
-                    transaction_stat = store_get(client_transaction, key, &value);
-                    if (transaction_stat != TRANS_ABORTED)
-                    {
-                        blob_unref(tmp, *payload);
-                    }else{
-                        debug("Error: transaction aborted");
-                    }
-                    blob_unref(tmp, *payload);
-                }
-                if (type == XACTO_PUT_PKT)
-                {
-                    value = tmp;
-                    warn("blob reference count value 1: %d", value->refcnt);
-                    // put the value in the store
-                    transaction_stat = store_put(client_transaction, key, value);
-                    warn("blob reference count value 1.5: %d", value->refcnt);
-                    if (transaction_stat == TRANS_ABORTED)
-                    {
-                        debug("Error: transaction aborted");
-                    }
-                    free(key);
-                    key_allocated = 0;
-                }
-                // key_dispose(key);
-                blob_unref(value, *payload);
-                warn("blob reference count value 2: %d", value->refcnt);
-                send_packet = 1;
-                break;
-            default:
-                debug("Error: invalid request type");
-                // free the payload
-                free(payload);
-                // free the request packet
-                free(request);
-                if (key_allocated) {
-                    free(key);
-                }
+                // send reply packet
+                send_reply_packet(fd, req_pkt, commit_stat);
                 creg_unregister(client_registry, fd);
-                return NULL;
-        }
-
-        if (!send_packet)
-        {
-            // free the payload
-            free(payload);
-            // free the request packet
-            free(request);
-            continue;
-        }
-        send_reply_packet(fd, request, transaction_stat);
-        if (type == XACTO_GET_PKT)
-        {
-            info("value got: %s", value->content);
-            send_value_packet(fd, request, value->content, strlen(value->content), transaction_stat);
-            blob_unref(value, value->prefix);
-        }
-        // free the request packet
-        free(request);
-        // free the payload
-        free(payload);
-        // reset the type
-        type = XACTO_NO_PKT;
-        // reset the send_packet flag
-        send_packet = 0;
-        // reset the key and value
-        key = NULL;
-        value = NULL;
-        // reset the tmp blob
-        tmp = NULL;
-        if (transaction_stat == TRANS_ABORTED)
-        {
-            debug("Error: transaction aborted");
-            // unregister the client
-            creg_unregister(client_registry, fd);
-            // free the payload
-            return NULL;
-        }
-        if (transaction_stat == TRANS_COMMITTED)
-        {
-            debug("transaction committed, can exit loop");
-            creg_unregister(client_registry, fd);
-            // free the payload
-            break;
+                // free memory
+                free(req_pkt);
+                free(datap);
+                goto end_service;
+                break;
         }
     }
+    end_service:
+    debug("xacto_client_service: fd %d done", fd);
     return NULL;
 }
