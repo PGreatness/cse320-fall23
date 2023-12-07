@@ -124,6 +124,8 @@ VERSION *version_create(TRANSACTION *tp, BLOB *bp)
     VERSION *vp = malloc(sizeof(VERSION));
     if (vp == NULL) return NULL;
     vp->blob = bp;
+    vp->creator = tp;
+    if (tp) trans_ref(tp, "version create");
     if (bp) blob_ref(bp, bp->prefix);
     vp->creator = tp;
     return vp;
@@ -131,6 +133,8 @@ VERSION *version_create(TRANSACTION *tp, BLOB *bp)
 
 void version_dispose(VERSION *vp)
 {
+    debug("Dispose of version %p", vp);
+    if (vp->creator) trans_unref(vp->creator, "version dispose of creator");
     if (vp->blob) blob_unref(vp->blob, vp->blob->prefix);
     free(vp);
 }
