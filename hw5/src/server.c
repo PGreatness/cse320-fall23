@@ -101,6 +101,7 @@ void *xacto_client_service(void *arg)
             trans_abort(cl_trans);
             return NULL;
         }
+        memset(req_pkt, 0, sizeof(XACTO_PACKET));
         void **datap = malloc(sizeof(void *));
         if (datap == NULL)
         {
@@ -270,6 +271,8 @@ void *xacto_client_service(void *arg)
                 // free memory
                 free(req_pkt);
                 free(datap);
+                // close the connection
+                Close(fd);
                 goto end_service;
                 break;
         }

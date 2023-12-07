@@ -189,7 +189,7 @@ void creg_shutdown_all(CLIENT_REGISTRY* cr)
     CLIENT* curr = cr->head;
     while (curr != NULL)
     {
-        shutdown(curr->fd, SHUT_RD);
+        shutdown(curr->fd, SHUT_RDWR);
         curr = curr->next;
         cr->total_clients--;
     }

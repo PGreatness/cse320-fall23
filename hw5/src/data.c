@@ -77,16 +77,17 @@ int blob_compare(BLOB *blob1, BLOB *blob2)
 {
     if (blob1->size != blob2->size) return blob1->size - blob2->size;
 
-    return memcmp(blob1->content, blob2->content, blob1->size);
+    return blob_hash(blob1) - blob_hash(blob2);
 }
 
 int blob_hash(BLOB *bp)
 {
     long hash = 0;
+    int large_prime = 8663; // generated from https://bigprimes.org/
     char* s = bp->content;
     while(*s != '\0')
     {
-        hash = hash * 31 + *s;
+        hash = hash * large_prime + *s;
         s++;
     }
     return hash;

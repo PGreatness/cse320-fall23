@@ -84,8 +84,9 @@ int proto_recv_packet(int fd, XACTO_PACKET *pkt, void **datap)
         errno = EIO;
         return -1;
     }
+    uint32_t size = ntohl(pkt->size);
     // check for timeout
-    if (ntohl(pkt->size) < 0 || ntohl(pkt->size) > sizeof(XACTO_PACKET))
+    if (size < 0 || size > sizeof(XACTO_PACKET))
     {
         debug("Timeout received");
         errno = ETIMEDOUT;
@@ -109,10 +110,9 @@ int proto_recv_packet(int fd, XACTO_PACKET *pkt, void **datap)
     debug("Received packet:\ntype: %d,\nstatus: %d,\nnull: %d,\nserial: %d,\nsize: %d,\ntimestamp_sec: %d,\ntimestamp_nsec: %d",
         pkt->type, pkt->status, pkt->null, ntohl(pkt->serial), ntohl(pkt->size), ntohl(pkt->timestamp_sec), ntohl(pkt->timestamp_nsec));
 
-    if (ntohl(pkt->size))
+    if (size)
     {
         // Receive the key
-        uint32_t size = ntohl(pkt->size);
         debug("Receiving key of size %d", size);
         if (size > 0)
         {

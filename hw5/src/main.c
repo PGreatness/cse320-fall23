@@ -14,6 +14,8 @@
 
 static void terminate(int status);
 
+CLIENT_REGISTRY *client_registry;
+
 void install_signal_handler(int signum, void (*handler)(int), int flags)
 {
     struct sigaction sa;
@@ -29,10 +31,10 @@ void install_signal_handler(int signum, void (*handler)(int), int flags)
 void sighup_handler(int sig)
 {
     debug("SIGHUP received, terminating");
+    creg_shutdown_all(client_registry);
     // terminate(EXIT_SUCCESS);
 }
 
-CLIENT_REGISTRY *client_registry;
 
 int main(int argc, char* argv[]){
     // Option processing should be performed here.
