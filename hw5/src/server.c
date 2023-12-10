@@ -163,7 +163,7 @@ void *xacto_client_service(void *arg)
                 {
                     debug("Fail to read value for PUT request");
                     key_dispose(key);
-                    blob_unref(tmp_blob, tmp_blob->prefix);
+                    blob_unref(tmp_blob, "packet reading for PUT failed");
                     free(req_pkt);
                     free(datap);
                     creg_unregister(client_registry, fd);
@@ -184,22 +184,23 @@ void *xacto_client_service(void *arg)
                 {
                     debug("Transaction aborted while putting key and value into store");
                     key_dispose(key);
-                    blob_unref(tmp_blob, tmp_blob->prefix);
-                    blob_unref(value, tmp_blob->prefix);
+                    blob_unref(tmp_blob, "putting key and value into store failed");
+                    blob_unref(value, "putting key and value into store failed");
                     free(req_pkt);
                     free(*datap);
                     free(datap);
                     creg_unregister(client_registry, fd);
                     return NULL;
                 }
+                // blob_unref(value, value->prefix);
                 // send reply packet
                 send_reply_packet(fd, req_pkt, put_in_store);
                 // free memory
                 // key_dispose(key); // THIS LINE IS CAUSING SEGFAULT BUT WHY?
                 debug("unrefing tmp_blob in PUT");
-                blob_unref(value, value->prefix);
+                blob_unref(value, "free value in PUT");
                 debug("unrefing value in PUT");
-                blob_unref(tmp_blob, tmp_blob->prefix);
+                blob_unref(tmp_blob, "free the tmp_blob in PUT");
                 free(req_pkt);
                 free(*datap);
                 free(datap);
@@ -234,8 +235,8 @@ void *xacto_client_service(void *arg)
                 {
                     debug("Transaction aborted while getting value from store");
                     // key_dispose(key2);
-                    blob_unref(tmp_blob2, tmp_blob2->prefix);
-                    blob_unref(value2, value2->prefix);
+                    blob_unref(tmp_blob2, "getting value from store failed");
+                    blob_unref(value2, "getting value from store failed");
                     free(req_pkt);
                     free(*datap);
                     free(datap);
@@ -244,11 +245,12 @@ void *xacto_client_service(void *arg)
                 }
                 // send reply packet
                 send_reply_packet(fd, req_pkt, get_value_stat);
+                if (value2) blob_unref(value2, "free value2 in GET");
                 // send value packet
                 send_value_packet(fd, req_pkt, value2 ? value2->content : NULL, value2 ? value2->size : 0, get_value_stat);
                 // free memory
-                blob_unref(tmp_blob2, tmp_blob2->prefix);
-                if (value2) blob_unref(value2, value2->prefix);
+                blob_unref(tmp_blob2, "free tmp_blob2 in GET");
+                if (value2) blob_unref(value2, "free value2 in GET");
                 free(req_pkt);
                 free(*datap);
                 free(datap);

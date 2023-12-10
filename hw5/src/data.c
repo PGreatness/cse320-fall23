@@ -21,15 +21,7 @@ BLOB *blob_create(char* content, size_t size)
     }
     memcpy(blob->content, content, size);
     blob->content[size] = '\0';
-    blob->prefix = malloc(size + 1);
-    if (blob->prefix == NULL)
-    {
-        free(blob->content);
-        free(blob);
-        return NULL;
-    }
-    memcpy(blob->prefix, content, size);
-    blob->prefix[size] = '\0';
+    blob->prefix = "create blob with content";
     blob->size = size;
     blob->refcnt = 1;
     warn("blob->content: %s", blob->content);
@@ -41,13 +33,8 @@ BLOB *blob_ref(BLOB *blob, char* why)
 {
     pthread_mutex_lock(&blob->mutex);
     blob->refcnt++;
-    if (strlen(why) > strlen(blob->prefix))
-    {
-        free(blob->prefix);
-        blob->prefix = malloc(strlen(why) + 1);
-    }
-    memcpy(blob->prefix, why, strlen(why));
-    blob->prefix[strlen(why)] = '\0';
+    debug("blob_ref: %s, refcnt: %d", blob->content, blob->refcnt);
+    blob->prefix = why;
     pthread_mutex_unlock(&blob->mutex);
     return blob;
 }
@@ -56,15 +43,15 @@ void blob_unref(BLOB *blob, char* why)
 {
     // info("GOT IN BLOB_UNREF");
     pthread_mutex_lock(&blob->mutex);
-    info("blob_unref: %s", blob->content);
-    info("blob_unref: %p", blob);
+    debug("WHY: %s", why);
+    // info("blob_unref: %p", blob);
     blob->refcnt--;
+    info("blob_unref: %s, refcnt: %d", blob->content, blob->refcnt);
     blob->prefix = why;
     if (blob->refcnt == 0)
     {
         warn("freeing blob");
         free(blob->content);
-        free(blob->prefix);
         pthread_mutex_unlock(&blob->mutex);
         pthread_mutex_destroy(&blob->mutex);
         free(blob);
@@ -83,7 +70,7 @@ int blob_compare(BLOB *blob1, BLOB *blob2)
 int blob_hash(BLOB *bp)
 {
     long hash = 0;
-    int large_prime = 8663; // generated from https://bigprimes.org/
+    int large_prime = 59; // generated from https://bigprimes.org/
     char* s = bp->content;
     while(*s != '\0')
     {
@@ -99,7 +86,7 @@ KEY *key_create(BLOB *bp)
     KEY *key = malloc(sizeof(KEY));
     debug("key: %p", key);
     if (key == NULL) return NULL;
-    key->blob = blob_ref(bp, bp->prefix);
+    key->blob = blob_ref(bp, "create key from blob");
     key->hash = blob_hash(bp);
     debug("key->hash: %d", key->hash);
     debug("key->blob: %p", key->blob);
@@ -108,7 +95,7 @@ KEY *key_create(BLOB *bp)
 
 void key_dispose(KEY *kp)
 {
-    blob_unref(kp->blob, kp->blob->prefix);
+    blob_unref(kp->blob, "dispose of key");
     free(kp);
 }
 
@@ -121,13 +108,14 @@ int key_compare(KEY *kp1, KEY *kp2)
 VERSION *version_create(TRANSACTION *tp, BLOB *bp)
 {
     // debug("version_create: %s", bp->content);
+    debug("version_create: %p", bp);
     VERSION *vp = malloc(sizeof(VERSION));
     if (vp == NULL) return NULL;
+    memset(vp, 0, sizeof(VERSION));
     vp->blob = bp;
     vp->creator = tp;
     if (tp) trans_ref(tp, "version create");
-    if (bp) blob_ref(bp, bp->prefix);
-    vp->creator = tp;
+    if (bp) blob_ref(bp, "remove this");
     return vp;
 }
 
@@ -135,6 +123,6 @@ void version_dispose(VERSION *vp)
 {
     debug("Dispose of version %p", vp);
     if (vp->creator) trans_unref(vp->creator, "version dispose of creator");
-    if (vp->blob) blob_unref(vp->blob, vp->blob->prefix);
+    if (vp->blob) blob_unref(vp->blob, "version dispose of blob");
     free(vp);
 }
