@@ -1,0 +1,90 @@
+hello world
+=========== TEST LOG FOR: run_echo ===========
+	[  0] EXPECT(STARTUP) TIMEOUT(100 ms)
+	[expect STARTUP]
+	Waiting for connection...
+	Connected to child: fd = 10
+[0000.001486]: <~~ STARTUP (sent at 0000.001462)
+	Event type matched expected type STARTUP (0 usec, limit 100000)	
+	[  1] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT]
+[0000.001564]: <~~ PROMPT (sent at 0000.001546)
+	Event type matched expected type PROMPT (0 usec, limit 10000)	
+	[  2] SEND(run echo hello world)
+[0000.001591]: ~~> run echo hello world
+	[  3] EXPECT(SHOW) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [3]SHOW]. Now: [0000.001608] Timeout: [0000.101608]
+	[  4] EXPECT(SHOW) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [4]SHOW]. Now: [0000.001611] Timeout: [0000.101611]
+	[  5] EXPECT(INPUT) TIMEOUT(10 ms)
+	[expect INPUT] [queue: [3]SHOW [4]SHOW]
+[0000.001640]: <~~ INPUT (sent at 0000.001623)
+	Event type matched expected type INPUT (0 usec, limit 10000)	
+	[  6] EXPECT(CHANGE) TIMEOUT(10 ms)
+	[expect CHANGE] [queue: [3]SHOW [4]SHOW]
+[0000.002655]: <~~ CHANGE (sent at 0000.001832)
+	[881855: none -> running]
+	Event type matched expected type CHANGE (0 usec, limit 10000)	
+	[  7] EXPECT(SIGNAL) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [7]SIGNAL]. Now: [0000.002684] Timeout: [0000.102684]
+	[  8] EXPECT(CHANGE) FLAGS(0x4) TIMEOUT(10 ms)
+	Adding a new event to the queue: [expect [8]CHANGE]. Now: [0000.002687] Timeout: [0000.012687]
+	[  9] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [7]SIGNAL [8]CHANGE]
+[0000.002701]: <~~ SIGNAL (sent at 0000.002547)
+	Async event matched: SIGNAL
+	[  9] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [8]CHANGE]
+[0000.002711]: <~~ CHANGE (sent at 0000.002560)
+	Async event matched: CHANGE
+	[881855: running -> stopped]
+	[  9] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW]
+[0000.002720]: <~~ PROMPT (sent at 0000.002581)
+	Event type matched expected type PROMPT (0 usec, limit 10000)	
+	[ 10] SEND(cont 0)
+[0000.002739]: ~~> cont 0
+	[ 11] EXPECT(SHOW) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [11]SHOW]. Now: [0000.002749] Timeout: [0000.102749]
+	[ 12] EXPECT(SHOW) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [12]SHOW]. Now: [0000.002751] Timeout: [0000.102751]
+	[ 13] EXPECT(INPUT) TIMEOUT(10 ms)
+	[expect INPUT] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW]
+[0000.002848]: <~~ INPUT (sent at 0000.002795)
+	Event type matched expected type INPUT (0 usec, limit 10000)	
+	[ 14] EXPECT(CHANGE) TIMEOUT(10 ms)
+	[expect CHANGE] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW]
+[0000.002864]: <~~ CHANGE (sent at 0000.002836)
+	[881855: stopped -> running]
+	Event type matched expected type CHANGE (0 usec, limit 10000)	
+	[ 15] EXPECT(SIGNAL) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [15]SIGNAL]. Now: [0000.002871] Timeout: [0000.102871]
+	[ 16] EXPECT(CHANGE) FLAGS(0x4) TIMEOUT(10 ms)
+	Adding a new event to the queue: [expect [16]CHANGE]. Now: [0000.002873] Timeout: [0000.012873]
+	[ 17] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW [15]SIGNAL [16]CHANGE]
+[0000.002883]: <~~ PROMPT (sent at 0000.002858)
+	Event type matched expected type PROMPT (0 usec, limit 10000)	
+	[ 18] EXPECT(PROMPT) FLAGS(0x10) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW [15]SIGNAL [16]CHANGE]
+[0000.004161]: <~~ SIGNAL (sent at 0000.004076)
+	Async event matched: SIGNAL
+	[ 18] EXPECT(PROMPT) FLAGS(0x10) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW [16]CHANGE]
+[0000.004189]: <~~ CHANGE (sent at 0000.004139)
+	Async event matched: CHANGE
+	[881855: running -> dead]
+	[ 18] EXPECT(PROMPT) FLAGS(0x10) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW]
+[0000.014328]: Driver: timeout (0, 10000)
+Optionally expected event PROMPT did not arrive before timeout -- advancing
+	[ 19] FLAGS(0x8) TIMEOUT(100 ms)
+	[expect NONE] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW]
+[0000.114530]: Driver: timeout (0, 100000)
+!!! Timeout waiting for the queue to be empty.
+Unmatched events:
+	Type: SHOW, args: 0 T running echo hello world
+	Type: SHOW, args: 0 T stopped echo hello world
+	Type: SHOW, args: 0 T running echo hello world
+	Type: SHOW, args: 0 T dead echo hello world
+=========== ABORTING TEST: run_echo ===========

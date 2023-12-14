@@ -1,0 +1,38 @@
+=========== TEST LOG FOR: invalid_cont_with_no_processes ===========
+	[  0] EXPECT(STARTUP) TIMEOUT(100 ms)
+	[expect STARTUP]
+	Waiting for connection...
+	Connected to child: fd = 10
+[0000.001584]: <~~ STARTUP (sent at 0000.001527)
+	Event type matched expected type STARTUP (0 usec, limit 100000)	
+	[  1] EXPECT(PROMPT) TIMEOUT(100 ms)
+	[expect PROMPT]
+[0000.001633]: <~~ PROMPT (sent at 0000.001616)
+	Event type matched expected type PROMPT (0 usec, limit 100000)	
+	[  2] SEND(cont 0)
+[0000.001658]: ~~> cont 0
+	[  3] EXPECT(INPUT) TIMEOUT(100 ms)
+	[expect INPUT]
+[0000.001757]: <~~ INPUT (sent at 0000.001696)
+	Event type matched expected type INPUT (0 usec, limit 100000)	
+	[  4] EXPECT(ERROR) TIMEOUT(10 ms)
+	[expect ERROR]
+[0000.001977]: <~~ ERROR (sent at 0000.001927)
+	ERROR_EVENT: cont
+	Event type matched expected type ERROR (0 usec, limit 10000)	
+	[  5] EXPECT(PROMPT) TIMEOUT(100 ms)
+	[expect PROMPT]
+[0000.001991]: <~~ PROMPT (sent at 0000.001948)
+	Event type matched expected type PROMPT (0 usec, limit 100000)	
+	[  6] SEND(quit)
+[0000.002007]: ~~> quit
+	[  7] EXPECT(INPUT) TIMEOUT(100 ms)
+	[expect INPUT]
+[0000.002098]: <~~ INPUT (sent at 0000.002051)
+	Event type matched expected type INPUT (0 usec, limit 100000)	
+	[  8] EXPECT(SHUTDOWN) TIMEOUT(1000 ms)
+	[expect SHUTDOWN]
+[0000.002111]: <~~ SHUTDOWN (sent at 0000.002091)
+	Event type matched expected type SHUTDOWN (0 usec, limit 1000)	
+	Target process 881944 terminated with status 0x0
+=========== END OF TEST: invalid_cont_with_no_processes ===========

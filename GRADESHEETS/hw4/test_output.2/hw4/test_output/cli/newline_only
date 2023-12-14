@@ -1,0 +1,33 @@
+=========== TEST LOG FOR: newline_only ===========
+	[  0] EXPECT(STARTUP) TIMEOUT(100 ms)
+	[expect STARTUP]
+	Waiting for connection...
+	Connected to child: fd = 10
+[0000.000450]: <~~ STARTUP (sent at 0000.000428)
+	Event type matched expected type STARTUP (0 usec, limit 100000)	
+	[  1] EXPECT(PROMPT) TIMEOUT(100 ms)
+	[expect PROMPT]
+[0000.000672]: <~~ PROMPT (sent at 0000.000648)
+	Event type matched expected type PROMPT (0 usec, limit 100000)	
+	[  2] SEND()
+[0000.000684]: ~~> 
+	[  3] EXPECT(INPUT)
+	[expect INPUT]
+[0000.000880]: <~~ INPUT (sent at 0000.000858)
+	Event type matched expected type INPUT 	
+	[  4] EXPECT(PROMPT)
+	[expect PROMPT]
+[0000.001071]: <~~ PROMPT (sent at 0000.001050)
+	Event type matched expected type PROMPT 	
+	[  5] SEND(quit)
+[0000.001077]: ~~> quit
+	[  6] EXPECT(INPUT)
+	[expect INPUT]
+[0000.001262]: <~~ INPUT (sent at 0000.001238)
+	Event type matched expected type INPUT 	
+	[  7] EXPECT(SHUTDOWN)
+	[expect SHUTDOWN]
+[0000.001450]: <~~ SHUTDOWN (sent at 0000.001429)
+	Event type matched expected type SHUTDOWN 	
+	Target process 56872 terminated with status 0xd
+=========== END OF TEST: newline_only ===========

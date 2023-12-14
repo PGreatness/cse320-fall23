@@ -1,0 +1,22 @@
+=========== TEST LOG FOR: start_quit_shutdown ===========
+	[  0] EXPECT(STARTUP) TIMEOUT(100 ms)
+	[expect STARTUP]
+	Waiting for connection...
+	Connected to child: fd = 10
+[0000.001405]: <~~ STARTUP (sent at 0000.001380)
+	Event type matched expected type STARTUP (0 usec, limit 100000)	
+	[  1] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT]
+[0000.001491]: <~~ PROMPT (sent at 0000.001472)
+	Event type matched expected type PROMPT (0 usec, limit 10000)	
+	[  2] SEND(quit) EXPECT(INPUT)
+[0000.001516]: ~~> quit
+	[expect INPUT]
+[0000.001878]: <~~ INPUT (sent at 0000.001555)
+	Event type matched expected type INPUT 	
+	[  3] EXPECT(SHUTDOWN) FLAGS(0x1) TIMEOUT(100 ms)
+	[expect SHUTDOWN]
+[0000.001932]: <~~ SHUTDOWN (sent at 0000.001641)
+	Event type matched expected type SHUTDOWN (0 usec, limit 100000)	
+	Target process 881923 terminated with status 0x0
+=========== END OF TEST: start_quit_shutdown ===========

@@ -1,0 +1,93 @@
+function a @ 0x564c90f071d0, argument x @ 0x7ffec5157888 (=0xfedcba98)
+function b @ 0x564c90f07225: argument x @ 0x7ffec5157868 (=0xedcba987)
+function c @ 0x564c90f0727a: argument x @ 0x7ffec5157848 (=0xdcba9876)
+function d @ 0x564c90f072cf: argument x @ 0x7ffec5157828 (=0xcba98765)
+function e @ 0x564c90f07324: argument x @ 0x7ffec5157808 (=0xba987654)
+function f @ 0x564c90f07389 called
+static_variable @ 0x564c90f0a030 (=0)
+local_variable @ 0x7ffec51577e0 (=a9876543)
+=========== TEST LOG FOR: poke_unwritable ===========
+	[  0] EXPECT(STARTUP) TIMEOUT(100 ms)
+	[expect STARTUP]
+	Waiting for connection...
+	Connected to child: fd = 10
+[0000.001559]: <~~ STARTUP (sent at 0000.001502)
+	Event type matched expected type STARTUP (0 usec, limit 100000)	
+	[  1] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT]
+[0000.001608]: <~~ PROMPT (sent at 0000.001588)
+	Event type matched expected type PROMPT (0 usec, limit 10000)	
+	[  2] SEND(run testprog/tp)
+[0000.001643]: ~~> run testprog/tp
+	[  3] EXPECT(SHOW) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [3]SHOW]. Now: [0000.001663] Timeout: [0000.101663]
+	[  4] EXPECT(SHOW) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [4]SHOW]. Now: [0000.001665] Timeout: [0000.101665]
+	[  5] EXPECT(INPUT) TIMEOUT(10 ms)
+	[expect INPUT] [queue: [3]SHOW [4]SHOW]
+[0000.001761]: <~~ INPUT (sent at 0000.001707)
+	Event type matched expected type INPUT (0 usec, limit 10000)	
+	[  6] EXPECT(CHANGE) TIMEOUT(10 ms)
+	[expect CHANGE] [queue: [3]SHOW [4]SHOW]
+[0000.001955]: <~~ CHANGE (sent at 0000.001906)
+	[882014: none -> running]
+	Event type matched expected type CHANGE (0 usec, limit 10000)	
+	[  7] EXPECT(SIGNAL) TIMEOUT(100 ms)
+	[expect SIGNAL] [queue: [3]SHOW [4]SHOW]
+[0000.002335]: <~~ SIGNAL (sent at 0000.002290)
+	Event type matched expected type SIGNAL (0 usec, limit 100000)	
+	[  8] EXPECT(CHANGE) TIMEOUT(10 ms)
+	[expect CHANGE] [queue: [3]SHOW [4]SHOW]
+[0000.002350]: <~~ CHANGE (sent at 0000.002304)
+	[882014: running -> stopped]
+	Event type matched expected type CHANGE (0 usec, limit 10000)	
+	[  9] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW]
+[0000.002361]: <~~ PROMPT (sent at 0000.002318)
+	Event type matched expected type PROMPT (0 usec, limit 10000)	
+	[ 10] SEND(cont 0)
+[0000.002374]: ~~> cont 0
+	[ 11] EXPECT(SHOW) FLAGS(0x4) TIMEOUT(10 ms)
+	Adding a new event to the queue: [expect [11]SHOW]. Now: [0000.002382] Timeout: [0000.012382]
+	[ 12] EXPECT(INPUT) TIMEOUT(10 ms)
+	[expect INPUT] [queue: [3]SHOW [4]SHOW [11]SHOW]
+[0000.002470]: <~~ INPUT (sent at 0000.002425)
+	Event type matched expected type INPUT (0 usec, limit 10000)	
+	[ 13] EXPECT(CHANGE) TIMEOUT(10 ms)
+	[expect CHANGE] [queue: [3]SHOW [4]SHOW [11]SHOW]
+[0000.002484]: <~~ CHANGE (sent at 0000.002457)
+	[882014: stopped -> running]
+	Event type matched expected type CHANGE (0 usec, limit 10000)	
+	[ 14] EXPECT(SIGNAL) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [14]SIGNAL]. Now: [0000.002491] Timeout: [0000.102491]
+	[ 15] EXPECT(CHANGE) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [15]CHANGE]. Now: [0000.002493] Timeout: [0000.102493]
+	[ 16] EXPECT(SHOW) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [16]SHOW]. Now: [0000.002495] Timeout: [0000.102495]
+	[ 17] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [11]SHOW [14]SIGNAL [15]CHANGE [16]SHOW]
+[0000.002503]: <~~ PROMPT (sent at 0000.002476)
+	Event type matched expected type PROMPT (0 usec, limit 10000)	
+	[ 18] EXPECT(PROMPT) FLAGS(0x10) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [11]SHOW [14]SIGNAL [15]CHANGE [16]SHOW]
+[0000.003425]: <~~ SIGNAL (sent at 0000.003345)
+	Async event matched: SIGNAL
+	[ 18] EXPECT(PROMPT) FLAGS(0x10) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [11]SHOW [15]CHANGE [16]SHOW]
+[0000.003451]: <~~ CHANGE (sent at 0000.003406)
+	Async event matched: CHANGE
+	[882014: running -> stopped]
+	[ 18] EXPECT(PROMPT) FLAGS(0x10) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [11]SHOW [16]SHOW]
+[0000.017133]: Driver: timeout (0, 10000)
+Optionally expected event PROMPT did not arrive before timeout -- advancing
+	[ 19] FLAGS(0x8) TIMEOUT(100 ms)
+	[expect NONE] [queue: [3]SHOW [4]SHOW [11]SHOW [16]SHOW]
+[0000.117305]: Driver: timeout (0, 100000)
+!!! Timeout waiting for the queue to be empty.
+Unmatched events:
+	Type: SHOW, args: 0 T running testprog/tp
+	Type: SHOW, args: 0 T stopped testprog/tp
+	Type: SHOW, args: 0 T running testprog/tp
+	Type: SHOW, args: 0 T stopped testprog/tp
+=========== ABORTING TEST: poke_unwritable ===========

@@ -1,0 +1,85 @@
+=========== TEST LOG FOR: garbage_collection ===========
+	[  0] EXPECT(STARTUP) TIMEOUT(10 ms)
+	[expect STARTUP]
+	Waiting for connection...
+	Connected to child: fd = 10
+[0000.000479]: <~~ STARTUP (sent at 0000.000466)
+	Event type matched expected type STARTUP (0 usec, limit 10000)	
+	[  1] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT]
+[0000.000782]: <~~ PROMPT (sent at 0000.000768)
+	Event type matched expected type PROMPT (0 usec, limit 10000)	
+	[  2] SEND(run echo 0) TIMEOUT(10 ms)
+[0000.000790]: ~~> run echo 0
+	[  3] EXPECT(SHOW) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [3]SHOW]. Now: [0000.000795] Timeout: [0000.100795]
+	[  4] EXPECT(SHOW) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [4]SHOW]. Now: [0000.000796] Timeout: [0000.100796]
+	[  5] EXPECT(INPUT) TIMEOUT(10 ms)
+	[expect INPUT] [queue: [3]SHOW [4]SHOW]
+[0000.001024]: <~~ INPUT (sent at 0000.000990)
+	Event type matched expected type INPUT (0 usec, limit 10000)	
+	[  6] EXPECT(CHANGE) TIMEOUT(10 ms)
+	[expect CHANGE] [queue: [3]SHOW [4]SHOW]
+[0000.001338]: <~~ CHANGE (sent at 0000.001323)
+	[56949: none -> running]
+	Event type matched expected type CHANGE (0 usec, limit 10000)	
+	[  7] EXPECT(SIGNAL) TIMEOUT(100 ms)
+	[expect SIGNAL] [queue: [3]SHOW [4]SHOW]
+[0000.001651]: <~~ SIGNAL (sent at 0000.001633)
+	Event type matched expected type SIGNAL (0 usec, limit 100000)	
+	[  8] EXPECT(CHANGE) TIMEOUT(10 ms)
+	[expect CHANGE] [queue: [3]SHOW [4]SHOW]
+[0000.003542]: <~~ CHANGE (sent at 0000.003520)
+	[56949: running -> stopped]
+	Event type matched expected type CHANGE (0 usec, limit 10000)	
+	[  9] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW]
+[0000.004171]: <~~ PROMPT (sent at 0000.003947)
+	Event type matched expected type PROMPT (0 usec, limit 10000)	
+	[ 10] SEND(run echo 1) TIMEOUT(10 ms)
+[0000.004188]: ~~> run echo 1
+	[ 11] EXPECT(SHOW) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [11]SHOW]. Now: [0000.004192] Timeout: [0000.104192]
+	[ 12] EXPECT(SHOW) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [12]SHOW]. Now: [0000.004192] Timeout: [0000.104192]
+	[ 13] EXPECT(INPUT) TIMEOUT(10 ms)
+	[expect INPUT] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW]
+[0000.004345]: <~~ INPUT (sent at 0000.004329)
+	Event type matched expected type INPUT (0 usec, limit 10000)	
+	[ 14] EXPECT(CHANGE) TIMEOUT(10 ms)
+	[expect CHANGE] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW]
+[0000.004642]: <~~ CHANGE (sent at 0000.004627)
+	[56950: none -> running]
+	Event type matched expected type CHANGE (0 usec, limit 10000)	
+	[ 15] EXPECT(SIGNAL) FLAGS(0x4) TIMEOUT(100 ms)
+	Adding a new event to the queue: [expect [15]SIGNAL]. Now: [0000.004646] Timeout: [0000.104646]
+	[ 16] EXPECT(CHANGE) FLAGS(0x4) TIMEOUT(10 ms)
+	Adding a new event to the queue: [expect [16]CHANGE]. Now: [0000.004647] Timeout: [0000.014647]
+	[ 17] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW [15]SIGNAL [16]CHANGE]
+[0000.004997]: <~~ SIGNAL (sent at 0000.004978)
+	Async event matched: SIGNAL
+	[ 17] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW [16]CHANGE]
+[0000.005357]: <~~ CHANGE (sent at 0000.005341)
+	Async event matched: CHANGE
+	[56950: running -> stopped]
+	[ 17] EXPECT(PROMPT) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW]
+[0000.005586]: <~~ PROMPT (sent at 0000.005567)
+	Event type matched expected type PROMPT (0 usec, limit 10000)	
+	[ 18] EXPECT(PROMPT) FLAGS(0x10) TIMEOUT(10 ms)
+	[expect PROMPT] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW]
+[0000.016671]: Driver: timeout (0, 10000)
+Optionally expected event PROMPT did not arrive before timeout -- advancing
+	[ 19] FLAGS(0x8) TIMEOUT(100 ms)
+	[expect NONE] [queue: [3]SHOW [4]SHOW [11]SHOW [12]SHOW]
+[0000.117047]: Driver: timeout (0, 100000)
+!!! Timeout waiting for the queue to be empty.
+Unmatched events:
+	Type: SHOW, args: 0 T running echo 0
+	Type: SHOW, args: 0 T stopped echo 0
+	Type: SHOW, args: 1 T running echo 1
+	Type: SHOW, args: 1 T stopped echo 1
+=========== ABORTING TEST: garbage_collection ===========

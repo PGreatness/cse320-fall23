@@ -1,0 +1,29 @@
+=========== TEST LOG FOR: help_command ===========
+	[  0] EXPECT(STARTUP) TIMEOUT(100 ms)
+	[expect STARTUP]
+	Waiting for connection...
+	Connected to child: fd = 10
+[0000.000421]: <~~ STARTUP (sent at 0000.000407)
+	Event type matched expected type STARTUP (0 usec, limit 100000)	
+	[  1] EXPECT(PROMPT) TIMEOUT(100 ms)
+	[expect PROMPT]
+[0000.000666]: <~~ PROMPT (sent at 0000.000652)
+	Event type matched expected type PROMPT (0 usec, limit 100000)	
+	[  2] SEND(help)
+[0000.000674]: ~~> help
+	[  3] EXPECT(INPUT) FLAGS(0x1) TIMEOUT(10 ms)
+	[expect INPUT]
+[0000.000888]: <~~ INPUT (sent at 0000.000873)
+	Event type matched expected type INPUT (0 usec, limit 10000)	
+	[  4] SEND(quit)
+[0000.000893]: ~~> quit
+	[  5] EXPECT(SHUTDOWN) FLAGS(0x1) TIMEOUT(1000 ms)
+	[expect SHUTDOWN]
+[0000.001106]: <~~ PROMPT (sent at 0000.001093)
+	Event type (PROMPT) does not match expected (SHUTDOWN) -- skipping
+[0000.001332]: <~~ INPUT (sent at 0000.001319)
+	Event type (INPUT) does not match expected (SHUTDOWN) -- skipping
+[0000.001547]: <~~ SHUTDOWN (sent at 0000.001533)
+	Event type matched expected type SHUTDOWN (0 usec, limit 1000)	
+	Target process 56858 terminated with status 0xd
+=========== END OF TEST: help_command ===========
