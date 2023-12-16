@@ -1,0 +1,50 @@
+Graded Commit:d80caedb1f149070439ca1451e10bcfdba49917d
+
+TEST NAME, POINTS,OUT OF
+client_registry_suite/basic_one_registry,1,1,
+client_registry_suite/basic_one_registry_premature,1,1,
+client_registry_suite/basic_two_registries,1,1,
+client_registry_suite/many_threads_one_registry,0,1,The test timed out.: None
+client_registry_suite/many_threads_one_registry_premature,0,1,The test timed out.: None
+data_suite/blob_compare_test,1,1,
+data_suite/blob_create_test,1,1,
+data_suite/blob_ref_unref_test,1,1,
+data_suite/key_compare_test,1,1,
+data_suite/key_create_test,0,1,"1 assertion(s) failed.: tests/data_test.c:72: Expected reference count 1, was 2"
+data_suite/key_dispose_test,0,1,"1 assertion(s) failed.: tests/data_test.c:85: Expected reference count 1, was 2"
+data_suite/many_threads_ref_unref_blob,1,1,
+data_suite/version_create_test,0,1,"1 assertion(s) failed.: tests/data_test.c:115: Blob refcnt was 2, not 1"
+data_suite/version_dispose_test,0,1,"1 assertion(s) failed.: tests/data_test.c:135: Blob refcnt was 2, not 1"
+protocol_suite/recv_empty,1,1,
+protocol_suite/recv_error,1,1,
+protocol_suite/recv_no_payload,1,1,
+protocol_suite/recv_null_payload,1,1,
+protocol_suite/recv_short_header,0,1,1 assertion(s) failed.: tests/protocol_test.c:227: Returned value was not -1
+protocol_suite/recv_short_payload,0,1,1 assertion(s) failed.: tests/protocol_test.c:244: Returned value was not -1
+protocol_suite/recv_with_payload,1,1,
+protocol_suite/send_error,1,1,
+protocol_suite/send_no_payload,0,1,1 assertion(s) failed.: tests/protocol_test.c:40: Packet sent did not match expected
+protocol_suite/send_null_payload,0,1,1 assertion(s) failed.: tests/protocol_test.c:94: Packet sent did not match expected
+protocol_suite/send_with_payload,1,1,
+store_suite/collisions,0,1,1 assertion(s) failed.: tests/store_test.c:270: Store was not implemented
+store_suite/get_on_empty_store,0,1,1 assertion(s) failed.: tests/store_test.c:173: Store was not implemented
+store_suite/init,0,1,1 assertion(s) failed.: tests/store_test.c:162: Store was not implemented
+store_suite/multi_put_then_get,0,1,1 assertion(s) failed.: tests/store_test.c:239: Store was not implemented
+store_suite/multi_trans_backward,0,1,1 assertion(s) failed.: tests/store_test.c:376: Store was not implemented
+store_suite/multi_trans_forward,0,1,1 assertion(s) failed.: tests/store_test.c:296: Store was not implemented
+store_suite/multi_trans_forward_gc,0,1,1 assertion(s) failed.: tests/store_test.c:326: Store was not implemented
+store_suite/put_on_empty_store,0,1,1 assertion(s) failed.: tests/store_test.c:194: Store was not implemented
+store_suite/put_then_get,0,1,1 assertion(s) failed.: tests/store_test.c:213: Store was not implemented
+store_suite/stress_test,0,1,1 assertion(s) failed.: tests/store_test.c:445: Store was not implemented
+transaction_suite/many_threads_ref_unref_trans,0,1,1 assertion(s) failed.: tests/transaction_test.c:289: Transaction module was not implemented
+transaction_suite/transaction_abort_test,0,1,1 assertion(s) failed.: tests/transaction_test.c:62: Transaction module was not implemented
+transaction_suite/transaction_commit_test,0,1,1 assertion(s) failed.: tests/transaction_test.c:50: Transaction module was not implemented
+transaction_suite/transaction_create_test,0,1,1 assertion(s) failed.: tests/transaction_test.c:24: Transaction module was not implemented
+transaction_suite/transaction_dependent_abort_block_test,0,1,1 assertion(s) failed.: tests/transaction_test.c:150: Transaction module was not implemented
+transaction_suite/transaction_dependent_abort_test,0,1,1 assertion(s) failed.: tests/transaction_test.c:74: Transaction module was not implemented
+transaction_suite/transaction_dependent_commit_block_test,0,1,1 assertion(s) failed.: tests/transaction_test.c:123: Transaction module was not implemented
+transaction_suite/transaction_dependent_commit_test,0,1,1 assertion(s) failed.: tests/transaction_test.c:91: Transaction module was not implemented
+transaction_suite/transaction_multi_dependent_test_1,0,1,1 assertion(s) failed.: tests/transaction_test.c:165: Transaction module was not implemented
+transaction_suite/transaction_multi_dependent_test_2,0,1,1 assertion(s) failed.: tests/transaction_test.c:198: Transaction module was not implemented
+transaction_suite/transaction_ref_unref_test,0,1,1 assertion(s) failed.: tests/transaction_test.c:36: Transaction module was not implemented
+total,15,46

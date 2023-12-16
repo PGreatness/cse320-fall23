@@ -1,0 +1,9 @@
+Graded Commit:d80caedb1f149070439ca1451e10bcfdba49917d
+
+TEST NAME, POINTS,OUT OF
+server_suite/00_start_server,1,1,
+server_suite/01_connect_abort,1,1,
+server_suite/02_connect_commit,1,1,
+server_suite/05_bank_simulation,0,1,"2 assertion(s) failed.: tests/server_test.c:372: Receive reply failed
+tests/server_test.c:361: Receive reply failed"
+total,3,4

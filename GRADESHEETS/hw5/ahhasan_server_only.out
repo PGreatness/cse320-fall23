@@ -1,0 +1,633 @@
+--ascii is deprecated. Use LANG/LC_* variables to control encoding, and TERM/--color to control colors.
+[----] Criterion v2.4.1-13-g2f48d0f-dirty (bleeding)
+[====] Running 4 tests from server_suite:
+[RUN ] server_suite::00_start_server
+[RUN ] server_suite::02_connect_commit
+[RUN ] server_suite::01_connect_abort
+server_suite/00_start_server
+[RUN ] server_suite::05_bank_simulation
+Starting server...pid = 1055634
+Connected to server localhost:9999
+[PASS] server_suite::01_connect_abort: (0.01s)
+***Initialization phase
+[PASS] server_suite::02_connect_commit: (0.23s)
+***Transfer phase
+proto_recv_packet: Input/output error
+proto_recv_packet: Input/output error
+ret = -1
+proto_recv_packet: Success
+ret = -1
+proto_recv_packet: Input/output error
+ret = -1
+proto_recv_packet: Input/output error
+ret = -1
+[----] tests/server_test.c:361: Assertion Failed
+[----]   
+ret = -1
+[----]   Receive reply failed
+[----]   
+proto_recv_packet: Input/output error
+ret = -1
+proto_recv_packet: Input/output error
+ret = -1
+proto_recv_packet: Success
+proto_recv_packet: Success
+ret = -1
+ret = -1
+proto_recv_packet: Input/output error
+ret = -1
+proto_recv_packet: Success
+ret = -1
+[----] tests/server_test.c:372: Assertion Failed
+[----]   
+[----]   Receive reply failed
+[----]   
+proto_recv_packet: Success
+ret = -1
+proto_recv_packet: Success
+ret = -1
+proto_recv_packet: Input/output error
+proto_recv_packet: Success
+ret = -1
+ret = -1
+[FAIL] server_suite::05_bank_simulation: (2.55s)
+proto_recv_packet: Input/output error
+ret = -1
+proto_recv_packet: Success
+ret = -1
+proto_recv_packet: Input/output error
+ret = -1
+[ERR ] Could not write the "assert" message down the event pipe: Bad file descriptor.
+[----] Warning! The test `server_suite::05_bank_simulation` crashed during its setup or teardown.
+Sending SIGHUP to server pid 1055634
+Server wait() returned = 0x8b
+Server terminated with signal 11
+==1055634== Memcheck, a memory error detector
+==1055634== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==1055634== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==1055634== Command: bin/xacto -p 9999
+==1055634== Parent PID: 1055612
+==1055634== 
+==1055634== Thread 3:
+==1055634== Invalid read of size 8
+==1055634==    at 0x10CA77: key_dispose (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF38: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aadd18 is 8 bytes inside a block of size 16 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10CA98: key_dispose (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10DD4E: fJTky0Jxoj3 (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D083: ??? (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D449: store_put (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF23: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10CA1A: key_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BDEE: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid free() / delete / delete[] / realloc()
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10CA98: key_dispose (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF38: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aadd10 is 0 bytes inside a block of size 16 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10CA98: key_dispose (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10DD4E: fJTky0Jxoj3 (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D083: ??? (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D449: store_put (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF23: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10CA1A: key_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BDEE: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid read of size 4
+==1055634==    at 0x490BEF4: pthread_mutex_lock@@GLIBC_2.2.5 (pthread_mutex_lock.c:80)
+==1055634==    by 0x10C8CC: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF4E: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aadc40 is 16 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10CA8C: key_dispose (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF38: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BDDE: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid read of size 4
+==1055634==    at 0x490B7CD: __pthread_mutex_lock_full (pthread_mutex_lock.c:186)
+==1055634==    by 0x10C8CC: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF4E: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aadc40 is 16 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10CA8C: key_dispose (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF38: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BDDE: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid read of size 4
+==1055634==    at 0x10C8D1: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF4E: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aadc58 is 40 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10CA8C: key_dispose (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF38: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BDDE: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid write of size 4
+==1055634==    at 0x10C8DB: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF4E: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aadc58 is 40 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10CA8C: key_dispose (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF38: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BDDE: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid write of size 8
+==1055634==    at 0x10C8E6: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF4E: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aadc70 is 64 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10CA8C: key_dispose (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF38: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BDDE: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid read of size 4
+==1055634==    at 0x10C8EE: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF4E: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aadc58 is 40 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10CA8C: key_dispose (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF38: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BDDE: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid read of size 4
+==1055634==    at 0x490DA74: __pthread_mutex_unlock_usercnt (pthread_mutex_unlock.c:51)
+==1055634==    by 0x490DA74: pthread_mutex_unlock@@GLIBC_2.2.5 (pthread_mutex_unlock.c:368)
+==1055634==    by 0x10C936: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF4E: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aadc40 is 16 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10CA8C: key_dispose (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF38: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BDDE: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid read of size 4
+==1055634==    at 0x490DAD5: __pthread_mutex_unlock_usercnt (pthread_mutex_unlock.c:55)
+==1055634==    by 0x490DAD5: pthread_mutex_unlock@@GLIBC_2.2.5 (pthread_mutex_unlock.c:368)
+==1055634==    by 0x10C936: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF4E: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aadc40 is 16 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10CA8C: key_dispose (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF38: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BDDE: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid read of size 4
+==1055634==    at 0x490BEF4: pthread_mutex_lock@@GLIBC_2.2.5 (pthread_mutex_lock.c:80)
+==1055634==    by 0x10C8CC: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF64: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aaddc0 is 16 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10DCE8: fTRKSZ69DmH (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D2E1: ??? (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D466: store_put (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF23: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF08: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid read of size 4
+==1055634==    at 0x490B7CD: __pthread_mutex_lock_full (pthread_mutex_lock.c:186)
+==1055634==    by 0x10C8CC: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF64: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aaddc0 is 16 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10DCE8: fTRKSZ69DmH (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D2E1: ??? (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D466: store_put (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF23: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF08: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid read of size 4
+==1055634==    at 0x10C8D1: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF64: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aaddd8 is 40 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10DCE8: fTRKSZ69DmH (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D2E1: ??? (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D466: store_put (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF23: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF08: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid write of size 4
+==1055634==    at 0x10C8DB: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF64: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aaddd8 is 40 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10DCE8: fTRKSZ69DmH (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D2E1: ??? (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D466: store_put (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF23: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF08: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid write of size 8
+==1055634==    at 0x10C8E6: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF64: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aaddf0 is 64 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10DCE8: fTRKSZ69DmH (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D2E1: ??? (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D466: store_put (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF23: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF08: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid read of size 4
+==1055634==    at 0x10C8EE: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF64: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aaddd8 is 40 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10DCE8: fTRKSZ69DmH (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D2E1: ??? (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D466: store_put (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF23: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF08: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid read of size 4
+==1055634==    at 0x490DA74: __pthread_mutex_unlock_usercnt (pthread_mutex_unlock.c:51)
+==1055634==    by 0x490DA74: pthread_mutex_unlock@@GLIBC_2.2.5 (pthread_mutex_unlock.c:368)
+==1055634==    by 0x10C936: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF64: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aaddc0 is 16 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10DCE8: fTRKSZ69DmH (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D2E1: ??? (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D466: store_put (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF23: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF08: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Invalid read of size 4
+==1055634==    at 0x490DAD5: __pthread_mutex_unlock_usercnt (pthread_mutex_unlock.c:55)
+==1055634==    by 0x490DAD5: pthread_mutex_unlock@@GLIBC_2.2.5 (pthread_mutex_unlock.c:368)
+==1055634==    by 0x10C936: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF64: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x4aaddc0 is 16 bytes inside a block of size 72 free'd
+==1055634==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C928: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10DCE8: fTRKSZ69DmH (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D2E1: ??? (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10D466: store_put (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF23: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Block was alloc'd at
+==1055634==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x10C7A3: blob_create (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10BF08: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634== 
+==1055634== Thread 2:
+==1055634== Invalid read of size 4
+==1055634==    at 0x490BEF4: pthread_mutex_lock@@GLIBC_2.2.5 (pthread_mutex_lock.c:80)
+==1055634==    by 0x10C8CC: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10C162: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  Address 0x10 is not stack'd, malloc'd or (recently) free'd
+==1055634== 
+==1055634== 
+==1055634== Process terminating with default action of signal 11 (SIGSEGV)
+==1055634==  Access not within mapped region at address 0x10
+==1055634==    at 0x490BEF4: pthread_mutex_lock@@GLIBC_2.2.5 (pthread_mutex_lock.c:80)
+==1055634==    by 0x10C8CC: blob_unref (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10C162: xacto_client_service (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x4908AC2: start_thread (pthread_create.c:442)
+==1055634==    by 0x4999813: clone (clone.S:100)
+==1055634==  If you believe this happened as a result of a stack
+==1055634==  overflow in your program's main thread (unlikely but
+==1055634==  possible), you can try to increase the size of the
+==1055634==  main thread stack using the --main-stacksize= flag.
+==1055634==  The main thread stack size used in this run was 8388608.
+==1055634== 
+==1055634== FILE DESCRIPTORS: 27 open (3 std) at exit.
+==1055634== Open AF_INET socket 26: 127.0.0.1:9999 <-> 127.0.0.1:44296
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 25: 127.0.0.1:9999 <-> 127.0.0.1:44284
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 24: 127.0.0.1:9999 <-> 127.0.0.1:44268
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 23: 127.0.0.1:9999 <-> 127.0.0.1:44256
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 22: 127.0.0.1:9999 <-> 127.0.0.1:44252
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 21: 127.0.0.1:9999 <-> 127.0.0.1:44236
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 20: 127.0.0.1:9999 <-> 127.0.0.1:44234
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 9: 127.0.0.1:9999 <-> 127.0.0.1:44222
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 19: 127.0.0.1:9999 <-> 127.0.0.1:44206
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 18: 127.0.0.1:9999 <-> 127.0.0.1:44194
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 10: 127.0.0.1:9999 <-> 127.0.0.1:44182
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 17: 127.0.0.1:9999 <-> 127.0.0.1:44176
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 16: 127.0.0.1:9999 <-> 127.0.0.1:44166
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 15: 127.0.0.1:9999 <-> 127.0.0.1:44164
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 14: 127.0.0.1:9999 <-> 127.0.0.1:44150
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 11: 127.0.0.1:9999 <-> 127.0.0.1:44148
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 8: 127.0.0.1:9999 <-> 127.0.0.1:44144
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 7: 127.0.0.1:9999 <-> 127.0.0.1:44130
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 6: 127.0.0.1:9999 <-> 127.0.0.1:44128
+==1055634==    at 0x499B26F: accept (accept.c:26)
+==1055634==    by 0x10C701: Accept (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B1A8: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open AF_INET socket 5: 0.0.0.0:9999 <-> unbound
+==1055634==    at 0x499B94B: socket (syscall-template.S:120)
+==1055634==    by 0x10C637: Socket (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10C458: open_listenfd (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10B169: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== Open file descriptor 13: /dev/shm/bxf_arena_1055610 (deleted)
+==1055634==    <inherited from parent>
+==1055634== 
+==1055634== Open file descriptor 12: /dev/shm/bxf_arena_1055610 (deleted)
+==1055634==    <inherited from parent>
+==1055634== 
+==1055634== Open file descriptor 4:
+==1055634==    <inherited from parent>
+==1055634== 
+==1055634== Open file descriptor 3: /home/gene/grader-s19/hw5/repos/ahhasan/hw5/valgrind.out
+==1055634==    <inherited from parent>
+==1055634== 
+==1055634== 
+==1055634== HEAP SUMMARY:
+==1055634==     in use at exit: 13,724 bytes in 286 blocks
+==1055634==   total heap usage: 922 allocs, 642 frees, 26,477 bytes allocated
+==1055634== 
+==1055634== Thread 1:
+==1055634== 3,536 bytes in 13 blocks are possibly lost in loss record 22 of 22
+==1055634==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1055634==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==1055634==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==1055634==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==1055634==    by 0x49097B4: allocate_stack (allocatestack.c:430)
+==1055634==    by 0x49097B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==1055634==    by 0x10B216: listen_for_connections (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634==    by 0x10AA39: main (in /home/gene/grader-s19/hw5/repos/ahhasan/hw5/bin/xacto)
+==1055634== 
+==1055634== LEAK SUMMARY:
+==1055634==    definitely lost: 0 bytes in 0 blocks
+==1055634==    indirectly lost: 0 bytes in 0 blocks
+==1055634==      possibly lost: 3,536 bytes in 13 blocks
+==1055634==    still reachable: 10,188 bytes in 273 blocks
+==1055634==         suppressed: 0 bytes in 0 blocks
+==1055634== Reachable blocks (those to which a pointer was found) are not shown.
+==1055634== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==1055634== 
+==1055634== For lists of detected and suppressed errors, rerun with: -s
+==1055634== ERROR SUMMARY: 86 errors from 20 contexts (suppressed: 0 from 0)
+[PASS] server_suite::00_start_server: (45.03s)
+[----] Writing xml report in `crit.xml`.
+[====] Synthesis: Tested: 4 | Passing: 3 | Failing: 1 | Crashing: 0 
